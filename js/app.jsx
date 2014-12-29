@@ -45,7 +45,6 @@ var CaseverList = React.createClass({
 
 var SearchableCaseverList = React.createClass({
   loadCasevers: function() {
-    console.log("hi")
     $.ajax({
       url: buildQueryUrl(this.props.url, this.state.query),
       dataType: 'jsonp',
@@ -83,20 +82,6 @@ var SearchableCaseverList = React.createClass({
   }
 })
 
-function parseQuery(query) {
-  var queries = query.split(" ")
-}
-function buildQueryUrl(url, queryStrings) {
-  //TODO: parse and transform query to tastypie filters
-  var queryUrl = url + "?"
-  //var queryStrings = parseQuery(query);
-  for (qs of queryStrings) {
-    queryUrl += ("&" + qs)
-  }
-
-  //var queryUrl = url + "?order_by=modified_on"
-  return queryUrl;
-}
 
 var mockCasevers = [
   {"status": "active", "name": "Foobar!", "productversion": "Firefox OS 2.2"},

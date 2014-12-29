@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Mocha Tests</title>
+    <link rel="stylesheet" href="mocha.css" />
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <!--framework js-->
+    <script src="./mocha.js"></script>
+    <script src="./chai.js"></script>
+    <script src="./sinon-1.10.3.js"></script>
+    
+
+    <!--js under test-->
+    <script src="../js/parser.js"></script>
+
+
+    <script>mocha.setup('bdd')</script>
+    <script src="test_parser.js"></script>
+    <script>
+      mocha.checkLeaks();
+      mocha.run();
+    </script>
+  </body>
+</html>
