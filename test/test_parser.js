@@ -20,9 +20,21 @@ describe('Parser', function(){
     });
 
     it('Turn tokens into TastyPie search queries', function(){
-      var query = [{key:"", value:"hello"}]
-      var result = queryCodegen(query);
-      expect(result).to.be.eql(["name__icontains=hello"])
+      var testDatum = [
+        {input: [{key:"name", value:"foobar"}], expected: ["name__icontains=foobar"]},
+        //{input: [{key:"foo", value:"foofoo"}], expected: ["name__icontains=foofoo"]},
+        {input: [{key:"foo", value:"foofoo"}], expected: [""]},
+        {input: [{key:"tag", value:"foofoo"}], expected: ["tags__name__icontains=foofoo"]},
+        {input: [{key:"suite", value:"foofoo"}], expected: ["case__suites__name__icontains=foofoo"]},
+        {input: [{key:"product", value:"foofoo"}], expected: ["productversion__product__name__icontains=foofoo"]},
+        {input: [{key:"ver", value:"2.4"}], expected: ["productversion__version__icontains=2.4"]},
+        {input: [{key:"status", value:"active"}], expected: ["status=active"]},
+        {input: [{key:"name", value:"\"foo bar\""}], expected: ["name__icontains=foo%20bar"]},
+      ];
+      for (var testData of testDatum) {
+        var result = queryCodegen(testData.input);
+        expect(result).to.be.eql(testData.expected);
+      }
     });
   });
 });
