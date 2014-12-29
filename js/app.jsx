@@ -1,8 +1,14 @@
 var SearchForm= React.createClass({
+  handleSubmit: function(e) {
+    console.log('search submitted ' + this.refs.searchbox.getDOMNode().value);
+    e.preventDefault();
+    console.log(this.props.onSubmit);
+    this.props.onSubmit(this.refs.searchbox.getDOMNode().value);
+  },
   render: function() {
     return (
-      <form onSubmit={this.props.onSubmit}>
-        <input type="text" id="searchInput" defaultValue={this.props.query} />
+      <form onSubmit={this.handleSubmit}>
+        <input type="text" id="searchInput" ref="searchbox" defaultValue={this.props.query} />
         <button type="submit" id="searchSubmit">Search</button>
       </form>
     )
@@ -44,13 +50,16 @@ var CaseverList = React.createClass({
 });
 
 var SearchableCaseverList = React.createClass({
-  loadCasevers: function() {
+  loading: {meta:{}, objects: [{status:"Loading..."}]},
+  loadCasevers: function(query) {
+    var limit=20
+    console.log('ajaxing ' + this.state.query)
     $.ajax({
-      url: buildQueryUrl(this.props.url, this.state.query),
+      url: buildQueryUrl(this.props.url, query) + "&limit=" + limit,
       dataType: 'jsonp',
 
       success: function(data) {
-        this.setState({query: this.state.query, casevers: data});
+        this.setState({casevers: data});
       }.bind(this),
 
       error: function(xhr, status, err) {
@@ -61,15 +70,16 @@ var SearchableCaseverList = React.createClass({
   },
 
   getInitialState: function() {
-    return {query: "product:\"Firefox OS\"", casevers: {meta:{}, objects: [{status:"Loading..."}]}};
+    return {query: "product:\"Firefox OS\"", casevers: this.loading};
   },
 
   componentDidMount: function() {
-    this.loadCasevers();
+    this.loadCasevers(this.state.query);
   },
 
-  handleSearch: function() {
-    this.loadCasevers()
+  handleSearch: function(query) {
+    this.loadCasevers(query)
+    this.setState({query: query, casevers: this.loading})
   },
 
   render: function() {
@@ -83,16 +93,11 @@ var SearchableCaseverList = React.createClass({
 })
 
 
-var mockCasevers = [
-  {"status": "active", "name": "Foobar!", "productversion": "Firefox OS 2.2"},
-  {"status": "draft", "name": "Foobarbar!", "productversion": "Firefox OS 2.1"}
-];
-
 var apiUrl="https://moztrap.mozilla.org/api/v1/caseversion/";
 //use jsonp to overcome CORS
 //var jsonpApiUrl = "http://jsonp.nodejitsu.com/?callback=&url=" + apiUrl 
 
 React.render(
-  <SearchableCaseverList casevers={mockCasevers} url={apiUrl+ "?limit=20"}/>,
+  <SearchableCaseverList url={apiUrl}/>,
   document.getElementById("content")
 );

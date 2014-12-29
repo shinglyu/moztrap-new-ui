@@ -35,14 +35,15 @@ function queryCodegen(tokens) {
   });
 }
 
-function buildQueryUrl(url, queryStrings) {
+function buildQueryUrl(url, query) {
   //TODO: parse and transform query to tastypie filters
   var queryUrl = url + "?";
   //var queryUrl = url;
-  //var queryStrings = parseQuery(query);
+  var queryStrings = queryCodegen(parseQuery(query));
   queryStrings.map(function(qs){queryUrl += ("&" + qs);});
 
   //var queryUrl = url + "?order_by=modified_on"
+  console.log(queryUrl);
   return queryUrl;
 }
 
