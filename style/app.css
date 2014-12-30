@@ -2,3 +2,8 @@
   display: inline-block;
   width: 20%
 }
+
+.suiteListItem div{
+  display: inline-block;
+  width: 30%
+}
