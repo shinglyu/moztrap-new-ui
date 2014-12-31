@@ -11,11 +11,79 @@ var App = React.createClass({
   }
 });
 
+var SearchableRemoteListMixin = {
+  //need to implement `function buildURL(query) {...}`
+  loading: {meta:{}, objects: [{name:"Loading..."}]},
+  notFound: {data:{objects:[{name:"Can't find anything. Try loosen the search criteria."}]}},
+  loadRemoteData: function(url) {
+    $.ajax({
+      url: url,
+      dataType: 'jsonp',
+      timeout: 10000, // Force trigger the error callback
+
+      success: function(data) {
+        this.setState({data: data});
+      }.bind(this),
+
+      /*
+      FIXME: this doesn't seem to work under jsonp proxy
+      statusCode: {
+        400: function() {
+          alert.log('bad request');
+        },
+      },
+      */
+      error: function(xhr, status, err) {
+        this.setState(this.notFound)
+        console.error(xhr, status, err.toString());
+      }.bind(this)
+    });
+  },
+  //FIXME: Change this to pagination
+  loadMore: function() {
+    //FIXME: dont' hardcode this url
+    var url = "https://moztrap.mozilla.org" + this.state.data.meta.next;
+    console.log(url)
+    $.ajax({
+      url: url,
+      dataType: 'jsonp',
+
+      success: function(data) {
+        console.log(data)
+        data.objects = this.state.data.objects.concat(data.objects)
+        this.setState({data: data});
+      }.bind(this),
+
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+  getInitialState: function() {
+    return {query: "product:\"Firefox OS\"", data: this.loading};
+  },
+
+  componentDidMount: function() {
+    this.loadRemoteData(this.buildURL(this.state.query));
+  }, 
+  
+  handleSearch: function(query) { 
+    console.log(query)
+    this.loadRemoteData(this.buildURL(query));
+    this.setState({query: query, data: this.loading});
+  },
+
+  componentWillReceiveProps: function() {
+    this.setState({data: this.loading})
+    this.loadRemoteData(this.buildURL(this.state.query));
+  },
+
+}
+
 var SearchForm= React.createClass({
   handleSubmit: function(e) {
-    console.log('search submitted ' + this.refs.searchbox.getDOMNode().value);
     e.preventDefault();
-    console.log(this.props.onSubmit); this.props.onSubmit(this.refs.searchbox.getDOMNode().value);
+    this.props.onSubmit(this.refs.searchbox.getDOMNode().value);
   },
   render: function() {
     return (
@@ -56,56 +124,29 @@ var CaseverList = React.createClass({
     return (
       <div className="caseverList">
         {casevers}
+        <a href="javascript:void(0);" onClick={this.props.onLoadMore}>more</a>
       </div>
     )
   }
 });
 
 var SearchableCaseverList = React.createClass({
+  mixins: [SearchableRemoteListMixin],
   api_url: "https://moztrap.mozilla.org/api/v1/caseversion/",
   //TODO: migrate to api_url: "https://moztrap.mozilla.org/api/v1/caseversionsearch/",
-  loading: {meta:{}, objects: [{status:"Loading..."}]},
-  loadCasevers: function(query) {
-    var limit = 20;
-    var url = buildQueryUrl(this.api_url, query, caseversionCodegen) + "&limit=" + limit;
-    if (typeof this.props.suiteId !== "undefined"){
-      url += "&case__suites=" + this.props.suiteId;
-    }
-    $.ajax({
-      url: url,
-      dataType: 'jsonp',
-
-      success: function(data) {
-        this.setState({casevers: data});
-      }.bind(this),
-
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
-    });
-
+  buildURL: function(query) {
+      var limit=20
+      return buildQueryUrl(this.api_url, query, caseversionCodegen) + "&limit=" + limit;
   },
-
-  getInitialState: function() {
-    return {query: "product:\"Firefox OS\"", casevers: this.loading};
-  },
-
-  componentDidMount: function() {
-    this.loadCasevers(this.state.query);
-  }, handleSearch: function(query) { this.loadCasevers(query)
-    this.setState({query: query, casevers: this.loading})
-  },
-
-  componentWillReceiveProps: function() {
-    this.setState({casevers: this.loading})
-    this.loadCasevers(this.state.query);
+  handleLoadMore: function() {
+    this.loadMore();
   },
 
   render: function() {
     return (
       <div>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
-        <CaseverList casevers={this.state.casevers}/>
+        <CaseverList casevers={this.state.data} onLoadMore={this.handleLoadMore}/>
       </div>
     )
   }
@@ -145,45 +186,18 @@ var SuiteList = React.createClass({
 });
 
 var SearchableSuiteList = React.createClass({
+  mixins: [SearchableRemoteListMixin],
   api_url: "https://moztrap.mozilla.org/api/v1/suite/",
-  loading: {meta:{}, objects: [{status:"Loading..."}]},
-  loadSuites: function(query) {
-    var limit=20
-    console.log('ajaxing ' + this.state.query)
-    $.ajax({
-      url: buildQueryUrl(this.api_url, query, suiteCodegen) + "&limit=" + limit,
-      dataType: 'jsonp',
-
-      success: function(data) {
-        this.setState({suites: data});
-      }.bind(this),
-
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
-    });
-
-  },
-
-  getInitialState: function() {
-    return {query: "product:\"Firefox OS\"", suites: this.loading};
-  },
-
-  componentDidMount: function() {
-    this.loadSuites(this.state.query);
-  },
-
-
-  handleSearch: function(query) {
-    this.loadSuites(query);
-    this.setState({query: query, suites: this.loading});
+  buildURL: function(query) {
+      var limit=20
+      return buildQueryUrl(this.api_url, query, suiteCodegen) + "&limit=" + limit;
   },
 
   render: function() {
     return (
       <div>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
-        <SuiteList suites={this.state.suites}/>
+        <SuiteList suites={this.state.data}/>
       </div>
     )
   }

@@ -17,6 +17,8 @@
     "tests"
   ],
   "dependencies": {
-    "react-router": "~0.11.6"
+    "react-router": "~0.11.6",
+    "URIjs": "~1.14.1",
+    "jsonproxy": "~0.2.2"
   }
 }
