@@ -63,6 +63,7 @@ var CaseverList = React.createClass({
 
 var SearchableCaseverList = React.createClass({
   api_url: "https://moztrap.mozilla.org/api/v1/caseversion/",
+  //TODO: migrate to api_url: "https://moztrap.mozilla.org/api/v1/caseversionsearch/",
   loading: {meta:{}, objects: [{status:"Loading..."}]},
   loadCasevers: function(query) {
     var limit = 20;
@@ -119,7 +120,9 @@ var SuiteListItem = React.createClass({
           {this.props.suite.status}
         </div>
         <div className="name">
-          {this.props.suite.name}
+          <a href={"./index.html#/suite/" + this.props.suite.id}> 
+            {this.props.suite.name}
+          </a>
         </div>
       </div>
     )
