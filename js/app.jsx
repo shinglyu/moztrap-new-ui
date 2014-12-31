@@ -201,7 +201,28 @@ var SearchableSuiteList = React.createClass({
       </div>
     )
   }
-})
+});
+
+SearchableCaseverSelectionList = React.createClass({
+  mixins: [SearchableRemoteListMixin],
+  api_url: "https://moztrap.mozilla.org/api/v1/caseversionselection/",
+  buildURL: function(query) {
+      var limit=20
+      var url = buildQueryUrl(this.api_url, query, caseversionCodegen);
+      url += "&case__suites" + (this.props.isNotIn?"__ne":"") + "=" + this.props.suiteId;
+      url += "&limit=" + limit;
+      return url
+  },
+
+  render: function() {
+    return (
+      <div>
+        <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
+        <CaseverList casevers={this.state.data}/>
+      </div>
+    )
+  }
+});
 
 var AddToSuite = React.createClass({
   //mixins: [Router.State],
@@ -239,9 +260,11 @@ var AddToSuite = React.createClass({
   render: function() {
     return (
       <div>
-        <h1>Add to suite </h1>
         <h2>{this.state.suite.name}</h2>
-        <SearchableCaseverList suiteId={this.state.suite.id}/>
+        <h1>Add to suite </h1>
+        <SearchableCaseverSelectionList isNotIn={true} suiteId={this.state.suite.id}/>
+        <h1>Remove from suite </h1>
+        <SearchableCaseverSelectionList isNotIn={false} suiteId={this.state.suite.id}/>
       </div>
     )
   }
