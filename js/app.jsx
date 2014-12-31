@@ -106,9 +106,6 @@ var CaseverListItem = React.createClass({
         <div className="name">
           {this.props.casever.name}
         </div>
-        <div className="productversion">
-          {this.props.casever.productversion}
-        </div>
       </div>
     )
   }
