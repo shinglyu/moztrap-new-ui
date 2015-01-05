@@ -73,6 +73,10 @@ var SearchableRemoteListMixin = {
     this.setState({query: query, data: this.loading});
   },
 
+  handleLoadMore: function() {
+    this.loadMore();
+  },
+
   componentWillReceiveProps: function() {
     this.setState({data: this.loading})
     this.loadRemoteData(this.buildURL(this.state.query));
@@ -92,6 +96,14 @@ var SearchForm = React.createClass({
         <button type="submit" id="searchSubmit">Search</button>
       </form>
     )
+  }
+});
+
+var MoreLink = React.createClass({
+  render: function() {
+    return (
+      <a className="morelink" href="javascript:void(0);" onClick={this.props.onLoadMore}>more</a>
+    );
   }
 });
 
@@ -121,7 +133,6 @@ var CaseverList = React.createClass({
     return (
       <div className="caseverList">
         {casevers}
-        <a href="javascript:void(0);" onClick={this.props.onLoadMore}>more</a>
       </div>
     )
   }
@@ -135,15 +146,13 @@ var SearchableCaseverList = React.createClass({
       var limit=20
       return buildQueryUrl(this.api_url, query, caseversionCodegen) + "&limit=" + limit;
   },
-  handleLoadMore: function() {
-    this.loadMore();
-  },
 
   render: function() {
     return (
       <div>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
-        <CaseverList casevers={this.state.data} onLoadMore={this.handleLoadMore}/>
+        <CaseverList casevers={this.state.data}/>
+        <MoreLink onLoadMore={this.handleLoadMore}/>
       </div>
     )
   }
@@ -195,6 +204,7 @@ var SearchableSuiteList = React.createClass({
       <div>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
         <SuiteList suites={this.state.data}/>
+        <MoreLink onLoadMore={this.handleLoadMore}/>
       </div>
     )
   }
@@ -216,6 +226,7 @@ SearchableCaseverSelectionList = React.createClass({
       <div>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
         <CaseverList casevers={this.state.data}/>
+        <MoreLink onLoadMore={this.handleLoadMore}/>
       </div>
     )
   }
