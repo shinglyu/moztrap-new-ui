@@ -80,7 +80,7 @@ var SearchableRemoteListMixin = {
 
 }
 
-var SearchForm= React.createClass({
+var SearchForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
     this.props.onSubmit(this.refs.searchbox.getDOMNode().value);
@@ -278,6 +278,7 @@ var routes = (
     <DefaultRoute handler={SearchableCaseverList}/>
     <Route name="caseversions" path="/caseversion" handler={SearchableCaseverList}/>
     <Route name="suites" path="/suite" handler={SearchableSuiteList}/>
+    <Route name="suites_noid" path="/suite/" handler={SearchableSuiteList}/>
     <Route name="suite" path="/suite/:id" handler={AddToSuite} />
   </Route>
 );
