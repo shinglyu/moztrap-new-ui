@@ -85,6 +85,9 @@ var SearchForm= React.createClass({
     e.preventDefault();
     this.props.onSubmit(this.refs.searchbox.getDOMNode().value);
   },
+  componentDidMount: function() {
+    initAutocomplete();
+  },
   render: function() {
     return (
       <form onSubmit={this.handleSubmit}>
