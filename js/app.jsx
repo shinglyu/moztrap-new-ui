@@ -11,6 +11,13 @@ var App = React.createClass({
   }
 });
 
+var config = {
+  baseUrl: "https://moztrap.mozilla.org",
+  //baseUrl: "https://moztrap.allizom.org",
+  defaultProduct: "Firefox OS",
+  //defaultProduct: "MozTrap",
+}
+
 var SearchableRemoteListMixin = {
   //need to implement `function buildURL(query) {...}`
   loading: {meta:{}, objects: [{name:"Loading..."}]},
@@ -42,7 +49,7 @@ var SearchableRemoteListMixin = {
   //FIXME: Change this to pagination
   loadMore: function() {
     //FIXME: dont' hardcode this url
-    var url = "https://moztrap.mozilla.org" + this.state.data.meta.next;
+    var url = config.baseUrl + this.state.data.meta.next;
     console.log(url)
     $.ajax({
       url: url,
@@ -60,7 +67,7 @@ var SearchableRemoteListMixin = {
     });
   },
   getInitialState: function() {
-    return {query: "product:\"Firefox OS\"", data: this.loading};
+    return {query: "product:\"" + config.defaultProduct + "\"", data: this.loading};
   },
 
   componentDidMount: function() {
@@ -140,7 +147,7 @@ var CaseverList = React.createClass({
 
 var SearchableCaseverList = React.createClass({
   mixins: [SearchableRemoteListMixin],
-  api_url: "https://moztrap.mozilla.org/api/v1/caseversion/",
+  api_url: config.baseUrl + "/api/v1/caseversion/",
   //TODO: migrate to api_url: "https://moztrap.mozilla.org/api/v1/caseversionsearch/",
   buildURL: function(query) {
       var limit=20
@@ -193,7 +200,7 @@ var SuiteList = React.createClass({
 
 var SearchableSuiteList = React.createClass({
   mixins: [SearchableRemoteListMixin],
-  api_url: "https://moztrap.mozilla.org/api/v1/suite/",
+  api_url: config.baseUrl + "/api/v1/suite/",
   buildURL: function(query) {
       var limit=20
       return buildQueryUrl(this.api_url, query, suiteCodegen) + "&limit=" + limit;
@@ -212,7 +219,7 @@ var SearchableSuiteList = React.createClass({
 
 SearchableCaseverSelectionList = React.createClass({
   mixins: [SearchableRemoteListMixin],
-  api_url: "https://moztrap.mozilla.org/api/v1/caseversionselection/",
+  api_url: config.baseUrl + "/api/v1/caseversionselection/",
   buildURL: function(query) {
       var limit=20
       var url = buildQueryUrl(this.api_url, query, caseversionCodegen);
@@ -234,7 +241,7 @@ SearchableCaseverSelectionList = React.createClass({
 
 var AddToSuite = React.createClass({
   //mixins: [Router.State],
-  api_url: "https://moztrap.mozilla.org/api/v1/suite/",
+  api_url: config.baseUrl + "/api/v1/suite/",
   loadSuite: function(id) {
     $.ajax({
       url: this.api_url + id + "/",
