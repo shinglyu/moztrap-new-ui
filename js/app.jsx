@@ -16,6 +16,7 @@ var config = {
   //baseUrl: "https://moztrap.allizom.org",
   defaultProduct: "Firefox OS",
   //defaultProduct: "MozTrap",
+  defaultListLimit: 20,
 }
 
 var SearchableRemoteListMixin = {
@@ -150,8 +151,7 @@ var SearchableCaseverList = React.createClass({
   api_url: config.baseUrl + "/api/v1/caseversion/",
   //TODO: migrate to api_url: "https://moztrap.mozilla.org/api/v1/caseversionsearch/",
   buildURL: function(query) {
-      var limit=20
-      return buildQueryUrl(this.api_url, query, caseversionCodegen) + "&limit=" + limit;
+      return buildQueryUrl(this.api_url, query, caseversionCodegen) + "&limit=" + config.defaultListLimit;
   },
 
   render: function() {
@@ -202,8 +202,7 @@ var SearchableSuiteList = React.createClass({
   mixins: [SearchableRemoteListMixin],
   api_url: config.baseUrl + "/api/v1/suite/",
   buildURL: function(query) {
-      var limit=20
-      return buildQueryUrl(this.api_url, query, suiteCodegen) + "&limit=" + limit;
+      return buildQueryUrl(this.api_url, query, suiteCodegen) + "&limit=" + config.defaultListLimit;
   },
 
   render: function() {
@@ -221,10 +220,9 @@ SearchableCaseverSelectionList = React.createClass({
   mixins: [SearchableRemoteListMixin],
   api_url: config.baseUrl + "/api/v1/caseversionselection/",
   buildURL: function(query) {
-      var limit=20
       var url = buildQueryUrl(this.api_url, query, caseversionCodegen);
       url += "&case__suites" + (this.props.isNotIn?"__ne":"") + "=" + this.props.suiteId;
-      url += "&limit=" + limit;
+      url += "&limit=" + config.defaultListLimit;
       return url
   },
 
