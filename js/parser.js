@@ -1,4 +1,4 @@
-function parseQuery(query) {
+function tokenize(query) {
   //var queries = query.split(" ");
   var re = /([^\s"']+"([^"]*)"|[^\s]+)/g;
   var results = query.match(re);
@@ -57,7 +57,7 @@ function buildQueryUrl(url, query, codegen) {
   //TODO: parse and transform query to tastypie filters
   var queryUrl = url + "?";
   //var queryUrl = url;
-  var queryStrings = codegen(parseQuery(query));
+  var queryStrings = codegen(tokenize(query));
   queryStrings.map(function(qs){queryUrl += ("&" + qs);});
 
   //var queryUrl = url + "?order_by=modified_on"

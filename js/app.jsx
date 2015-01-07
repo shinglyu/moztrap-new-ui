@@ -11,6 +11,14 @@ var App = React.createClass({
   }
 });
 
+var config = {
+  baseUrl: "https://moztrap.mozilla.org",
+  //baseUrl: "https://moztrap.allizom.org",
+  defaultProduct: "Firefox OS",
+  //defaultProduct: "MozTrap",
+  defaultListLimit: 20,
+}
+
 var SearchableRemoteListMixin = {
   //need to implement `function buildURL(query) {...}`
   loading: {meta:{}, objects: [{name:"Loading..."}]},
@@ -42,7 +50,7 @@ var SearchableRemoteListMixin = {
   //FIXME: Change this to pagination
   loadMore: function() {
     //FIXME: dont' hardcode this url
-    var url = "https://moztrap.mozilla.org" + this.state.data.meta.next;
+    var url = config.baseUrl + this.state.data.meta.next;
     console.log(url)
     $.ajax({
       url: url,
@@ -60,7 +68,7 @@ var SearchableRemoteListMixin = {
     });
   },
   getInitialState: function() {
-    return {query: "product:\"Firefox OS\"", data: this.loading};
+    return {query: "product:\"" + config.defaultProduct + "\"", data: this.loading};
   },
 
   componentDidMount: function() {
@@ -73,6 +81,10 @@ var SearchableRemoteListMixin = {
     this.setState({query: query, data: this.loading});
   },
 
+  handleLoadMore: function() {
+    this.loadMore();
+  },
+
   componentWillReceiveProps: function() {
     this.setState({data: this.loading})
     this.loadRemoteData(this.buildURL(this.state.query));
@@ -80,7 +92,7 @@ var SearchableRemoteListMixin = {
 
 }
 
-var SearchForm= React.createClass({
+var SearchForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
     this.props.onSubmit(this.refs.searchbox.getDOMNode().value);
@@ -95,6 +107,14 @@ var SearchForm= React.createClass({
         <button type="submit" id="searchSubmit">Search</button>
       </form>
     )
+  }
+});
+
+var MoreLink = React.createClass({
+  render: function() {
+    return (
+      <a className="morelink" href="javascript:void(0);" onClick={this.props.onLoadMore}>more</a>
+    );
   }
 });
 
@@ -124,7 +144,6 @@ var CaseverList = React.createClass({
     return (
       <div className="caseverList">
         {casevers}
-        <a href="javascript:void(0);" onClick={this.props.onLoadMore}>more</a>
       </div>
     )
   }
@@ -132,21 +151,18 @@ var CaseverList = React.createClass({
 
 var SearchableCaseverList = React.createClass({
   mixins: [SearchableRemoteListMixin],
-  api_url: "https://moztrap.mozilla.org/api/v1/caseversion/",
+  api_url: config.baseUrl + "/api/v1/caseversion/",
   //TODO: migrate to api_url: "https://moztrap.mozilla.org/api/v1/caseversionsearch/",
   buildURL: function(query) {
-      var limit=20
-      return buildQueryUrl(this.api_url, query, caseversionCodegen) + "&limit=" + limit;
-  },
-  handleLoadMore: function() {
-    this.loadMore();
+      return buildQueryUrl(this.api_url, query, caseversionCodegen) + "&limit=" + config.defaultListLimit;
   },
 
   render: function() {
     return (
       <div>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
-        <CaseverList casevers={this.state.data} onLoadMore={this.handleLoadMore}/>
+        <CaseverList casevers={this.state.data}/>
+        <MoreLink onLoadMore={this.handleLoadMore}/>
       </div>
     )
   }
@@ -187,10 +203,9 @@ var SuiteList = React.createClass({
 
 var SearchableSuiteList = React.createClass({
   mixins: [SearchableRemoteListMixin],
-  api_url: "https://moztrap.mozilla.org/api/v1/suite/",
+  api_url: config.baseUrl + "/api/v1/suite/",
   buildURL: function(query) {
-      var limit=20
-      return buildQueryUrl(this.api_url, query, suiteCodegen) + "&limit=" + limit;
+      return buildQueryUrl(this.api_url, query, suiteCodegen) + "&limit=" + config.defaultListLimit;
   },
 
   render: function() {
@@ -198,6 +213,7 @@ var SearchableSuiteList = React.createClass({
       <div>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
         <SuiteList suites={this.state.data}/>
+        <MoreLink onLoadMore={this.handleLoadMore}/>
       </div>
     )
   }
@@ -205,12 +221,12 @@ var SearchableSuiteList = React.createClass({
 
 SearchableCaseverSelectionList = React.createClass({
   mixins: [SearchableRemoteListMixin],
-  api_url: "https://moztrap.mozilla.org/api/v1/caseversionselection/",
+  api_url: config.baseUrl + "/api/v1/caseversionselection/",
+  //api_url: config.baseUrl + "/api/speedy/caseselection/",
   buildURL: function(query) {
-      var limit=20
       var url = buildQueryUrl(this.api_url, query, caseversionCodegen);
       url += "&case__suites" + (this.props.isNotIn?"__ne":"") + "=" + this.props.suiteId;
-      url += "&limit=" + limit;
+      url += "&limit=" + config.defaultListLimit;
       return url
   },
 
@@ -219,6 +235,7 @@ SearchableCaseverSelectionList = React.createClass({
       <div>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
         <CaseverList casevers={this.state.data}/>
+        <MoreLink onLoadMore={this.handleLoadMore}/>
       </div>
     )
   }
@@ -226,7 +243,7 @@ SearchableCaseverSelectionList = React.createClass({
 
 var AddToSuite = React.createClass({
   //mixins: [Router.State],
-  api_url: "https://moztrap.mozilla.org/api/v1/suite/",
+  api_url: config.baseUrl + "/api/v1/suite/",
   loadSuite: function(id) {
     $.ajax({
       url: this.api_url + id + "/",
@@ -281,6 +298,7 @@ var routes = (
     <DefaultRoute handler={SearchableCaseverList}/>
     <Route name="caseversions" path="/caseversion" handler={SearchableCaseverList}/>
     <Route name="suites" path="/suite" handler={SearchableSuiteList}/>
+    <Route name="suites_noid" path="/suite/" handler={SearchableSuiteList}/>
     <Route name="suite" path="/suite/:id" handler={AddToSuite} />
   </Route>
 );
