@@ -219,6 +219,7 @@ var SearchableSuiteList = React.createClass({
 SearchableCaseverSelectionList = React.createClass({
   mixins: [SearchableRemoteListMixin],
   api_url: config.baseUrl + "/api/v1/caseversionselection/",
+  //api_url: config.baseUrl + "/api/speedy/caseselection/",
   buildURL: function(query) {
       var url = buildQueryUrl(this.api_url, query, caseversionCodegen);
       url += "&case__suites" + (this.props.isNotIn?"__ne":"") + "=" + this.props.suiteId;
