@@ -14,3 +14,8 @@
 .caseverListItem div.status {
   width:8%;
 }
+
+#searchInput {
+  width: 50vw;
+  font-size: 1.2em
+}

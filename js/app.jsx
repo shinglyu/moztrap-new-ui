@@ -103,7 +103,7 @@ var SearchForm = React.createClass({
   render: function() {
     return (
       <form onSubmit={this.handleSubmit}>
-        <input type="text" id="searchInput" ref="searchbox" defaultValue={this.props.query} />
+        <textarea type="text" id="searchInput" ref="searchbox" defaultValue={this.props.query} />
         <button type="submit" id="searchSubmit">Search</button>
       </form>
     )
