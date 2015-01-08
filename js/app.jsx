@@ -219,9 +219,32 @@ var SearchableSuiteList = React.createClass({
 SearchableCaseverSelectionList = React.createClass({
   mixins: [SearchableRemoteListMixin],
   api_url: config.baseUrl + "/api/v1/caseversionselection/",
+  //api_url: config.baseUrl + "/api/v1/caseselection/",
   //api_url: config.baseUrl + "/api/speedy/caseselection/",
   buildURL: function(query) {
       var url = buildQueryUrl(this.api_url, query, caseversionCodegen);
+      url += "&case__suites" + (this.props.isNotIn?"__ne":"") + "=" + this.props.suiteId;
+      url += "&limit=" + config.defaultListLimit;
+      return url
+  },
+
+  render: function() {
+    return (
+      <div>
+        <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
+        <CaseverList casevers={this.state.data}/>
+        <MoreLink onLoadMore={this.handleLoadMore}/>
+      </div>
+    )
+  }
+});
+
+SearchableCaseSelectionList = React.createClass({
+  mixins: [SearchableRemoteListMixin],
+  api_url: config.baseUrl + "/api/v1/caseselection/",
+  //api_url: config.baseUrl + "/api/speedy/caseselection/",
+  buildURL: function(query) {
+      var url = buildQueryUrl(this.api_url, query, caseselectionCodegen);
       url += "&case__suites" + (this.props.isNotIn?"__ne":"") + "=" + this.props.suiteId;
       url += "&limit=" + config.defaultListLimit;
       return url
@@ -276,9 +299,9 @@ var AddToSuite = React.createClass({
       <div>
         <h2>{this.state.suite.name}</h2>
         <h1>Add to suite </h1>
-        <SearchableCaseverSelectionList isNotIn={true} suiteId={this.state.suite.id}/>
+        <SearchableCaseSelectionList isNotIn={true} suiteId={this.state.suite.id}/>
         <h1>Remove from suite </h1>
-        <SearchableCaseverSelectionList isNotIn={false} suiteId={this.state.suite.id}/>
+        <SearchableCaseSelectionList isNotIn={false} suiteId={this.state.suite.id}/>
       </div>
     )
   }

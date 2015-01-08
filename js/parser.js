@@ -35,6 +35,26 @@ function caseversionCodegen(tokens) {
   });
 }
 
+function caseselectionCodegen(tokens) {
+  var toRESTQuery = {
+    '':     'name__icontains=',
+    'name': 'name__icontains=',
+    'tag': 'tags__name__icontains=',
+    'product': 'productversion__product__name__icontains=',
+    'status': 'status=',
+  };
+  //TODO:exact match?
+  return tokens.map(function(token){
+    token.value = token.value.replace('"', '', 'g'); //tirm the \"
+    if (typeof toRESTQuery[token.key] === "undefined") {
+      return '';
+    } else {
+      return toRESTQuery[token.key] + encodeURI(token.value);
+    }
+  });
+  
+}
+
 function suiteCodegen(tokens) {
   var toRESTQuery = {
     '':     'name__icontains=',
