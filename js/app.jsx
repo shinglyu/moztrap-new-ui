@@ -294,6 +294,16 @@ var AddToSuite = React.createClass({
     this.loadSuite(this.props.params.id);
   },
 
+  handleModifySuite: function() {
+    var addcases = []
+    $('.caseverList input:checkbox').each(function() {
+      if (this.checked) {
+        addcases.push(this.value());
+      }
+    })
+    alert("hi");
+  },
+
   render: function() {
     return (
       <div>
@@ -302,6 +312,7 @@ var AddToSuite = React.createClass({
         <SearchableCaseSelectionList isNotIn={true} suiteId={this.state.suite.id}/>
         <h1>Remove from suite </h1>
         <SearchableCaseSelectionList isNotIn={false} suiteId={this.state.suite.id}/>
+        <button id="modifySuite" onClick={this.handleModifySuite}>Submit</button>
       </div>
     )
   }
