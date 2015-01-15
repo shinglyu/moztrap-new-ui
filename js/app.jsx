@@ -12,10 +12,11 @@ var App = React.createClass({
 });
 
 var config = {
-  baseUrl: "https://moztrap.mozilla.org",
+  //baseUrl: "https://moztrap.mozilla.org",
+  baseUrl: "http://localhost:8000",
   //baseUrl: "https://moztrap.allizom.org",
-  defaultProduct: "Firefox OS",
-  //defaultProduct: "MozTrap",
+  //defaultProduct: "Firefox OS",
+  defaultProduct: "MozTrap",
   defaultListLimit: 20,
 }
 
@@ -261,6 +262,7 @@ SearchableCaseSelectionList = React.createClass({
   }
 });
 
+//FIXME: rename to something like SuiteManagement or similar
 var AddToSuite = React.createClass({
   //mixins: [Router.State],
   api_url: config.baseUrl + "/api/v1/suite/",
@@ -295,13 +297,31 @@ var AddToSuite = React.createClass({
   },
 
   handleModifySuite: function() {
+    var data = {
+      case: "/api/v1/case/1/", //Can log in 
+      suite: "/api/v1/suite/2/", //MozTrap bla bla
+      order: 0,
+    }; 
+    $.jsonp({
+      type: "POST",
+      url: config.baseUrl + "/api/v1/suitecase/",
+      data: data,
+      success: function(data) {
+        console.log("succeeded")
+      }.bind(this),
+
+      error: function(xhr, status, err) {
+        console.error(xhr, status, err.toString());
+      }.bind(this)
+    });
+    /*
     var addcases = []
     $('.caseverList input:checkbox').each(function() {
       if (this.checked) {
         addcases.push(this.value());
       }
     })
-    alert("hi");
+    */
   },
 
   render: function() {
