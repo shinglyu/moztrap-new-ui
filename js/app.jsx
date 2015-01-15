@@ -52,13 +52,13 @@ var SearchableRemoteListMixin = {
   loadMore: function() {
     //FIXME: dont' hardcode this url
     var url = config.baseUrl + this.state.data.meta.next;
-    console.log(url)
+    // console.log(url)
     $.ajax({
       url: url,
       dataType: 'jsonp',
 
       success: function(data) {
-        console.log(data)
+        // console.log(data)
         data.objects = this.state.data.objects.concat(data.objects)
         this.setState({data: data});
       }.bind(this),
@@ -77,7 +77,7 @@ var SearchableRemoteListMixin = {
   }, 
   
   handleSearch: function(query) { 
-    console.log(query)
+    // console.log(query)
     this.loadRemoteData(this.buildURL(query));
     this.setState({query: query, data: this.loading});
   },
@@ -86,10 +86,12 @@ var SearchableRemoteListMixin = {
     this.loadMore();
   },
 
+  /*
   componentWillReceiveProps: function() {
     this.setState({data: this.loading})
     this.loadRemoteData(this.buildURL(this.state.query));
   },
+  */
 
 }
 
@@ -120,7 +122,7 @@ var CaseverListItem = React.createClass({
   render: function() {
     return (
       <div className="caseverListItem">
-        <input type="checkbox"/>
+        <input type="checkbox" value={this.props.casever.case} onChange={this.props.onChange}/>
         <div className="status">
           {this.props.casever.status}
         </div>
@@ -133,11 +135,17 @@ var CaseverListItem = React.createClass({
 });
 
 var CaseverList = React.createClass({
+  /*
+  handleChange: function(e) {
+    console.log(e.target.value)
+  },
+  */
   render: function() {
     //can use the casevers.meta
     var casevers = this.props.casevers.objects.map(function(casever){
-      return (<CaseverListItem casever={casever} />)
-    })
+      // console.log(casever)
+      return (<CaseverListItem casever={casever} onChange={this.props.onCheck}/>)
+    }.bind(this))
 
     return (
       <div className="caseverList">
@@ -255,7 +263,7 @@ SearchableCaseSelectionList = React.createClass({
     return (
       <div>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
-        <CaseverList casevers={this.state.data}/>
+        <CaseverList casevers={this.state.data} onCheck={this.props.onCheck}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
       </div>
     )
@@ -283,7 +291,10 @@ var AddToSuite = React.createClass({
   },
   
   getInitialState: function() {
-    return {suite: {name: "Loading...", id: this.props.params.id}};
+    return ({suite: {name: "Loading...", id: this.props.params.id}, 
+            addQueue:[], 
+            removeQueue:[]}
+           )
   },
 
   componentDidMount: function() {
@@ -297,6 +308,7 @@ var AddToSuite = React.createClass({
   },
 
   handleModifySuite: function() {
+    /*
     var data = {
       case: "/api/v1/case/1/", //Can log in 
       suite: "/api/v1/suite/2/", //MozTrap bla bla
@@ -314,6 +326,7 @@ var AddToSuite = React.createClass({
         console.error(xhr, status, err.toString());
       }.bind(this)
     });
+    */
     /*
     var addcases = []
     $('.caseverList input:checkbox').each(function() {
@@ -321,7 +334,33 @@ var AddToSuite = React.createClass({
         addcases.push(this.value());
       }
     })
+    alert("hi");
     */
+    console.log("For suite id: "+  this.state.suite.resource_uri)
+    console.log("You are about to add " + this.state.addQueue.join() + "; Remove " + this.state.removeQueue.join())
+  },
+
+  handleQueueUpdate: function(e, queueName) {
+    if (e.target.checked){
+      console.log("Add " + e.target.value);
+      var newState = {};
+      newState[queueName] = this.state[queueName].concat(e.target.value);
+      this.setState(newState);
+    }
+    else {
+      console.log("Cancel add " + e.target.value);
+      this.state[queueName].splice(this.state[queueName].indexOf(e.target.value), 1);
+      var newState = {};
+      newState[queueName] = this.state[queueName];
+      this.setState(newState);
+    }
+  },
+  handleAdd: function(e) {
+    this.handleQueueUpdate(e, "addQueue")
+  },
+
+  handleRemove: function(e) {
+    this.handleQueueUpdate(e, "removeQueue")
   },
 
   render: function() {
@@ -329,9 +368,15 @@ var AddToSuite = React.createClass({
       <div>
         <h2>{this.state.suite.name}</h2>
         <h1>Add to suite </h1>
-        <SearchableCaseSelectionList isNotIn={true} suiteId={this.state.suite.id}/>
+        <SearchableCaseSelectionList isNotIn={true} 
+                                     suiteId={this.state.suite.id}
+                                     onCheck={this.handleAdd}
+        />
         <h1>Remove from suite </h1>
-        <SearchableCaseSelectionList isNotIn={false} suiteId={this.state.suite.id}/>
+        <SearchableCaseSelectionList isNotIn={false} 
+                                     suiteId={this.state.suite.id}
+                                     onCheck={this.handleRemove}
+        />
         <button id="modifySuite" onClick={this.handleModifySuite}>Submit</button>
       </div>
     )
