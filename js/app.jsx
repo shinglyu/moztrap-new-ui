@@ -12,10 +12,11 @@ var App = React.createClass({
 });
 
 var config = {
-  baseUrl: "https://moztrap.mozilla.org",
+  //baseUrl: "https://moztrap.mozilla.org",
+  baseUrl: "http://localhost:8000",
   //baseUrl: "https://moztrap.allizom.org",
-  defaultProduct: "Firefox OS",
-  //defaultProduct: "MozTrap",
+  //defaultProduct: "Firefox OS",
+  defaultProduct: "MozTrap",
   defaultListLimit: 20,
 }
 
@@ -51,13 +52,11 @@ var SearchableRemoteListMixin = {
   loadMore: function() {
     //FIXME: dont' hardcode this url
     var url = config.baseUrl + this.state.data.meta.next;
-    console.log(url)
     $.ajax({
       url: url,
       dataType: 'jsonp',
 
       success: function(data) {
-        console.log(data)
         data.objects = this.state.data.objects.concat(data.objects)
         this.setState({data: data});
       }.bind(this),
@@ -76,7 +75,6 @@ var SearchableRemoteListMixin = {
   }, 
   
   handleSearch: function(query) { 
-    console.log(query)
     this.loadRemoteData(this.buildURL(query));
     this.setState({query: query, data: this.loading});
   },
@@ -85,10 +83,12 @@ var SearchableRemoteListMixin = {
     this.loadMore();
   },
 
+  /*
   componentWillReceiveProps: function() {
     this.setState({data: this.loading})
     this.loadRemoteData(this.buildURL(this.state.query));
   },
+  */
 
 }
 
@@ -122,7 +122,7 @@ var CaseverListItem = React.createClass({
   render: function() {
     return (
       <div className="caseverListItem">
-        <input type="checkbox"/>
+        <input type="checkbox" value={this.props.casever.case} onChange={this.props.onChange}/>
         <div className="status">
           {this.props.casever.status}
         </div>
@@ -138,8 +138,8 @@ var CaseverList = React.createClass({
   render: function() {
     //can use the casevers.meta
     var casevers = this.props.casevers.objects.map(function(casever){
-      return (<CaseverListItem casever={casever} />)
-    })
+      return (<CaseverListItem casever={casever} onChange={this.props.onCheck}/>)
+    }.bind(this))
 
     return (
       <div className="caseverList">
@@ -222,6 +222,7 @@ var SearchableSuiteList = React.createClass({
 SearchableCaseverSelectionList = React.createClass({
   mixins: [SearchableRemoteListMixin],
   api_url: config.baseUrl + "/api/v1/caseversionselection/",
+  //api_url: config.baseUrl + "/api/v1/caseselection/",
   //api_url: config.baseUrl + "/api/speedy/caseselection/",
   buildURL: function(query) {
       var url = buildQueryUrl(this.api_url, query, caseversionCodegen);
@@ -241,6 +242,29 @@ SearchableCaseverSelectionList = React.createClass({
   }
 });
 
+SearchableCaseSelectionList = React.createClass({
+  mixins: [SearchableRemoteListMixin],
+  api_url: config.baseUrl + "/api/v1/caseselection/",
+  //api_url: config.baseUrl + "/api/speedy/caseselection/",
+  buildURL: function(query) {
+      var url = buildQueryUrl(this.api_url, query, caseselectionCodegen);
+      url += "&case__suites" + (this.props.isNotIn?"__ne":"") + "=" + this.props.suiteId;
+      url += "&limit=" + config.defaultListLimit;
+      return url
+  },
+
+  render: function() {
+    return (
+      <div>
+        <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
+        <CaseverList casevers={this.state.data} onCheck={this.props.onCheck}/>
+        <MoreLink onLoadMore={this.handleLoadMore}/>
+      </div>
+    )
+  }
+});
+
+//FIXME: rename to something like SuiteManagement or similar
 var AddToSuite = React.createClass({
   //mixins: [Router.State],
   api_url: config.baseUrl + "/api/v1/suite/",
@@ -261,7 +285,10 @@ var AddToSuite = React.createClass({
   },
   
   getInitialState: function() {
-    return {suite: {name: "Loading...", id: this.props.params.id}};
+    return ({suite: {name: "Loading...", id: this.props.params.id}, 
+            addQueue:[], 
+            removeQueue:[]}
+           )
   },
 
   componentDidMount: function() {
@@ -274,24 +301,131 @@ var AddToSuite = React.createClass({
     this.loadSuite(this.props.params.id);
   },
 
+  handleModifySuite: function() {
+    //console.log("For suite id: "+  this.state.suite.resource_uri)
+    //console.log("You are about to add " + this.state.addQueue.join() + "; Remove " + this.state.removeQueue.join())
+    /* Data format example:
+      {
+        case: "/api/v1/case/1/", //Can log in 
+        suite: "/api/v1/suite/3/", //MozTrap bla bla
+        order: 0,
+      }
+    */
+    var addDatum = this.state.addQueue.map(function(caseuri){
+      return ({
+        case: caseuri,
+        suite: this.state.suite.resource_uri,
+        //order: 0,
+      });
+    }, this)
+
+    function postSuiteCase() {
+      console.log(addDatum)
+      if (addDatum.length == 0) {
+        return;
+      }
+      var data = addDatum.pop()
+      $.ajax({
+        type: "POST",
+        //TODO: ask user for username and apikey
+        url: config.baseUrl + "/api/v1/suitecase/?username=admin-django&api_key=c67c9af7-7e07-4820-b686-5f92ae94f6c9",
+        contentType:"application/json",
+        data: JSON.stringify(data),
+        success: function(data) {
+          console.log("succeeded")
+          postSuiteCase()
+        }.bind(this),
+
+        error: function(xhr, status, err) {
+          console.error(xhr, status, err.toString());
+        }.bind(this)
+      });
+    }
+    postSuiteCase()
+
+    var allSuitecases = undefined;
+    var removeSuitecases = undefined;
+    var removeDatum = undefined;
+    $.ajax({
+      type: "GET",
+      //TODO: ask user for username and apikey
+      url: config.baseUrl + "/api/v1/suitecase/?suite=" + this.state.suite.id,
+
+      success: function(data) {
+        allSuitecases = data.objects;
+        removeSuitecases = allSuitecases.filter(sc => (this.state.removeQueue.indexOf(sc.case) >= 0));
+        removeDatum = removeSuitecases.map(sc => sc.id)
+        removeSuiteCase(removeDatum)
+      }.bind(this),
+
+      error: function(xhr, status, err) {
+        console.error(xhr, status, err.toString());
+      }.bind(this)
+    });
+
+    function removeSuiteCase(removeDatum) {
+      if (removeDatum.length == 0) {
+        return;
+      }
+      var data = removeDatum.pop()
+      //Need to remove mtapi.py:198 to make this DELETE work
+      $.ajax({
+        type: "DELETE",
+        //TODO: ask user for username and apikey
+        url: config.baseUrl + "/api/v1/suitecase/" + data + "/?permanent=True&username=admin-django&api_key=c67c9af7-7e07-4820-b686-5f92ae94f6c9",
+
+        success: function(data) {
+          if (removeDatum.length == 0){return;}
+          removeSuiteCase(removeDatum)
+        }.bind(this),
+
+        error: function(xhr, status, err) {
+          console.error(xhr, status, err.toString());
+        }.bind(this)
+      });
+    }
+  },
+
+  handleQueueUpdate: function(e, queueName) {
+    if (e.target.checked){
+      var newState = {};
+      newState[queueName] = this.state[queueName].concat(e.target.value);
+      this.setState(newState);
+    }
+    else {
+      this.state[queueName].splice(this.state[queueName].indexOf(e.target.value), 1);
+      var newState = {};
+      newState[queueName] = this.state[queueName];
+      this.setState(newState);
+    }
+  },
+  handleAdd: function(e) {
+    this.handleQueueUpdate(e, "addQueue")
+  },
+
+  handleRemove: function(e) {
+    this.handleQueueUpdate(e, "removeQueue")
+  },
+
   render: function() {
     return (
       <div>
         <h2>{this.state.suite.name}</h2>
         <h1>Add to suite </h1>
-        <SearchableCaseverSelectionList isNotIn={true} suiteId={this.state.suite.id}/>
+        <SearchableCaseSelectionList isNotIn={true} 
+                                     suiteId={this.state.suite.id}
+                                     onCheck={this.handleAdd}
+        />
         <h1>Remove from suite </h1>
-        <SearchableCaseverSelectionList isNotIn={false} suiteId={this.state.suite.id}/>
+        <SearchableCaseSelectionList isNotIn={false} 
+                                     suiteId={this.state.suite.id}
+                                     onCheck={this.handleRemove}
+        />
+        <button id="modifySuite" onClick={this.handleModifySuite}>Submit</button>
       </div>
     )
   }
 })
-
-        //<SearchableCaseverList suiteId={this.state.suite.id}/>
-//React.render(
-//  <SearchableCaseverList url={apiUrl}/>,
-//  document.getElementById("content")
-//);
 
 var routes = (
   <Route name="app" path="/" handler={App}>
