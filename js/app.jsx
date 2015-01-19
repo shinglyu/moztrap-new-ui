@@ -52,13 +52,11 @@ var SearchableRemoteListMixin = {
   loadMore: function() {
     //FIXME: dont' hardcode this url
     var url = config.baseUrl + this.state.data.meta.next;
-    // console.log(url)
     $.ajax({
       url: url,
       dataType: 'jsonp',
 
       success: function(data) {
-        // console.log(data)
         data.objects = this.state.data.objects.concat(data.objects)
         this.setState({data: data});
       }.bind(this),
@@ -77,7 +75,6 @@ var SearchableRemoteListMixin = {
   }, 
   
   handleSearch: function(query) { 
-    // console.log(query)
     this.loadRemoteData(this.buildURL(query));
     this.setState({query: query, data: this.loading});
   },
@@ -135,15 +132,9 @@ var CaseverListItem = React.createClass({
 });
 
 var CaseverList = React.createClass({
-  /*
-  handleChange: function(e) {
-    console.log(e.target.value)
-  },
-  */
   render: function() {
     //can use the casevers.meta
     var casevers = this.props.casevers.objects.map(function(casever){
-      // console.log(casever)
       return (<CaseverListItem casever={casever} onChange={this.props.onCheck}/>)
     }.bind(this))
 
@@ -308,9 +299,15 @@ var AddToSuite = React.createClass({
   },
 
   handleModifySuite: function() {
-    console.log("For suite id: "+  this.state.suite.resource_uri)
-    console.log("You are about to add " + this.state.addQueue.join() + "; Remove " + this.state.removeQueue.join())
-
+    //console.log("For suite id: "+  this.state.suite.resource_uri)
+    //console.log("You are about to add " + this.state.addQueue.join() + "; Remove " + this.state.removeQueue.join())
+    /* Data format example:
+      {
+        case: "/api/v1/case/1/", //Can log in 
+        suite: "/api/v1/suite/3/", //MozTrap bla bla
+        order: 0,
+      }
+    */
     var addDatum = this.state.addQueue.map(function(caseuri){
       return ({
         case: caseuri,
@@ -319,21 +316,6 @@ var AddToSuite = React.createClass({
       });
     }, this)
 
-    //console.log(datum)
-    
-    /*
-    var data = {items:[{
-      case: "/api/v1/case/1/", //Can log in 
-      suite: "/api/v1/suite/3/", //MozTrap bla bla
-      order: 0,
-    },
-    {
-      case: "/api/v1/case/2/", //Can log in 
-      suite: "/api/v1/suite/3/", //MozTrap bla bla
-      order: 0,
-    }
-    ]}; 
-    */
     function postSuiteCase() {
       console.log(addDatum)
       if (addDatum.length == 0) {
@@ -355,11 +337,8 @@ var AddToSuite = React.createClass({
           console.error(xhr, status, err.toString());
         }.bind(this)
       });
-        //console.log("next: " + datum.slice(1))
-        //setInterval(function () {postSuiteCase(datum.slice(1))}, 1000);
     }
     postSuiteCase()
-
 
     var allSuitecases = undefined;
     var removeSuitecases = undefined;
@@ -368,8 +347,7 @@ var AddToSuite = React.createClass({
       type: "GET",
       //TODO: ask user for username and apikey
       url: config.baseUrl + "/api/v1/suitecase/?suite=" + this.state.suite.id,
-      //contentType:"application/json",
-      //data: JSON.stringify(data),
+
       success: function(data) {
         allSuitecases = data.objects;
         removeSuitecases = allSuitecases.filter(sc => (this.state.removeQueue.indexOf(sc.case) >= 0));
@@ -383,7 +361,6 @@ var AddToSuite = React.createClass({
     });
 
     function removeSuiteCase(removeDatum) {
-      console.log(removeDatum)
       if (removeDatum.length == 0) {
         return;
       }
@@ -393,13 +370,9 @@ var AddToSuite = React.createClass({
         type: "DELETE",
         //TODO: ask user for username and apikey
         url: config.baseUrl + "/api/v1/suitecase/" + data + "/?permanent=True&username=admin-django&api_key=c67c9af7-7e07-4820-b686-5f92ae94f6c9",
-        //url: config.baseUrl + "/api/v1/suitecase/?username=admin-django&api_key=c67c9af7-7e07-4820-b686-5f92ae94f6c9",
-        //contentType:"application/json",
-        //data: JSON.stringify(data),
+
         success: function(data) {
-          console.log("succeeded")
           if (removeDatum.length == 0){return;}
-          //removeSuiteCase(removeDatum.slice(1))
           removeSuiteCase(removeDatum)
         }.bind(this),
 
@@ -407,21 +380,16 @@ var AddToSuite = React.createClass({
           console.error(xhr, status, err.toString());
         }.bind(this)
       });
-        //console.log("next: " + datum.slice(1))
-        //setInterval(function () {postSuiteCase(datum.slice(1))}, 1000);
     }
-
   },
 
   handleQueueUpdate: function(e, queueName) {
     if (e.target.checked){
-      console.log("Add " + e.target.value);
       var newState = {};
       newState[queueName] = this.state[queueName].concat(e.target.value);
       this.setState(newState);
     }
     else {
-      console.log("Cancel add " + e.target.value);
       this.state[queueName].splice(this.state[queueName].indexOf(e.target.value), 1);
       var newState = {};
       newState[queueName] = this.state[queueName];
@@ -455,12 +423,6 @@ var AddToSuite = React.createClass({
     )
   }
 })
-
-        //<SearchableCaseverList suiteId={this.state.suite.id}/>
-//React.render(
-//  <SearchableCaseverList url={apiUrl}/>,
-//  document.getElementById("content")
-//);
 
 var routes = (
   <Route name="app" path="/" handler={App}>
