@@ -82,9 +82,15 @@ p.compareItems = function(item1, item2)
 
 function initAutocomplete() {
   $("#searchInput").textext({
-    plugins : 'autocomplete suggestions tags',
-    suggestions: modifiers.concat(fakeItems),//[ 'tag:', 'product:', 'suite:'],
+    //plugins : 'autocomplete suggestions tags',
+    plugins : 'autocomplete ajax tags',
+    //suggestions: modifiers.concat(fakeItems),//[ 'tag:', 'product:', 'suite:'],
     itemManager: GroupedItemManager,
+    ajax: {
+      url: "http://localhost:8000/autocomplete.json",
+      dataType: "json",
+      cacheResults: true,
+    }
     //prompt : 'Add one...'
   });
 }
