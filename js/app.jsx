@@ -308,36 +308,109 @@ var AddToSuite = React.createClass({
   },
 
   handleModifySuite: function() {
+    console.log("For suite id: "+  this.state.suite.resource_uri)
+    console.log("You are about to add " + this.state.addQueue.join() + "; Remove " + this.state.removeQueue.join())
+
+    var addDatum = this.state.addQueue.map(function(caseuri){
+      return ({
+        case: caseuri,
+        suite: this.state.suite.resource_uri,
+        //order: 0,
+      });
+    }, this)
+
+    //console.log(datum)
+    
     /*
-    var data = {
+    var data = {items:[{
       case: "/api/v1/case/1/", //Can log in 
-      suite: "/api/v1/suite/2/", //MozTrap bla bla
+      suite: "/api/v1/suite/3/", //MozTrap bla bla
       order: 0,
-    }; 
-    $.jsonp({
-      type: "POST",
-      url: config.baseUrl + "/api/v1/suitecase/",
-      data: data,
+    },
+    {
+      case: "/api/v1/case/2/", //Can log in 
+      suite: "/api/v1/suite/3/", //MozTrap bla bla
+      order: 0,
+    }
+    ]}; 
+    */
+    function postSuiteCase() {
+      console.log(addDatum)
+      if (addDatum.length == 0) {
+        return;
+      }
+      var data = addDatum.pop()
+      $.ajax({
+        type: "POST",
+        //TODO: ask user for username and apikey
+        url: config.baseUrl + "/api/v1/suitecase/?username=admin-django&api_key=c67c9af7-7e07-4820-b686-5f92ae94f6c9",
+        contentType:"application/json",
+        data: JSON.stringify(data),
+        success: function(data) {
+          console.log("succeeded")
+          postSuiteCase()
+        }.bind(this),
+
+        error: function(xhr, status, err) {
+          console.error(xhr, status, err.toString());
+        }.bind(this)
+      });
+        //console.log("next: " + datum.slice(1))
+        //setInterval(function () {postSuiteCase(datum.slice(1))}, 1000);
+    }
+    postSuiteCase()
+
+
+    var allSuitecases = undefined;
+    var removeSuitecases = undefined;
+    var removeDatum = undefined;
+    $.ajax({
+      type: "GET",
+      //TODO: ask user for username and apikey
+      url: config.baseUrl + "/api/v1/suitecase/?suite=" + this.state.suite.id,
+      //contentType:"application/json",
+      //data: JSON.stringify(data),
       success: function(data) {
-        console.log("succeeded")
+        allSuitecases = data.objects;
+        removeSuitecases = allSuitecases.filter(sc => (this.state.removeQueue.indexOf(sc.case) >= 0));
+        removeDatum = removeSuitecases.map(sc => sc.id)
+        removeSuiteCase(removeDatum)
       }.bind(this),
 
       error: function(xhr, status, err) {
         console.error(xhr, status, err.toString());
       }.bind(this)
     });
-    */
-    /*
-    var addcases = []
-    $('.caseverList input:checkbox').each(function() {
-      if (this.checked) {
-        addcases.push(this.value());
+
+    function removeSuiteCase(removeDatum) {
+      console.log(removeDatum)
+      if (removeDatum.length == 0) {
+        return;
       }
-    })
-    alert("hi");
-    */
-    console.log("For suite id: "+  this.state.suite.resource_uri)
-    console.log("You are about to add " + this.state.addQueue.join() + "; Remove " + this.state.removeQueue.join())
+      var data = removeDatum.pop()
+      //Need to remove mtapi.py:198 to make this DELETE work
+      $.ajax({
+        type: "DELETE",
+        //TODO: ask user for username and apikey
+        url: config.baseUrl + "/api/v1/suitecase/" + data + "/?permanent=True&username=admin-django&api_key=c67c9af7-7e07-4820-b686-5f92ae94f6c9",
+        //url: config.baseUrl + "/api/v1/suitecase/?username=admin-django&api_key=c67c9af7-7e07-4820-b686-5f92ae94f6c9",
+        //contentType:"application/json",
+        //data: JSON.stringify(data),
+        success: function(data) {
+          console.log("succeeded")
+          if (removeDatum.length == 0){return;}
+          //removeSuiteCase(removeDatum.slice(1))
+          removeSuiteCase(removeDatum)
+        }.bind(this),
+
+        error: function(xhr, status, err) {
+          console.error(xhr, status, err.toString());
+        }.bind(this)
+      });
+        //console.log("next: " + datum.slice(1))
+        //setInterval(function () {postSuiteCase(datum.slice(1))}, 1000);
+    }
+
   },
 
   handleQueueUpdate: function(e, queueName) {
