@@ -87,7 +87,7 @@ function initAutocomplete() {
     //suggestions: modifiers.concat(fakeItems),//[ 'tag:', 'product:', 'suite:'],
     itemManager: GroupedItemManager,
     ajax: {
-      url: "http://localhost:8000/autocomplete.json",
+      //url: "http://localhost:8000/test/autocomplete.json",
       dataType: "json",
       cacheResults: true,
     }
