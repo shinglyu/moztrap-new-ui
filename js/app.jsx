@@ -95,7 +95,9 @@ var SearchableRemoteListMixin = {
 var SearchForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
-    this.props.onSubmit(this.refs.searchbox.getDOMNode().value);
+    console.log(JSON.parse($(this.refs.searchbox.getDOMNode()).textext()[0].hiddenInput().val()));
+    var hiddenInputVal = $(this.refs.searchbox.getDOMNode()).textext()[0].hiddenInput().val()
+    this.props.onSubmit(JSON.parse(hiddenInputVal).join(' '));
   },
   componentDidMount: function() {
     initAutocomplete();

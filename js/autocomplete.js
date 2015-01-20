@@ -93,5 +93,9 @@ function initAutocomplete() {
     }
     //prompt : 'Add one...'
   });
+   $("#searchInput").bind('setFormData', function(e, data, isEmpty) {
+       var textext = $(e.target).textext()[0];
+       console.log(textext.hiddenInput().val());
+   });
 }
 
