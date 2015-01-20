@@ -97,7 +97,7 @@
 		{
       //TODO: do necessary parsing and filtering here
       if (data.hasOwnProperty('meta')) {
-        data = data.objects.map(d => "suite:" + d.name);
+        data = data.objects.map(d => "suite:\"" + d.name + '"');
       }
 			self._suggestions = data;
 			result = self.itemManager().filter(data, query);
