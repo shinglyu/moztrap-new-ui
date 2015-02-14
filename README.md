@@ -3,7 +3,7 @@ moztrap-new-ui
 
 A new frontend UI for MzoTrap that levarages on its REST API
 
-# Live Demo
+# Live Demo (only works in [Firefox](https://www.mozilla.org/en-US/firefox/new/))
 * [Test Case Search](http://shinglyu.github.io/moztrap-new-ui/#/)
 * [Test Suite Search](http://shinglyu.github.io/moztrap-new-ui/#/suite)
 
