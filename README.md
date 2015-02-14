@@ -20,5 +20,5 @@ A new frontend UI for MzoTrap that levarages on its REST API
 * [Presentation Slides](https://dl.dropboxusercontent.com/u/7281903/slides-4d90fc/tutorial.md.html#/)
 
 # Contributing
-We are migrating our backlog from Trello to GitHub. Simply submit bugs or feature requests using the GitHub "issures" to the right side of the page.
+We are migrating our backlog from Trello to GitHub. Simply submit bugs or feature requests using the GitHub "issues" to the right side of the page.
 
