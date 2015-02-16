@@ -350,8 +350,8 @@ var AddToSuite = React.createClass({
 
       success: function(data) {
         allSuitecases = data.objects;
-        removeSuitecases = allSuitecases.filter(sc => (this.state.removeQueue.indexOf(sc.case) >= 0));
-        removeDatum = removeSuitecases.map(sc => sc.id)
+        removeSuitecases = allSuitecases.filter(function(sc) {this.state.removeQueue.indexOf(sc.case) >= 0});
+        removeDatum = removeSuitecases.map(function(sc) {sc.id})
         removeSuiteCase(removeDatum)
       }.bind(this),
 
