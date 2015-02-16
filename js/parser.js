@@ -26,7 +26,7 @@ function caseversionCodegen(tokens) {
   };
   //TODO:exact match?
   return tokens.map(function(token){
-    token.value = token.value.replace('"', '', 'g'); //tirm the \"
+    token.value = token.value.replace(/"/g, '', 'g'); //tirm the \"
     if (typeof toRESTQuery[token.key] === "undefined") {
       return '';
     } else {
@@ -45,7 +45,7 @@ function caseselectionCodegen(tokens) {
   };
   //TODO:exact match?
   return tokens.map(function(token){
-    token.value = token.value.replace('"', '', 'g'); //tirm the \"
+    token.value = token.value.replace(/"/g, '', 'g'); //tirm the \"
     if (typeof toRESTQuery[token.key] === "undefined") {
       return '';
     } else {
@@ -64,7 +64,7 @@ function suiteCodegen(tokens) {
   };
   //TODO:exact match?
   return tokens.map(function(token){
-    token.value = token.value.replace('"', '', 'g'); //tirm the \"
+    token.value = token.value.replace(/"/g, '', 'g'); //tirm the \"
     if (typeof toRESTQuery[token.key] === "undefined") {
       return '';
     } else {
