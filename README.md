@@ -22,3 +22,4 @@ A new frontend UI for MzoTrap that levarages on its REST API
 # Contributing
 We are migrating our backlog from Trello to GitHub. Simply submit bugs or feature requests using the GitHub "issues" to the right side of the page.
 
+The feature requests are in this [Trello board](https://trello.com/b/FvWTBKjf/moztrap-enhancement-backlog), ask slyu@mozilla.com for access right. Everyone is welcomed to pick a bug/feature and work on it.
