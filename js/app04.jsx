@@ -64,7 +64,7 @@ var SearchableCaseverList = React.createClass({
     return (
       <div>
         <SearchForm/>
-        /* 0. state is used here    vvvvvvvvvvvvvv */
+        {/* 0. state is used here    vvvvvvvvvvvvvv */}
         <CaseverList casevers={this.state.casevers}/>
       </div>
     )
