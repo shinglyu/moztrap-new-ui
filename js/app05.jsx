@@ -1,12 +1,3 @@
-/* 
- + SearchableCaseverList
- ├- SearchForm
- └+ CaseverList      <== casever injected from here
-  ├- CaseverListItem <== access them using this.props.casever
-  ├- CaseverListItem
-  └- CaseverListItem
-*/
-
 var CaseverListItem = React.createClass({
   render: function() {
     return (
@@ -37,15 +28,16 @@ var CaseverList = React.createClass({
 var SearchForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
-    /* Access the ref="searchbox" by this.refs.searchbox */
+    /* 3. Access the ref="searchbox" by this.refs.searchbox */
     var query = this.refs.searchbox.getDOMNode().value;
     alert("You searched " + query)
   },
+
   render: function() {
     return (
       <form onSubmit={this.handleSubmit}>
-      {/* Assign the submit handler here*/}
-        {/* Set the name as ref="searchbox"*/}
+      {/* 2. Assign the submit handler here*/}
+        {/* 1. Set the name as ref="searchbox" vvvvvvvvvvvvvvv*/}
         <input type="text" id="searchInput" ref="searchbox" />
         <button type="submit" id="searchSubmit">Search</button>
       </form>
@@ -54,12 +46,10 @@ var SearchForm = React.createClass({
 });
 
 var SearchableCaseverList = React.createClass({
-  /* 1. This sets the inital this.state */
   getInitialState: function() {
     return {casevers:[{stats: "", name: "Loading..."}]};
   },
 
-  /* 2. Called when the component is mounted to the DOM */
   componentDidMount: function() {
     var onSuccess = function(data){
       this.setState({casevers: data})

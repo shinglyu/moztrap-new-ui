@@ -1,12 +1,3 @@
-/* 
- + SearchableCaseverList
- ├- SearchForm
- └+ CaseverList      <== casever injected from here
-  ├- CaseverListItem <== access them using this.props.casever
-  ├- CaseverListItem
-  └- CaseverListItem
-*/
-
 var CaseverListItem = React.createClass({
   render: function() {
     return (
@@ -37,15 +28,13 @@ var CaseverList = React.createClass({
 var SearchForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
-    /* Access the ref="searchbox" by this.refs.searchbox */
     var query = this.refs.searchbox.getDOMNode().value;
+    /* 1. Call the parent's search handler */
     this.props.onSearch(query);
   },
   render: function() {
     return (
       <form onSubmit={this.handleSubmit}>
-      {/* Assign the submit handler here*/}
-        {/* Set the name as ref="searchbox"*/}
         <input type="text" id="searchInput" ref="searchbox" />
         <button type="submit" id="searchSubmit">Search</button>
       </form>
@@ -54,12 +43,10 @@ var SearchForm = React.createClass({
 });
 
 var SearchableCaseverList = React.createClass({
-  /* 1. This sets the inital this.state */
   getInitialState: function() {
     return {casevers:[{stats: "", name: "Loading..."}]};
   },
 
-  /* 2. Called when the component is mounted to the DOM */
   componentDidMount: function() {
     var onSuccess = function(data){
       this.setState({casevers: data})
@@ -67,6 +54,7 @@ var SearchableCaseverList = React.createClass({
     fakeAJAX("http://moztrap.fake.com", onSuccess, this)
   },
 
+  /* 2. Perform a AJAX search and update the state */
   handleSearch: function (query){
     this.setState({casevers:[{stats: "", name: "Loading..."}]});
 

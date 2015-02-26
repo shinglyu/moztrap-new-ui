@@ -54,6 +54,7 @@ var SearchableCaseverList = React.createClass({
   /* 2. Called when the component is mounted to the DOM */
   componentDidMount: function() {
     var onSuccess = function(data){
+      /* 3. Update the state*/
       this.setState({casevers: data})
     }
     fakeAJAX("http://moztrap.fake.com", onSuccess, this)
@@ -63,6 +64,7 @@ var SearchableCaseverList = React.createClass({
     return (
       <div>
         <SearchForm/>
+        /* 0. state is used here    vvvvvvvvvvvvvv */
         <CaseverList casevers={this.state.casevers}/>
       </div>
     )

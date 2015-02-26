@@ -1,12 +1,3 @@
-/* 
- + SearchableCaseverList
- ├- SearchForm
- └+ CaseverList      <== casever injected from here
-  ├- CaseverListItem <== access them using this.props.casever
-  ├- CaseverListItem
-  └- CaseverListItem
-*/
-
 var CaseverListItem = React.createClass({
   render: function() {
     return (
@@ -37,15 +28,12 @@ var CaseverList = React.createClass({
 var SearchForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
-    /* Access the ref="searchbox" by this.refs.searchbox */
     var query = this.refs.searchbox.getDOMNode().value;
     this.props.onSearch(query);
   },
   render: function() {
     return (
       <form onSubmit={this.handleSubmit}>
-      {/* Assign the submit handler here*/}
-        {/* Set the name as ref="searchbox"*/}
         <input type="text" id="searchInput" ref="searchbox" />
         <button type="submit" id="searchSubmit">Search</button>
       </form>
@@ -53,18 +41,18 @@ var SearchForm = React.createClass({
   }
 });
 
-/* Extract the search part as reuseable mixin */
+/* 1. Extract the search part as reuseable mixin */
 SearchableListMixin = {
   getInitialState: function() {
     return {casevers:[{stats: "", name: "Loading..."}]};
   },
 
-  /* 2. Called when the component is mounted to the DOM */
   componentDidMount: function() {
     var onSuccess = function(data){
       this.setState({casevers: data})
     }
-    fakeAJAX("http://moztrap.fake.com", onSuccess, this)
+    /* 3. URL are extracted */
+    fakeAJAX(this.baseURL, onSuccess, this)
   },
 
   handleSearch: function (query){
@@ -73,13 +61,16 @@ SearchableListMixin = {
     var onSuccess = function(data){
       this.setState({casevers: data})
     }
-    fakeAJAX("http://moztrap.fake.com/?search=" + query, onSuccess, this)
+    fakeAJAX(this.baseURL + "/?search=" + query, onSuccess, this)
   },
 }
 
 var SearchableCaseverList = React.createClass({
-  /* Using Mixins */
+  /* 2. Using Mixins */
   mixins: [SearchableListMixin],
+
+  /* 4. Assign the URL used by the mixin */
+  baseURL: "http://moztrap.fake.com",
 
   render: function() {
     return (
