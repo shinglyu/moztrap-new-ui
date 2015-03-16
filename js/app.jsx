@@ -18,6 +18,8 @@ var config = {
   defaultProduct: "Firefox OS",
   //defaultProduct: "MozTrap",
   defaultListLimit: 20,
+  username: "admin-django",
+  api_key: "c67c9af7-7e07-4820-b686-5f92ae94f6c9",
 }
 
 var SearchableRemoteListMixin = {
@@ -299,8 +301,8 @@ var AddToSuite = React.createClass({
   },
 
   handleModifySuite: function() {
-    //console.log("For suite id: "+  this.state.suite.resource_uri)
-    //console.log("You are about to add " + this.state.addQueue.join() + "; Remove " + this.state.removeQueue.join())
+    console.log("For suite id: "+  this.state.suite.resource_uri)
+    console.log("You are about to add " + this.state.addQueue.join() + "; Remove " + this.state.removeQueue.join())
     /* Data format example:
       {
         case: "/api/v1/case/1/", //Can log in 
@@ -325,7 +327,7 @@ var AddToSuite = React.createClass({
       $.ajax({
         type: "POST",
         //TODO: ask user for username and apikey
-        url: config.baseUrl + "/api/v1/suitecase/?username=admin-django&api_key=c67c9af7-7e07-4820-b686-5f92ae94f6c9",
+        url: config.baseUrl + "/api/v1/suitecase/?username=" + config.username + "&api_key=" + config.api_key,
         contentType:"application/json",
         data: JSON.stringify(data),
         success: function(data) {
@@ -369,7 +371,7 @@ var AddToSuite = React.createClass({
       $.ajax({
         type: "DELETE",
         //TODO: ask user for username and apikey
-        url: config.baseUrl + "/api/v1/suitecase/" + data + "/?permanent=True&username=admin-django&api_key=c67c9af7-7e07-4820-b686-5f92ae94f6c9",
+        url: config.baseUrl + "/api/v1/suitecase/" + data + "/?permanent=True&username=" + config.username + "&api_key=" + config.api_key,
 
         success: function(data) {
           if (removeDatum.length == 0){return;}
