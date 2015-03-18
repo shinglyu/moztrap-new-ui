@@ -253,8 +253,8 @@ SearchableCaseSelectionList = React.createClass({
   },
 
   componentWillReceiveProps: function(nextProps) {
-    //update suite case list when props.isCaseListUpdate has been changed
-    console.log(nextProps.isCaseListUpdate + " " + this.props.isCaseListUpdate);
+    // update suite case list when props.isCaseListUpdate has been changed
+    //console.log(nextProps.isCaseListUpdate + " " + this.props.isCaseListUpdate);
     var update = (nextProps.isCaseListUpdate == this.props.isCaseListUpdate) ? false : true;
     if(update) {
       this.loadRemoteData(this.buildURL(this.state.query));
@@ -312,8 +312,8 @@ var AddToSuite = React.createClass({
   },
 
   handleModifySuite: function() {
-    console.log("For suite id: "+  this.state.suite.resource_uri)
-    console.log("You are about to add " + this.state.addQueue.join() + "; Remove " + this.state.removeQueue.join())
+    //console.log("For suite id: "+  this.state.suite.resource_uri)
+    //console.log("You are about to add " + this.state.addQueue.join() + "; Remove " + this.state.removeQueue.join())
     /* Data format example:
       {
         case: "/api/v1/case/1/", //Can log in 
