@@ -252,6 +252,15 @@ SearchableCaseSelectionList = React.createClass({
       return url
   },
 
+  componentWillReceiveProps: function(nextProps) {
+    //update suite case list when props.isCaseListUpdate has been changed
+    console.log(nextProps.isCaseListUpdate + " " + this.props.isCaseListUpdate);
+    var update = (nextProps.isCaseListUpdate == this.props.isCaseListUpdate) ? false : true;
+    if(update) {
+      this.loadRemoteData(this.buildURL(this.state.query));
+    }
+  },
+
   render: function() {
     return (
       <div>
@@ -286,7 +295,9 @@ var AddToSuite = React.createClass({
   getInitialState: function() {
     return ({suite: {name: "Loading...", id: this.props.params.id}, 
             addQueue:[], 
-            removeQueue:[]}
+            removeQueue:[],
+	    isCaseListUpdate: 0,
+            willRefresh: false}
            )
   },
 
@@ -318,9 +329,15 @@ var AddToSuite = React.createClass({
       });
     }, this)
 
-    function postSuiteCase() {
+    function postSuiteCase(that) {
       console.log(addDatum)
       if (addDatum.length == 0) {
+	if(that.state.willRefresh) {
+	   that.setState({isCaseListUpdate: that.state.isCaseListUpdate + 1});
+	   that.setState({willRefresh: false});
+	} else { //let removeSuiteCase to update case list
+	   that.setState({willRefresh: true});
+	}
         return;
       }
       var data = addDatum.pop()
@@ -332,7 +349,7 @@ var AddToSuite = React.createClass({
         data: JSON.stringify(data),
         success: function(data) {
           console.log("succeeded")
-          postSuiteCase()
+          postSuiteCase(that)
         }.bind(this),
 
         error: function(xhr, status, err) {
@@ -340,7 +357,7 @@ var AddToSuite = React.createClass({
         }.bind(this)
       });
     }
-    postSuiteCase()
+    postSuiteCase(this)
 
     var allSuitecases = undefined;
     var removeSuitecases = undefined;
@@ -354,7 +371,7 @@ var AddToSuite = React.createClass({
         allSuitecases = data.objects;
         removeSuitecases = allSuitecases.filter(sc => (this.state.removeQueue.indexOf(sc.case) >= 0));
         removeDatum = removeSuitecases.map(sc => sc.id)
-        removeSuiteCase(removeDatum)
+        removeSuiteCase(removeDatum, this)
       }.bind(this),
 
       error: function(xhr, status, err) {
@@ -362,8 +379,14 @@ var AddToSuite = React.createClass({
       }.bind(this)
     });
 
-    function removeSuiteCase(removeDatum) {
+    function removeSuiteCase(removeDatum, that) {
       if (removeDatum.length == 0) {
+	if(that.state.willRefresh) {  
+	   that.setState({isCaseListUpdate: that.state.isCaseListUpdate + 1});
+	   that.setState({willRefresh: false});
+	} else { //let postSuiteCase to update case list
+	   that.setState({willRefresh: true});
+	}
         return;
       }
       var data = removeDatum.pop()
@@ -374,8 +397,8 @@ var AddToSuite = React.createClass({
         url: config.baseUrl + "/api/v1/suitecase/" + data + "/?permanent=True&username=" + config.username + "&api_key=" + config.api_key,
 
         success: function(data) {
-          if (removeDatum.length == 0){return;}
-          removeSuiteCase(removeDatum)
+          //if (removeDatum.length == 0){return;}
+          removeSuiteCase(removeDatum, that)
         }.bind(this),
 
         error: function(xhr, status, err) {
@@ -414,11 +437,13 @@ var AddToSuite = React.createClass({
         <SearchableCaseSelectionList isNotIn={true} 
                                      suiteId={this.state.suite.id}
                                      onCheck={this.handleAdd}
+				     isCaseListUpdate={this.state.isCaseListUpdate}
         />
         <h1>Remove from suite </h1>
         <SearchableCaseSelectionList isNotIn={false} 
                                      suiteId={this.state.suite.id}
                                      onCheck={this.handleRemove}
+				     isCaseListUpdate={this.state.isCaseListUpdate}
         />
         <button id="modifySuite" onClick={this.handleModifySuite}>Submit</button>
       </div>
