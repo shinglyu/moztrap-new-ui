@@ -253,12 +253,8 @@ SearchableCaseSelectionList = React.createClass({
   },
 
   componentWillReceiveProps: function(nextProps) {
-    // update suite case list when props.isCaseListUpdate has been changed
-    //console.log(nextProps.isCaseListUpdate + " " + this.props.isCaseListUpdate);
-    var update = (nextProps.isCaseListUpdate == this.props.isCaseListUpdate) ? false : true;
-    if(update) {
-      this.loadRemoteData(this.buildURL(this.state.query));
-    }
+    //load remote suite case list
+    this.loadRemoteData(this.buildURL(this.state.query));
   },
 
   render: function() {
@@ -295,9 +291,8 @@ var AddToSuite = React.createClass({
   getInitialState: function() {
     return ({suite: {name: "Loading...", id: this.props.params.id}, 
             addQueue:[], 
-            removeQueue:[],
-	    isCaseListUpdate: 0,
-            willRefresh: false}
+            removeQueue:[]
+	    }
            )
   },
 
@@ -331,13 +326,8 @@ var AddToSuite = React.createClass({
 
     function postSuiteCase(that) {
       console.log(addDatum)
-      if (addDatum.length == 0) {
-	if(that.state.willRefresh) {
-	   that.setState({isCaseListUpdate: that.state.isCaseListUpdate + 1});
-	   that.setState({willRefresh: false});
-	} else { //let removeSuiteCase to update case list
-	   that.setState({willRefresh: true});
-	}
+      if (addDatum.length == 0) { //update state to trigger refresh
+	that.setState({suite: that.state.suite});
         return;
       }
       var data = addDatum.pop()
@@ -380,13 +370,8 @@ var AddToSuite = React.createClass({
     });
 
     function removeSuiteCase(removeDatum, that) {
-      if (removeDatum.length == 0) {
-	if(that.state.willRefresh) {  
-	   that.setState({isCaseListUpdate: that.state.isCaseListUpdate + 1});
-	   that.setState({willRefresh: false});
-	} else { //let postSuiteCase to update case list
-	   that.setState({willRefresh: true});
-	}
+      if (removeDatum.length == 0) { //update state to trigger refresh
+	that.setState({suite: that.state.suite});
         return;
       }
       var data = removeDatum.pop()
@@ -437,13 +422,11 @@ var AddToSuite = React.createClass({
         <SearchableCaseSelectionList isNotIn={true} 
                                      suiteId={this.state.suite.id}
                                      onCheck={this.handleAdd}
-				     isCaseListUpdate={this.state.isCaseListUpdate}
         />
         <h1>Remove from suite </h1>
         <SearchableCaseSelectionList isNotIn={false} 
                                      suiteId={this.state.suite.id}
                                      onCheck={this.handleRemove}
-				     isCaseListUpdate={this.state.isCaseListUpdate}
         />
         <button id="modifySuite" onClick={this.handleModifySuite}>Submit</button>
       </div>
