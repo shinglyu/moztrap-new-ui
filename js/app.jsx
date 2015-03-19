@@ -18,6 +18,8 @@ var config = {
   defaultProduct: "Firefox OS",
   //defaultProduct: "MozTrap",
   defaultListLimit: 20,
+  username: "admin-django",
+  api_key: "c67c9af7-7e07-4820-b686-5f92ae94f6c9",
 }
 
 var SearchableRemoteListMixin = {
@@ -250,6 +252,11 @@ SearchableCaseSelectionList = React.createClass({
       return url
   },
 
+  componentWillReceiveProps: function(nextProps) {
+    //load remote suite case list
+    this.loadRemoteData(this.buildURL(this.state.query));
+  },
+
   render: function() {
     return (
       <div>
@@ -284,7 +291,8 @@ var AddToSuite = React.createClass({
   getInitialState: function() {
     return ({suite: {name: "Loading...", id: this.props.params.id}, 
             addQueue:[], 
-            removeQueue:[]}
+            removeQueue:[]
+	    }
            )
   },
 
@@ -316,21 +324,22 @@ var AddToSuite = React.createClass({
       });
     }, this)
 
-    function postSuiteCase() {
+    function postSuiteCase(that) {
       console.log(addDatum)
-      if (addDatum.length == 0) {
+      if (addDatum.length == 0) { //update state to trigger refresh
+	that.setState({suite: that.state.suite});
         return;
       }
       var data = addDatum.pop()
       $.ajax({
         type: "POST",
         //TODO: ask user for username and apikey
-        url: config.baseUrl + "/api/v1/suitecase/?username=admin-django&api_key=c67c9af7-7e07-4820-b686-5f92ae94f6c9",
+        url: config.baseUrl + "/api/v1/suitecase/?username=" + config.username + "&api_key=" + config.api_key,
         contentType:"application/json",
         data: JSON.stringify(data),
         success: function(data) {
           console.log("succeeded")
-          postSuiteCase()
+          postSuiteCase(that)
         }.bind(this),
 
         error: function(xhr, status, err) {
@@ -338,7 +347,7 @@ var AddToSuite = React.createClass({
         }.bind(this)
       });
     }
-    postSuiteCase()
+    postSuiteCase(this)
 
     var allSuitecases = undefined;
     var removeSuitecases = undefined;
@@ -352,7 +361,7 @@ var AddToSuite = React.createClass({
         allSuitecases = data.objects;
         removeSuitecases = allSuitecases.filter(sc => (this.state.removeQueue.indexOf(sc.case) >= 0));
         removeDatum = removeSuitecases.map(sc => sc.id)
-        removeSuiteCase(removeDatum)
+        removeSuiteCase(removeDatum, this)
       }.bind(this),
 
       error: function(xhr, status, err) {
@@ -360,8 +369,9 @@ var AddToSuite = React.createClass({
       }.bind(this)
     });
 
-    function removeSuiteCase(removeDatum) {
-      if (removeDatum.length == 0) {
+    function removeSuiteCase(removeDatum, that) {
+      if (removeDatum.length == 0) { //update state to trigger refresh
+	that.setState({suite: that.state.suite});
         return;
       }
       var data = removeDatum.pop()
@@ -369,11 +379,11 @@ var AddToSuite = React.createClass({
       $.ajax({
         type: "DELETE",
         //TODO: ask user for username and apikey
-        url: config.baseUrl + "/api/v1/suitecase/" + data + "/?permanent=True&username=admin-django&api_key=c67c9af7-7e07-4820-b686-5f92ae94f6c9",
+        url: config.baseUrl + "/api/v1/suitecase/" + data + "/?permanent=True&username=" + config.username + "&api_key=" + config.api_key,
 
         success: function(data) {
-          if (removeDatum.length == 0){return;}
-          removeSuiteCase(removeDatum)
+          //if (removeDatum.length == 0){return;}
+          removeSuiteCase(removeDatum, that)
         }.bind(this),
 
         error: function(xhr, status, err) {
