@@ -11,17 +11,6 @@ var App = React.createClass({
   }
 });
 
-var config = {
-  baseUrl: "https://moztrap.mozilla.org",
-  //baseUrl: "http://localhost:8000",
-  //baseUrl: "https://moztrap.allizom.org",
-  defaultProduct: "Firefox OS",
-  //defaultProduct: "MozTrap",
-  defaultListLimit: 20,
-  username: "admin-django",
-  api_key: "c67c9af7-7e07-4820-b686-5f92ae94f6c9",
-}
-
 var SearchableRemoteListMixin = {
   //need to implement `function buildURL(query) {...}`
   loading: {meta:{}, objects: [{name:"Loading..."}]},
@@ -104,6 +93,7 @@ var SearchForm = React.createClass({
       <form onSubmit={this.handleSubmit}>
         <input type="text" id="searchInput" ref="searchbox" defaultValue={this.props.query} />
         <button type="submit" id="searchSubmit">Search</button>
+        <small>(<a href={this.props.syntaxlink} target="blank_">search syntax help</a>)</small>
       </form>
     )
   }
@@ -159,7 +149,7 @@ var SearchableCaseverList = React.createClass({
   render: function() {
     return (
       <div>
-        <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
+        <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
         <CaseverList casevers={this.state.data}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
       </div>

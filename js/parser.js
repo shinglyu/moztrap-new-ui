@@ -42,6 +42,7 @@ function caseselectionCodegen(tokens) {
     'tag': 'tags__name__icontains=',
     'product': 'productversion__product__name__icontains=',
     'status': 'status=',
+    //TODO: suite? can we AND?
   };
   //TODO:exact match?
   return tokens.map(function(token){
