@@ -40,6 +40,7 @@ function caseselectionCodegen(tokens) {
     '':     'name__icontains=',
     'name': 'name__icontains=',
     'tag': 'tags__name__icontains=',
+    'suite': 'case__suites__name__icontains=',
     'product': 'productversion__product__name__icontains=',
     'status': 'status=',
     //TODO: suite? can we AND?
