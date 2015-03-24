@@ -89,11 +89,14 @@ var SearchForm = React.createClass({
     this.props.onSubmit(this.refs.searchbox.getDOMNode().value);
   },
   render: function() {
+    if (typeof this.props.syntaxlink !== "undefined") {
+        var helplink = <small>(<a href={this.props.syntaxlink} target="blank_">search syntax help</a>)</small>;
+    }
     return (
       <form onSubmit={this.handleSubmit}>
         <input type="text" id="searchInput" ref="searchbox" defaultValue={this.props.query} />
         <button type="submit" id="searchSubmit">Search</button>
-        <small>(<a href={this.props.syntaxlink} target="blank_">search syntax help</a>)</small>
+        {helplink}
       </form>
     )
   }
@@ -200,7 +203,7 @@ var SearchableSuiteList = React.createClass({
   render: function() {
     return (
       <div>
-        <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
+        <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
         <SuiteList suites={this.state.data}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
       </div>
@@ -223,7 +226,7 @@ SearchableCaseverSelectionList = React.createClass({
   render: function() {
     return (
       <div>
-        <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
+        <SearchForm query={this.state.query} onSubmit={this.handleSearch} />
         <CaseverList casevers={this.state.data}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
       </div>
@@ -250,7 +253,7 @@ SearchableCaseSelectionList = React.createClass({
   render: function() {
     return (
       <div>
-        <SearchForm query={this.state.query} onSubmit={this.handleSearch}/>
+        <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
         <CaseverList casevers={this.state.data} onCheck={this.props.onCheck}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
       </div>
