@@ -112,6 +112,7 @@ var MoreLink = React.createClass({
 
 var CaseverListItem = React.createClass({
   render: function() {
+    var detailUrl = config.baseUrl + "/manage/cases/_detail/" + this.props.casever.id;
     return (
       <div className="caseverListItem">
         <input type="checkbox" value={this.props.casever.case} onChange={this.props.onChange}/>
@@ -119,7 +120,7 @@ var CaseverListItem = React.createClass({
           {this.props.casever.status}
         </div>
         <div className="name">
-          {this.props.casever.name}
+          <a href={detailUrl} target="blank_">{this.props.casever.name}</a>
         </div>
       </div>
     )
