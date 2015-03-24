@@ -1,8 +1,3 @@
-.caseverListItem div{
-  display: inline-block;
-  width: 80%;
-}
-
 .suiteListItem div{
   display: inline-block;
   width: 40%;
@@ -11,6 +6,13 @@
 .suiteListItem div.status {
   width:8%;
 }
-.caseverListItem div.status {
-  width:8%;
+
+.caseverListItem div{
+  display: inline-block;
+  width: 13%;
 }
+
+.caseverListItem div.name{
+  width:40%;
+}
+

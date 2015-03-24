@@ -113,6 +113,12 @@ var MoreLink = React.createClass({
 var CaseverListItem = React.createClass({
   render: function() {
     var detailUrl = config.baseUrl + "/manage/cases/_detail/" + this.props.casever.id;
+    //console.log(this.props.casever.tags)
+    // Formatting tags
+    // TODO: make each tag a div
+    if (typeof this.props.casever.tags !== "undefined"){
+      var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
+    }
     return (
       <div className="caseverListItem">
         <input type="checkbox" value={this.props.casever.case} onChange={this.props.onChange}/>
@@ -120,7 +126,16 @@ var CaseverListItem = React.createClass({
           {this.props.casever.status}
         </div>
         <div className="name">
-          <a href={detailUrl} target="blank_">{this.props.casever.name}</a>
+          <a href={detailUrl} target="blank_">{this.props.casever.name}</a> <small>{tags}</small>
+        </div>
+        <div className="priority">
+          {this.props.casever.priority}
+        </div>
+        <div className="productversion">
+          {this.props.casever.productversion_name}
+        </div>
+        <div className="modified_on">
+          {this.props.casever.modified_on}
         </div>
       </div>
     )
