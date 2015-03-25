@@ -5,18 +5,41 @@ var DefaultRoute = Router.DefaultRoute;
 var Link = Router.Link;
 var RouteHandler = Router.RouteHandler;
 
-var App = React.createClass({
-  render: function() {
-    return (<RouteHandler {...this.props}/>)
-  }
-});
-
 var Button = ReactBootstrap.Button
 var Row    = ReactBootstrap.Row
 var Col    = ReactBootstrap.Col
 var Grid   = ReactBootstrap.Grid
 var Input  = ReactBootstrap.Input
 var Table  = ReactBootstrap.Table
+var Navbar  = ReactBootstrap.Navbar
+var CollapsableNav= ReactBootstrap.CollapsableNav
+var Nav= ReactBootstrap.Nav
+var NavItem= ReactBootstrap.NavItem
+
+
+var Header = React.createClass({
+  render: function() {
+    return (
+      <Navbar brand="MozTrap+" inverse toggleNavKey={0}>
+        <Nav navbar>
+          <NavItem eventKey={1} href="#">Case</NavItem>
+          <NavItem eventKey={2} href="#/suite">Suite</NavItem>
+        </Nav>
+      </Navbar>
+    )
+  }
+})
+var App = React.createClass({
+  render: function() {
+    return (
+      <div>
+      <Header/>
+      <RouteHandler {...this.props}/>
+      </div>
+    )
+  }
+});
+
 
 var SearchableRemoteListMixin = {
   //need to implement `function buildURL(query) {...}`
