@@ -5,11 +5,41 @@ var DefaultRoute = Router.DefaultRoute;
 var Link = Router.Link;
 var RouteHandler = Router.RouteHandler;
 
+var Button = ReactBootstrap.Button
+var Row    = ReactBootstrap.Row
+var Col    = ReactBootstrap.Col
+var Grid   = ReactBootstrap.Grid
+var Input  = ReactBootstrap.Input
+var Table  = ReactBootstrap.Table
+var Navbar  = ReactBootstrap.Navbar
+var CollapsableNav= ReactBootstrap.CollapsableNav
+var Nav= ReactBootstrap.Nav
+var NavItem= ReactBootstrap.NavItem
+
+
+var Header = React.createClass({
+  render: function() {
+    return (
+      <Navbar brand="MozTrap+" inverse toggleNavKey={0}>
+        <Nav navbar>
+          <NavItem eventKey={1} href="#">Case</NavItem>
+          <NavItem eventKey={2} href="#/suite">Suite</NavItem>
+        </Nav>
+      </Navbar>
+    )
+  }
+})
 var App = React.createClass({
   render: function() {
-    return (<RouteHandler {...this.props}/>)
+    return (
+      <div>
+      <Header/>
+      <RouteHandler {...this.props}/>
+      </div>
+    )
   }
 });
+
 
 var SearchableRemoteListMixin = {
   //need to implement `function buildURL(query) {...}`
@@ -41,14 +71,16 @@ var SearchableRemoteListMixin = {
   },
   //FIXME: Change this to pagination
   loadMore: function() {
-    //FIXME: dont' hardcode this url
     var url = config.baseUrl + this.state.data.meta.next;
+    console.log(this.state.data.meta)
+    console.log(url)
     $.ajax({
       url: url,
       dataType: 'jsonp',
 
       success: function(data) {
         data.objects = this.state.data.objects.concat(data.objects)
+        console.log("LOADED!")
         this.setState({data: data});
       }.bind(this),
 
@@ -86,18 +118,24 @@ var SearchableRemoteListMixin = {
 var SearchForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
-    this.props.onSubmit(this.refs.searchbox.getDOMNode().value);
+    this.props.onSubmit(this.refs.searchbox.getDOMNode().firstChild.value); //FIXME: firstChild is a hack!
   },
   render: function() {
     if (typeof this.props.syntaxlink !== "undefined") {
-        var helplink = <small>(<a href={this.props.syntaxlink} target="blank_">search syntax help</a>)</small>;
+        var helplink = <small>(<a href={this.props.syntaxlink} target="blank_">help</a>)</small>;
     }
     return (
+      <Row>
       <form onSubmit={this.handleSubmit}>
-        <input type="text" id="searchInput" ref="searchbox" defaultValue={this.props.query} />
-        <button type="submit" id="searchSubmit">Search</button>
+        <Col xs={10} md={10}>
+        <Input type="text" id="searchInput" ref="searchbox" defaultValue={this.props.query} />
+        </Col>
+        <Col xs={2} md={2}>
+        <Button bsStyle="primary" type="submit" id="searchSubmit">Search</Button>
         {helplink}
+        </Col>
       </form>
+      </Row>
     )
   }
 });
@@ -105,7 +143,9 @@ var SearchForm = React.createClass({
 var MoreLink = React.createClass({
   render: function() {
     return (
-      <a className="morelink" href="javascript:void(0);" onClick={this.props.onLoadMore}>more</a>
+      <Button block onClick={this.props.onLoadMore}>
+        load more
+      </Button>
     );
   }
 });
@@ -120,24 +160,26 @@ var CaseverListItem = React.createClass({
       var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
     }
     return (
-      <div className="caseverListItem">
-        <input type="checkbox" value={this.props.casever.case} onChange={this.props.onChange}/>
-        <div className="status">
+      <tr className="caseverListItem">
+        <td>
+          <input type="checkbox" value={this.props.casever.case} onChange={this.props.onChange}/>
+        </td>
+        <td className="status">
           {this.props.casever.status}
-        </div>
-        <div className="name">
+        </td>
+        <td className="name">
           <a href={detailUrl} target="blank_">{this.props.casever.name}</a> <small>{tags}</small>
-        </div>
-        <div className="priority">
+        </td>
+        <td className="priority">
           {this.props.casever.priority}
-        </div>
-        <div className="productversion">
+        </td>
+        <td className="productversion">
           {this.props.casever.productversion_name}
-        </div>
-        <div className="modified_on">
+        </td>
+        <td className="modified_on">
           {this.props.casever.modified_on}
-        </div>
-      </div>
+        </td>
+      </tr>
     )
   }
 });
@@ -150,9 +192,11 @@ var CaseverList = React.createClass({
     }.bind(this))
 
     return (
-      <div className="caseverList">
+      <Table striped condensed hover className="caseverList">
+        <tbody>
         {casevers}
-      </div>
+        </tbody>
+      </Table>
     )
   }
 });
@@ -167,11 +211,11 @@ var SearchableCaseverList = React.createClass({
 
   render: function() {
     return (
-      <div>
+      <Grid>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
         <CaseverList casevers={this.state.data}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
-      </div>
+      </Grid>
     )
   }
 })
@@ -179,17 +223,19 @@ var SearchableCaseverList = React.createClass({
 var SuiteListItem = React.createClass({
   render: function() {
     return (
-      <div className="suiteListItem">
-        <input type="checkbox"/>
-        <div className="status">
+      <tr className="suiteListItem">
+        <td>
+          <input type="checkbox"/>
+        </td>
+        <td className="status">
           {this.props.suite.status}
-        </div>
-        <div className="name">
+        </td>
+        <td className="name">
           <a href={"./index.html#/suite/" + this.props.suite.id}> 
             {this.props.suite.name}
           </a>
-        </div>
-      </div>
+        </td>
+      </tr>
     )
   }
 });
@@ -202,9 +248,11 @@ var SuiteList = React.createClass({
     })
 
     return (
-      <div className="suiteList">
-        {suites}
-      </div>
+      <Table striped condensed hover className="suiteList">
+        <tbody>
+          {suites}
+        </tbody>
+      </Table>
     )
   }
 });
@@ -218,11 +266,11 @@ var SearchableSuiteList = React.createClass({
 
   render: function() {
     return (
-      <div>
+      <Grid>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
         <SuiteList suites={this.state.data}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
-      </div>
+      </Grid>
     )
   }
 });
@@ -425,20 +473,33 @@ var AddToSuite = React.createClass({
 
   render: function() {
     return (
-      <div>
-        <h2>{this.state.suite.name}</h2>
-        <h1>Add to suite </h1>
-        <SearchableCaseSelectionList isNotIn={true} 
-                                     suiteId={this.state.suite.id}
-                                     onCheck={this.handleAdd}
-        />
-        <h1>Remove from suite </h1>
-        <SearchableCaseSelectionList isNotIn={false} 
-                                     suiteId={this.state.suite.id}
-                                     onCheck={this.handleRemove}
-        />
-        <button id="modifySuite" onClick={this.handleModifySuite}>Submit</button>
-      </div>
+      <Grid>
+        <Row>
+          <h1>{this.state.suite.name}</h1>
+        </Row>
+        <Row>
+          <Col xs={12} md={6}>
+            <h2>Add to suite </h2>
+            <SearchableCaseSelectionList isNotIn={true} 
+                                         suiteId={this.state.suite.id}
+                                         onCheck={this.handleAdd}
+            />
+          </Col>
+          <Col xs={12} md={6}>
+          <h2>Remove from suite </h2>
+          <SearchableCaseSelectionList isNotIn={false} 
+                                       suiteId={this.state.suite.id}
+                                       onCheck={this.handleRemove}
+          />
+          </Col>
+        </Row>
+        
+        <Row>
+          <Col mdOffset={10}>
+            <Button bsStyle="success" block id="modifySuite" onClick={this.handleModifySuite}>Submit</Button>
+          </Col>
+        </Row>
+      </Grid>
     )
   }
 })
