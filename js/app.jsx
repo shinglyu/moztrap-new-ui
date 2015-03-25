@@ -11,6 +11,12 @@ var App = React.createClass({
   }
 });
 
+var Button = ReactBootstrap.Button
+var Row    = ReactBootstrap.Row
+var Col    = ReactBootstrap.Col
+var Grid   = ReactBootstrap.Grid
+var Input  = ReactBootstrap.Input
+
 var SearchableRemoteListMixin = {
   //need to implement `function buildURL(query) {...}`
   loading: {meta:{}, objects: [{name:"Loading..."}]},
@@ -86,18 +92,26 @@ var SearchableRemoteListMixin = {
 var SearchForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
-    this.props.onSubmit(this.refs.searchbox.getDOMNode().value);
+    this.props.onSubmit(this.refs.searchbox.getDOMNode().firstChild.value); //FIXME: firstChild is a hack!
   },
   render: function() {
     if (typeof this.props.syntaxlink !== "undefined") {
         var helplink = <small>(<a href={this.props.syntaxlink} target="blank_">search syntax help</a>)</small>;
     }
     return (
+      <Row>
       <form onSubmit={this.handleSubmit}>
-        <input type="text" id="searchInput" ref="searchbox" defaultValue={this.props.query} />
-        <button type="submit" id="searchSubmit">Search</button>
-        {helplink}
+        <Col xs={7}>
+        <Input type="text" id="searchInput" ref="searchbox" defaultValue={this.props.query} />
+        </Col>
+        <Col xs={1}>
+        <Button bsStyle="success" type="submit" id="searchSubmit">Search</Button>
+        </Col>
       </form>
+      <Col xs={4}>
+        {helplink}
+      </Col>
+      </Row>
     )
   }
 });
@@ -167,11 +181,11 @@ var SearchableCaseverList = React.createClass({
 
   render: function() {
     return (
-      <div>
+      <Grid>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
         <CaseverList casevers={this.state.data}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
-      </div>
+      </Grid>
     )
   }
 })
