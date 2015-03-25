@@ -120,7 +120,9 @@ var SearchForm = React.createClass({
 var MoreLink = React.createClass({
   render: function() {
     return (
-      <a className="morelink" href="javascript:void(0);" onClick={this.props.onLoadMore}>more</a>
+      <Button block onClick={this.props.onLoadMore}>
+        load more
+      </Button>
     );
   }
 });
