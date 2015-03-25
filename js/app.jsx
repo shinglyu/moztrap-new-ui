@@ -192,11 +192,13 @@ var CaseverList = React.createClass({
     }.bind(this))
 
     return (
+      <Row>
       <Table striped condensed hover className="caseverList">
         <tbody>
         {casevers}
         </tbody>
       </Table>
+      </Row>
     )
   }
 });
