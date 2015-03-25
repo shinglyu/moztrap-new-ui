@@ -468,7 +468,12 @@ var AddToSuite = React.createClass({
           />
           </Col>
         </Row>
-        <Button bsStyle="success" id="modifySuite" onClick={this.handleModifySuite}>Submit</Button>
+        
+        <Row>
+          <Col mdOffset={10}>
+            <Button bsStyle="success" block id="modifySuite" onClick={this.handleModifySuite}>Submit</Button>
+          </Col>
+        </Row>
       </Grid>
     )
   }
