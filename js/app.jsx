@@ -15,6 +15,7 @@ var Navbar  = ReactBootstrap.Navbar
 var CollapsableNav= ReactBootstrap.CollapsableNav
 var Nav= ReactBootstrap.Nav
 var NavItem= ReactBootstrap.NavItem
+var Glyphicon= ReactBootstrap.Glyphicon
 
 
 var Header = React.createClass({
@@ -29,12 +30,33 @@ var Header = React.createClass({
     )
   }
 })
+
+var Footer = React.createClass({
+  render: function() {
+    return (
+      <Row>
+        <hr/>
+        <a href="https://github.com/shinglyu/moztrap-new-ui/issues">Report Issues</a> 
+        <span> | </span>
+        <a href="https://github.com/shinglyu/moztrap-new-ui/">Source Code</a>
+        <span> | </span>
+        <a href="mailto://slyu@mozilla.com"><Glyphicon glyph="envelope"/></a>
+      </Row>
+    )
+  }
+})
+
+
+
 var App = React.createClass({
   render: function() {
     return (
       <div>
       <Header/>
+      <Grid>
       <RouteHandler {...this.props}/>
+      <Footer/>
+      </Grid>
       </div>
     )
   }
@@ -192,11 +214,13 @@ var CaseverList = React.createClass({
     }.bind(this))
 
     return (
+      <Row>
       <Table striped condensed hover className="caseverList">
         <tbody>
         {casevers}
         </tbody>
       </Table>
+      </Row>
     )
   }
 });
