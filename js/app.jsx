@@ -181,6 +181,9 @@ var CaseverListItem = React.createClass({
     if (typeof this.props.casever.tags !== "undefined"){
       var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
     }
+    if (typeof this.props.casever.case !== "undefined"){
+      var caseId = this.props.casever.case.split('/')[4]
+    }
     return (
       <tr className="caseverListItem">
         <td>
@@ -200,6 +203,16 @@ var CaseverListItem = React.createClass({
         </td>
         <td className="modified_on">
           {this.props.casever.modified_on}
+        </td>
+        <td className="edit">
+          <a title="edit" href={config.baseUrl + "/manage/caseversion/" + this.props.casever.id}>
+            <Glyphicon glyph="edit"/>
+          </a>
+        </td>
+        <td className="sharelink">
+          <a title="share link" href={config.baseUrl + "/manage/cases/?filter-id=" + caseId}> 
+            <Glyphicon glyph="share"/>
+          </a>
         </td>
       </tr>
     )
@@ -257,6 +270,16 @@ var SuiteListItem = React.createClass({
         <td className="name">
           <a href={"./index.html#/suite/" + this.props.suite.id}> 
             {this.props.suite.name}
+          </a>
+        </td>
+        <td className="edit">
+          <a title="edit" href={"./index.html#/suite/" + this.props.suite.id}> 
+            <Glyphicon glyph="edit"/>
+          </a>
+        </td>
+        <td className="sharelink">
+          <a title="share link" href={config.baseUrl + "/manage/cases/?filter-suite=" + this.props.suite.id}> 
+            <Glyphicon glyph="share"/>
           </a>
         </td>
       </tr>
