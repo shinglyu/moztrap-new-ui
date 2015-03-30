@@ -73,7 +73,6 @@ var SearchableRemoteListMixin = {
   loadRemoteData: function(url) {
     $.ajax({
       url: url,
-      dataType: 'jsonp',
       timeout: 10000, // Force trigger the error callback
 
       success: function(data) {
@@ -101,7 +100,6 @@ var SearchableRemoteListMixin = {
     console.log(url)
     $.ajax({
       url: url,
-      dataType: 'jsonp',
 
       success: function(data) {
         data.objects = this.state.data.objects.concat(data.objects)
@@ -147,7 +145,7 @@ var SearchForm = React.createClass({
   },
   render: function() {
     if (typeof this.props.syntaxlink !== "undefined") {
-        var helplink = <small>(<a href={this.props.syntaxlink} target="blank_">help</a>)</small>;
+        var helplink = <small>(<a href={this.props.syntaxlink} target="_blank">help</a>)</small>;
     }
     return (
       <Row>
@@ -196,7 +194,7 @@ var CaseverListItem = React.createClass({
           {this.props.casever.status}
         </td>
         <td className="name">
-          <a href={detailUrl} target="blank_">{this.props.casever.name}</a> <small>{tags}</small>
+          <a href={detailUrl} target="_blank">{this.props.casever.name}</a> <small>{tags}</small>
         </td>
         <td className="priority">
           {this.props.casever.priority}
@@ -384,7 +382,6 @@ var AddToSuite = React.createClass({
   loadSuite: function(id) {
     $.ajax({
       url: this.api_url + id + "/",
-      dataType: 'jsonp',
 
       success: function(data) {
         this.setState({suite: data}); 
