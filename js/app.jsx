@@ -361,7 +361,9 @@ SearchableCaseSelectionList = React.createClass({
 
   componentWillReceiveProps: function(nextProps) {
     //load remote suite case list
-    this.loadRemoteData(this.buildURL(this.state.query));
+    if (nextProps.refresh){
+      this.loadRemoteData(this.buildURL(this.state.query)); //FIXME: this causes unwanted update when checked
+    }
   },
 
   render: function() {
@@ -385,7 +387,8 @@ var AddToSuite = React.createClass({
       dataType: 'jsonp',
 
       success: function(data) {
-        this.setState({suite: data});
+        this.setState({suite: data}); 
+        //FIXME: the sub lists will load itself in the first time, and will reload by this trigger, remove this by adding a refrsh flag in the state
       }.bind(this),
 
       error: function(xhr, status, err) {
@@ -406,10 +409,10 @@ var AddToSuite = React.createClass({
     this.loadSuite(this.props.params.id);
   },
 
-  componentWillReceiveProps: function() {
+  componentWillReceiveProps: function(nextProps) {
     //this.setState{suite: {name: "Loading...", id: this.props.params.id}}
-    this.setState({suite: {id: this.props.params.id}});
-    this.loadSuite(this.props.params.id);
+    //this.setState({suite: {id: this.props.params.id}});
+    //this.loadSuite(this.props.params.id);
   },
 
   handleModifySuite: function() {
@@ -508,6 +511,8 @@ var AddToSuite = React.createClass({
     [].forEach.call(document.querySelectorAll('input[type=checkbox]'), function(checkbox){
       checkbox.checked = false;
     });
+
+    //this.loadSuite(this.props.params.id) //
     //this.setState({ addQueue:[], removeQueue:[] });
 
   },
@@ -516,16 +521,19 @@ var AddToSuite = React.createClass({
     if (e.target.checked){
       var newState = {};
       newState[queueName] = this.state[queueName].concat(e.target.value);
+      console.log('will set state')
       this.setState(newState);
     }
     else {
       this.state[queueName].splice(this.state[queueName].indexOf(e.target.value), 1);
       var newState = {};
       newState[queueName] = this.state[queueName];
+      console.log('will set state')
       this.setState(newState);
     }
   },
   handleAdd: function(e) {
+    console.log('handladd')
     this.handleQueueUpdate(e, "addQueue")
   },
 
@@ -550,13 +558,17 @@ var AddToSuite = React.createClass({
             <SearchableCaseSelectionList isNotIn={true} 
                                          suiteId={this.state.suite.id}
                                          onCheck={this.handleAdd}
+                                         refresh={this.state.addQueue.length == 0 && 
+                                                  this.state.removeQueue.length == 0}
+                                                  
             />
           </Col>
           <Col xs={12} md={6}>
           <h2>Remove from suite </h2>
           <SearchableCaseSelectionList isNotIn={false} 
-                                       suiteId={this.state.suite.id}
+                                       suiteId={this.props.params.id}
                                        onCheck={this.handleRemove}
+                                       refresh={this.state.addQueue.length == 0 && this.state.removeQueue.length == 0}
           />
           </Col>
         </Row>
