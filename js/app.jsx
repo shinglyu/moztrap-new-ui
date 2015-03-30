@@ -396,8 +396,7 @@ var AddToSuite = React.createClass({
     return ({suite: {name: "Loading...", id: this.props.params.id}, 
             addQueue:[], 
             removeQueue:[]
-	    }
-           )
+            })
   },
 
   componentDidMount: function() {
@@ -420,18 +419,13 @@ var AddToSuite = React.createClass({
         order: 0,
       }
     */
-    var addDatum = this.state.addQueue.map(function(caseuri){
-      return ({
-        case: caseuri,
-        suite: this.state.suite.resource_uri,
-        //order: 0,
-      });
-    }, this)
+    //FIXME: unnessary GET when add or removing cases
 
+    /* Helper functions */
     function postSuiteCase(that) {
       console.log(addDatum)
       if (addDatum.length == 0) { //update state to trigger refresh
-	that.setState({suite: that.state.suite});
+        that.setState({addQueue:[]}); //Cleanup the add queue
         return;
       }
       var data = addDatum.pop()
@@ -451,31 +445,10 @@ var AddToSuite = React.createClass({
         }.bind(this)
       });
     }
-    postSuiteCase(this)
-
-    var allSuitecases = undefined;
-    var removeSuitecases = undefined;
-    var removeDatum = undefined;
-    $.ajax({
-      type: "GET",
-      //TODO: ask user for username and apikey
-      url: config.baseUrl + "/api/v1/suitecase/?suite=" + this.state.suite.id,
-
-      success: function(data) {
-        allSuitecases = data.objects;
-        removeSuitecases = allSuitecases.filter(sc => (this.state.removeQueue.indexOf(sc.case) >= 0));
-        removeDatum = removeSuitecases.map(sc => sc.id)
-        removeSuiteCase(removeDatum, this)
-      }.bind(this),
-
-      error: function(xhr, status, err) {
-        console.error(xhr, status, err.toString());
-      }.bind(this)
-    });
 
     function removeSuiteCase(removeDatum, that) {
       if (removeDatum.length == 0) { //update state to trigger refresh
-	that.setState({suite: that.state.suite});
+        that.setState({removeQueue:[]}); //Cleanup the add queue
         return;
       }
       var data = removeDatum.pop()
@@ -495,6 +468,45 @@ var AddToSuite = React.createClass({
         }.bind(this)
       });
     }
+
+    /* Add */
+    var addDatum = this.state.addQueue.map(function(caseuri){
+      return ({
+        case: caseuri,
+        suite: this.state.suite.resource_uri,
+        //order: 0,
+      });
+    }, this)
+
+    postSuiteCase(this)
+
+    /* Remove; TODO: make add and remove more simialr*/
+    var allSuitecases = undefined;
+    var removeSuitecases = undefined;
+    var removeDatum = undefined;
+    $.ajax({
+      type: "GET",
+      url: config.baseUrl + "/api/v1/suitecase/?suite=" + this.state.suite.id,
+
+      success: function(data) {
+        allSuitecases = data.objects;
+        removeSuitecases = allSuitecases.filter(function(sc){ return (this.state.removeQueue.indexOf(sc.case) >= 0);}.bind(this));
+        removeDatum = removeSuitecases.map(function(sc) {return sc.id;})
+        removeSuiteCase(removeDatum, this)
+      }.bind(this),
+
+      error: function(xhr, status, err) {
+        console.error(xhr, status, err.toString());
+      }.bind(this)
+    });
+
+    /* Cleanup */
+
+    [].forEach.call(document.querySelectorAll('input[type=checkbox]'), function(checkbox){
+      checkbox.checked = false;
+    });
+    //this.setState({ addQueue:[], removeQueue:[] });
+
   },
 
   handleQueueUpdate: function(e, queueName) {
