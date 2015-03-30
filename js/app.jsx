@@ -534,6 +534,11 @@ var AddToSuite = React.createClass({
   },
 
   render: function() {
+    if (config.username == null || config.username == ""){ //FIXME: maybe set username default as null?
+      var credental_not_set_msg = <a href="#/settings">Click to set your username and api key before use</a>
+      var credental_not_set = true
+    }
+    
     return (
       <Grid>
         <Row>
@@ -557,8 +562,9 @@ var AddToSuite = React.createClass({
         </Row>
         
         <Row>
-          <Col mdOffset={10}>
-            <Button bsStyle="success" block id="modifySuite" onClick={this.handleModifySuite}>Submit</Button>
+          <Col mdOffset={8}>
+            {credental_not_set_msg}
+            <Button bsStyle="success" block disabled={credental_not_set} id="modifySuite" onClick={this.handleModifySuite}>Submit</Button>
           </Col>
         </Row>
       </Grid>
