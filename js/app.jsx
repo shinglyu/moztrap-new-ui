@@ -26,6 +26,9 @@ var Header = React.createClass({
           <NavItem eventKey={1} href="#">Case</NavItem>
           <NavItem eventKey={2} href="#/suite">Suite</NavItem>
         </Nav>
+        <Nav navbar right>
+          <NavItem eventKey={3} href="#/settings"><Glyphicon glyph="cog"/></NavItem>
+        </Nav>
       </Navbar>
     )
   }
@@ -206,7 +209,7 @@ var CaseverListItem = React.createClass({
         </td>
         <td className="edit">
           <a title="edit" href={config.baseUrl + "/manage/caseversion/" + this.props.casever.id}>
-            <Glyphicon glyph="edit"/>
+            <Glyphicon glyph="pencil"/>
           </a>
         </td>
         <td className="sharelink">
@@ -274,7 +277,7 @@ var SuiteListItem = React.createClass({
         </td>
         <td className="edit">
           <a title="edit" href={"./index.html#/suite/" + this.props.suite.id}> 
-            <Glyphicon glyph="edit"/>
+            <Glyphicon glyph="pencil"/>
           </a>
         </td>
         <td className="sharelink">
@@ -563,6 +566,43 @@ var AddToSuite = React.createClass({
   }
 })
 
+var Settings = React.createClass({
+  getInitialState: function() {
+    localforage.getItem('username').then(function(val){
+      this.setState({'username':val})
+    }.bind(this))
+    localforage.getItem('api_key').then(function(val){
+      this.setState({'api_key':val})
+    }.bind(this))
+    return ({'username': "Loading...", 'api_key':"Loading...",
+             //'buttonStyle': "primary"
+            });
+
+  },
+  handleUpdate: function() {
+    if (this.refs.username.getValue() !== ''){
+      localforage.setItem('username', this.refs.username.getValue())//TODO:trim?
+    }
+    if (this.refs.api_key.getValue() !== ''){
+      localforage.setItem('api_key', this.refs.api_key.getValue())
+    }
+    //TODO: change button color when all saved
+    //this.setState({'buttonStyle': "success"})
+
+  },
+  render: function() {
+    return (
+      <Row>
+      <Col md={12}>
+        <Input type="text" label="MozTrap Username" ref='username' placeholder={this.state.username} />
+        <Input type="text" label="API Key" ref='api_key' placeholder={this.state.api_key}/>
+        <Button type="submit" bsStyle="primary" onClick={this.handleUpdate}>Save</Button>
+      </Col>
+      </Row>
+    )
+  }
+})
+
 var routes = (
   <Route name="app" path="/" handler={App}>
     <DefaultRoute handler={SearchableCaseverList}/>
@@ -570,6 +610,7 @@ var routes = (
     <Route name="suites" path="/suite" handler={SearchableSuiteList}/>
     <Route name="suites_noid" path="/suite/" handler={SearchableSuiteList}/>
     <Route name="suite" path="/suite/:id" handler={AddToSuite} />
+    <Route name="settings" path="/settings" handler={Settings} />
   </Route>
 );
 
