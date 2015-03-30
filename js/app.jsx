@@ -244,7 +244,10 @@ var SearchableCaseverList = React.createClass({
   api_url: config.baseUrl + "/api/v1/caseversion/",
   //TODO: migrate to api_url: "https://moztrap.mozilla.org/api/v1/caseversionsearch/",
   buildURL: function(query) {
-      return buildQueryUrl(this.api_url, query, caseversionCodegen) + "&limit=" + config.defaultListLimit;
+      return (buildQueryUrl(this.api_url, query, caseversionCodegen) + 
+              "&limit=" + config.defaultListLimit + 
+              "&order_by=" + "-modified_on"
+             );
   },
 
   render: function() {
@@ -309,7 +312,10 @@ var SearchableSuiteList = React.createClass({
   mixins: [SearchableRemoteListMixin],
   api_url: config.baseUrl + "/api/v1/suite/",
   buildURL: function(query) {
-      return buildQueryUrl(this.api_url, query, suiteCodegen) + "&limit=" + config.defaultListLimit;
+      return (buildQueryUrl(this.api_url, query, suiteCodegen) + 
+                           "&limit=" + config.defaultListLimit + 
+                           "&order_by=" + "-modified_on"
+             );
   },
 
   render: function() {
@@ -323,6 +329,7 @@ var SearchableSuiteList = React.createClass({
   }
 });
 
+//TODO: can we remove this?
 SearchableCaseverSelectionList = React.createClass({
   mixins: [SearchableRemoteListMixin],
   api_url: config.baseUrl + "/api/v1/caseversionselection/",
@@ -332,6 +339,7 @@ SearchableCaseverSelectionList = React.createClass({
       var url = buildQueryUrl(this.api_url, query, caseversionCodegen);
       url += "&case__suites" + (this.props.isNotIn?"__ne":"") + "=" + this.props.suiteId;
       url += "&limit=" + config.defaultListLimit;
+      url += "&order_by=" + "-modified_on";
       return url
   },
 
@@ -354,6 +362,7 @@ SearchableCaseSelectionList = React.createClass({
       var url = buildQueryUrl(this.api_url, query, caseselectionCodegen);
       url += "&case__suites" + (this.props.isNotIn?"__ne":"") + "=" + this.props.suiteId;
       url += "&limit=" + config.defaultListLimit;
+      url += "&order_by=" + "-modified_on";
       return url
   },
 
