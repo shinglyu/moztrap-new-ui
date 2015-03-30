@@ -35,6 +35,5 @@
   },
   "_source": "git://github.com/mozilla/localForage.git",
   "_target": "~1.2.2",
-  "_originalSource": "localforage",
-  "_direct": true
+  "_originalSource": "localforage"
 }
