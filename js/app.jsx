@@ -581,10 +581,10 @@ var Settings = React.createClass({
   },
   handleUpdate: function() {
     if (this.refs.username.getValue() !== ''){
-      localforage.setItem('username', this.refs.username.getValue())//TODO:trim?
+      localforage.setItem('username', this.refs.username.getValue()).then(refreshConfig)//TODO:trim?
     }
     if (this.refs.api_key.getValue() !== ''){
-      localforage.setItem('api_key', this.refs.api_key.getValue())
+      localforage.setItem('api_key', this.refs.api_key.getValue()).then(refreshConfig)
     }
     //TODO: change button color when all saved
     //this.setState({'buttonStyle': "success"})
