@@ -1,3 +1,4 @@
+//TODO: replace this with jison generated parser
 function tokenize(query) {
   //var queries = query.split(" ");
   var re = /([^\s"']+"([^"]*)"|[^\s]+)/g;
