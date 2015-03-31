@@ -56,18 +56,28 @@ class MozTrapNewUISmokeTest(unittest.TestCase):
         #self.assertGreater(len(table.find_elements_by_class_name('caseverListItem')), 1)
         # TODO: Verify gaia tag in every result
 
-    def test_set_user_credental(self):
-        driver = self.driver
-        driver.get(self.baseURL + "/#/settings")
-
-        # Search
-        raise NotImplementedError
+    # def test_set_user_credental(self):
+    #    driver = self.driver
+    #    driver.get(self.baseURL + "/#/settings")
+    #
+    #    # Search
+    #    raise NotImplementedError
 
     def test_add_to_suite(self):
+        driver.get(self.baseURL + "/#/settings")
+        driver.find_element_by_id("usernameInput").send_keys('admin-django')
+        driver.find_element_by_id("api_key").send_keys('admin-django') #FIXME: how to setup this for easy test
+        driver.find_element_by_id("saveBtn").click()
+
+        driver.get(self.baseURL + "/#/suite/1") #FIXME: test suite id?
+        # Save
+
+
+
         raise NotImplementedError
 
-    def test_remove_from_suite(self):
-        raise NotImplementedError
+    # def test_remove_from_suite(self):
+    #     raise NotImplementedError
 
     def tearDown(self):
         self.driver.close()
