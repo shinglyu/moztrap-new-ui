@@ -78,23 +78,32 @@ function suiteCodegen(tokens) {
   });
 }
 
+/*
+function urlCodegen(tokens) {
+  return tokens.map(function(token){
+    token.value = token.value.replace('"', '', 'g'); //tirm the \"
+    return token.key + "=" + encodeURI(token.value);
+  });
+}
+*/
+
 function buildQueryUrl(url, query, codegen) {
   //TODO: parse and transform query to tastypie filters
   var queryUrl = url + "?";
   //var queryUrl = url;
-  console.log(query)
+  //console.log(query)
   var tokens = tokenize(query);
-  console.log(tokens)
+  //console.log(tokens)
   if (!tokens.map(function(tok){return tok['key']})
        .some(function(key){return key == 'orderby'})){
     tokens.push({'key':'orderby', 'value':'-modified_on'}); //FIXME: use default search term instead?
   }
-  console.log(tokens)
+  //console.log(tokens)
   var queryStrings = codegen(tokens);
   queryStrings.map(function(qs){queryUrl += ("&" + qs);});
 
   //var queryUrl = url + "?order_by=modified_on"
-  console.log(queryUrl);
+  //console.log(queryUrl);
   return queryUrl;
 }
 

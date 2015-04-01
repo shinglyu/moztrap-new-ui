@@ -96,14 +96,14 @@ var SearchableRemoteListMixin = {
   //FIXME: Change this to pagination
   loadMore: function() {
     var url = config.baseUrl + this.state.data.meta.next;
-    console.log(this.state.data.meta)
-    console.log(url)
+    //console.log(this.state.data.meta)
+    //console.log(url)
     $.ajax({
       url: url,
 
       success: function(data) {
         data.objects = this.state.data.objects.concat(data.objects)
-        console.log("LOADED!")
+        //console.log("LOADED!")
         this.setState({data: data});
       }.bind(this),
 
@@ -113,7 +113,14 @@ var SearchableRemoteListMixin = {
     });
   },
   getInitialState: function() {
-    return {query: "product:\"" + config.defaultProduct + "\"", data: this.loading};
+    if (typeof this.props.params.query !== "undefined"){
+      return {query: this.props.params.query, data: this.loading};
+
+    }
+    else {
+      //return {}
+      return {query: "product:\"" + config.defaultProduct + "\"", data: this.loading};
+    }
   },
 
   componentDidMount: function() {
@@ -123,6 +130,7 @@ var SearchableRemoteListMixin = {
   handleSearch: function(query) { 
     this.loadRemoteData(this.buildURL(query));
     this.setState({query: query, data: this.loading});
+    window.history.pushState({}, "MozTrap", document.URL.split("caseversion/search/")[0] + "caseversion/search/" + encodeURI(query));
   },
 
   handleLoadMore: function() {
@@ -251,6 +259,7 @@ var SearchableCaseverList = React.createClass({
   },
 
   render: function() {
+    //update
     return (
       <Grid>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
@@ -435,7 +444,7 @@ var AddToSuite = React.createClass({
 
     /* Helper functions */
     function postSuiteCase(that) {
-      console.log(addDatum)
+      //console.log(addDatum)
       if (addDatum.length == 0) { //update state to trigger refresh
         that.setState({addQueue:[]}); //Cleanup the add queue
         return;
@@ -448,7 +457,7 @@ var AddToSuite = React.createClass({
         contentType:"application/json",
         data: JSON.stringify(data),
         success: function(data) {
-          console.log("succeeded")
+          //console.log("succeeded")
           postSuiteCase(that)
         }.bind(this),
 
@@ -527,19 +536,19 @@ var AddToSuite = React.createClass({
     if (e.target.checked){
       var newState = {};
       newState[queueName] = this.state[queueName].concat(e.target.value);
-      console.log('will set state')
+      //console.log('will set state')
       this.setState(newState);
     }
     else {
       this.state[queueName].splice(this.state[queueName].indexOf(e.target.value), 1);
       var newState = {};
       newState[queueName] = this.state[queueName];
-      console.log('will set state')
+      //console.log('will set state')
       this.setState(newState);
     }
   },
   handleAdd: function(e) {
-    console.log('handladd')
+    //console.log('handladd')
     this.handleQueueUpdate(e, "addQueue")
   },
 
@@ -633,6 +642,7 @@ var routes = (
   <Route name="app" path="/" handler={App}>
     <DefaultRoute handler={SearchableCaseverList}/>
     <Route name="caseversions" path="/caseversion" handler={SearchableCaseverList}/>
+    <Route name="caseversion_search" path="/caseversion/search/:query" handler={SearchableCaseverList}/>
     <Route name="suites" path="/suite" handler={SearchableSuiteList}/>
     <Route name="suites_noid" path="/suite/" handler={SearchableSuiteList}/>
     <Route name="suite" path="/suite/:id" handler={AddToSuite} />

@@ -79,6 +79,17 @@ describe('Parser', function(){
         expect(result).to.be.eql(testData.expected);
       }
     });
+
+    it('Tokens to URI querystring', function(){
+      var testDatum = [
+        {input: [{key:"orderby", value:"name"}], expected: ["orderby=name"]},
+        {input: [{key:"name", value:"MozTrap"}], expected: ["name=MozTrap"]},
+      ];
+      for (var testData of testDatum) {
+        var result = urlCodegen(testData.input);
+        expect(result).to.be.eql(testData.expected);
+      }
+    });
   });
 });
 
