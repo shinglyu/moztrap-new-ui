@@ -113,7 +113,8 @@ var SearchableRemoteListMixin = {
     });
   },
   getInitialState: function() {
-    if (typeof this.props.params.query !== "undefined"){
+    if (typeof this.props.params !== "undefined"
+        && typeof this.props.params.query !== "undefined"){
       return {query: this.props.params.query, data: this.loading};
 
     }
