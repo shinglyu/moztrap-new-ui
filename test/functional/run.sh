@@ -1,8 +1,11 @@
+testclasspath=$1
+
+echo "Remember to edit js/config.js to fit your testing env"
 cd ../..
-python -m SimpleHTTPServer &
+python -m SimpleHTTPServer 8888 > /dev/null 2>&1 &
 serverpid=$!
 cd -
-python test.py
+python test.py $testclasspath
 
 DEADLINE=1   #seconds to wait
 kill $serverpid

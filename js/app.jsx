@@ -375,7 +375,7 @@ SearchableCaseSelectionList = React.createClass({
 
   render: function() {
     return (
-      <div>
+      <div id={this.props.id}>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
         <CaseverList casevers={this.state.data} onCheck={this.props.onCheck}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
@@ -566,6 +566,7 @@ var AddToSuite = React.createClass({
                                          onCheck={this.handleAdd}
                                          refresh={this.state.addQueue.length == 0 && 
                                                   this.state.removeQueue.length == 0}
+                                         id="ni_list"
                                                   
             />
           </Col>
@@ -575,6 +576,7 @@ var AddToSuite = React.createClass({
                                        suiteId={this.props.params.id}
                                        onCheck={this.handleRemove}
                                        refresh={this.state.addQueue.length == 0 && this.state.removeQueue.length == 0}
+                                       id="in_list"
           />
           </Col>
         </Row>
@@ -618,9 +620,9 @@ var Settings = React.createClass({
     return (
       <Row>
       <Col md={12}>
-        <Input type="text" label="MozTrap Username" ref='username' placeholder={this.state.username} />
-        <Input type="text" label="API Key" ref='api_key' placeholder={this.state.api_key}/>
-        <Button type="submit" bsStyle="primary" onClick={this.handleUpdate}>Save</Button>
+        <Input type="text" label="MozTrap Username" id="usernameInput" ref='username' placeholder={this.state.username} />
+        <Input type="text" label="API Key" id="apikeyInput" ref='api_key' placeholder={this.state.api_key}/>
+        <Button type="submit" id="saveBtn" bsStyle="primary" onClick={this.handleUpdate}>Save</Button>
       </Col>
       </Row>
     )
