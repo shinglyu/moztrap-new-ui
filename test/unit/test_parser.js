@@ -2,15 +2,22 @@ var expect = chai.expect;
 
 describe('Parser', function(){
   describe('codegen', function(){
-    it('build query url', function(){
+    it('build query url without explict orderby', function(){
       url="http://moztrap.com/api/v1/caseversion/";
       //var qss = ['order_by=modified_on', 'product="Firefox OS"'];
-      var qss = 'order_by:modified_on product:"Firefox OS"';
+      var qss = 'product:"Firefox OS"';
       var url = buildQueryUrl(url, qss, caseversionCodegen);
-      expect(url).to.be.equal("http://moztrap.com/api/v1/caseversion/?&order_by=modified_on&product=\"Firefox OS\"");
+      expect(url).to.be.equal("http://moztrap.com/api/v1/caseversion/?&productversion__product__name__icontains=Firefox%20OS&order_by=-modified_on");
       //expect(url).to.be.equal("http://moztrap.com/api/v1/caseversion/?order_by=modified_on&product=\"Firefox OS\"");
-    });
-
+    }); 
+    it('build query url with explict orderby', function(){
+      url="http://moztrap.com/api/v1/caseversion/";
+      //var qss = ['order_by=modified_on', 'product="Firefox OS"'];
+      var qss = 'product:"Firefox OS" orderby:name';
+      var url = buildQueryUrl(url, qss, caseversionCodegen);
+      expect(url).to.be.equal("http://moztrap.com/api/v1/caseversion/?&productversion__product__name__icontains=Firefox%20OS&order_by=name");
+      //expect(url).to.be.equal("http://moztrap.com/api/v1/caseversion/?order_by=modified_on&product=\"Firefox OS\"");
+    }); 
     it('parse basic query into tokens', function(){
       var query = "product:\"Firefox OS\" suite:Test hello";
       var result = tokenize(String(query));
@@ -49,6 +56,26 @@ describe('Parser', function(){
       ];
       for (var testData of testDatum) {
         var result = suiteCodegen(testData.input);
+        expect(result).to.be.eql(testData.expected);
+      }
+    });
+
+    it('Turn order by tokens into TastyPie search queries', function(){
+      var testDatum = [
+        {input: [{key:"orderby", value:"name"}], expected: ["order_by=name"]},
+        {input: [{key:"orderby", value:"-name"}], expected: ["order_by=-name"]},
+        {input: [{key:"orderby", value:"+name"}], expected: ["order_by=+name"]},
+      ];
+      for (var testData of testDatum) {
+        var result = suiteCodegen(testData.input);
+        expect(result).to.be.eql(testData.expected);
+      }
+      for (var testData of testDatum) {
+        var result = caseselectionCodegen(testData.input);
+        expect(result).to.be.eql(testData.expected);
+      }
+      for (var testData of testDatum) {
+        var result = caseversionCodegen(testData.input);
         expect(result).to.be.eql(testData.expected);
       }
     });
