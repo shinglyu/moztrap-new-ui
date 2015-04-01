@@ -6,6 +6,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from functools import partial
 
 
+localURL = "http://0.0.0.0:8888"
+prodURL  = "http://shinglyu.github.io/moztrap-new-ui"
+# baseURL = localURL
+baseURL = prodURL
+
 def waitForLoadComplete(driver):
     WebDriverWait(driver, 1000, poll_frequency=0.5).until(
         EC.invisibility_of_element_located((By.LINK_TEXT, 'Loading...'))
@@ -25,7 +30,7 @@ def titleInCaseSelectionList(title, listname, driver):
 class MozTrapNewUISmokeTest(unittest.TestCase):
 
     def setUp(self):
-        self.baseURL = "http://0.0.0.0:8888"
+        self.baseURL = baseURL
         self.driver = webdriver.Firefox()
         self.driver.implicitly_wait(5)  # seconds
 
@@ -102,6 +107,7 @@ class MozTrapNewUISmokeTest(unittest.TestCase):
         # self.assertGreater(len(table.find_elements_by_class_name('caseverListItem')), 1)
         # TODO: Verify ONE is the result
 
+    @unittest.skipIf(baseURL==prodURL, "Skipped for production before we have a test account")
     def test_add_to_suite(self):
         driver = self.driver
         driver.get(self.baseURL + "/#/settings")
