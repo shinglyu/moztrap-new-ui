@@ -47,7 +47,7 @@ class MozTrapNewUISmokeTest(unittest.TestCase):
         waitForLoadComplete(driver)
         # TODO: veriyf tag in every result
 
-    def test_shareable_uri_generation(self):
+    def test_shareable_uri_generation_caseversion(self):
 
         driver = self.driver
         driver.get(self.baseURL)
@@ -57,13 +57,31 @@ class MozTrapNewUISmokeTest(unittest.TestCase):
         elem.send_keys(' tag:test')
         driver.find_element_by_id("searchSubmit").click()
 
-        self.assertEqual(driver.current_url, self.baseURL + "/#/caseversion/search/product:%22MozTrap%22%20tag:test")  # FIXME: hardcoded product
+        self.assertEqual(driver.current_url, self.baseURL + "/#/search/product:%22MozTrap%22%20tag:test")  # FIXME: hardcoded product
 
-    def test_shared_uri(self):
+    def test_shared_uri_caseversion(self):
 
         driver = self.driver
-        driver.get(self.baseURL + "/#/caseversion/search/product:%22MozTrap%22%20tag:foo")  # FIXME: hardcoded product
+        driver.get(self.baseURL + "/#/search/product:%22MozTrap%22%20tag:foo")  # FIXME: hardcoded product
         self.assertEqual(driver.find_element_by_id("searchInput").get_attribute('value'), "product:\"MozTrap\" tag:foo")
+
+    def test_shareable_uri_generation_suite(self):
+
+        driver = self.driver
+        driver.get(self.baseURL + "/#/suite/")
+
+        # Search
+        elem = driver.find_element_by_id("searchInput")
+        elem.send_keys(' ONE')
+        driver.find_element_by_id("searchSubmit").click()
+
+        self.assertEqual(driver.current_url, self.baseURL + "/#/suite/search/product:%22MozTrap%22%20ONE")  # FIXME: hardcoded product
+
+    def test_shared_uri_suite(self):
+
+        driver = self.driver
+        driver.get(self.baseURL + "/#/suite/search/product:%22MozTrap%22%20TWO")  # FIXME: hardcoded product
+        self.assertEqual(driver.find_element_by_id("searchInput").get_attribute('value'), "product:\"MozTrap\" TWO")
 
     def test_search_suite(self):
 

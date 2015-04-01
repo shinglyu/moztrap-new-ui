@@ -1,5 +1,6 @@
 var Router = window.ReactRouter;
 var Route = Router.Route;
+var Redirect = Router.Redirect;
 var NotFoundRoute = Router.NotFoundRoute;
 var DefaultRoute = Router.DefaultRoute;
 var Link = Router.Link;
@@ -131,7 +132,7 @@ var SearchableRemoteListMixin = {
   handleSearch: function(query) { 
     this.loadRemoteData(this.buildURL(query));
     this.setState({query: query, data: this.loading});
-    window.history.pushState({}, "MozTrap", document.URL.split("caseversion/search/")[0] + "caseversion/search/" + encodeURI(query));
+    window.history.pushState({}, "MozTrap", document.URL.split("search/")[0] + "search/" + encodeURI(query));
   },
 
   handleLoadMore: function() {
@@ -642,12 +643,15 @@ var Settings = React.createClass({
 var routes = (
   <Route name="app" path="/" handler={App}>
     <DefaultRoute handler={SearchableCaseverList}/>
-    <Route name="caseversions" path="/caseversion" handler={SearchableCaseverList}/>
+    <Route name="caseversions"       path="/caseversion" handler={SearchableCaseverList}/>
     <Route name="caseversion_search" path="/caseversion/search/:query" handler={SearchableCaseverList}/>
-    <Route name="suites" path="/suite" handler={SearchableSuiteList}/>
-    <Route name="suites_noid" path="/suite/" handler={SearchableSuiteList}/>
-    <Route name="suite" path="/suite/:id" handler={AddToSuite} />
-    <Route name="settings" path="/settings" handler={Settings} />
+    <Redirect                        from="/search/:query"  to="/caseversion/search/:query" />
+    <Route name="suites_noid"        path="/suite/" handler={SearchableSuiteList}/>
+    <Redirect                        from="/suite"  to="/suite/" />
+    <Route name="suite_search"       path="/suite/search/:query" handler={SearchableSuiteList}/>
+    <Route name="suite"              path="/suite/:id" handler={AddToSuite} />
+    <Route name="settings"           path="/settings" handler={Settings} />
+    <NotFoundRoute handler={SearchableCaseverList}/>
   </Route>
 );
 
