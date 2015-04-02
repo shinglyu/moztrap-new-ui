@@ -132,6 +132,9 @@ var SearchableRemoteListMixin = {
   handleSearch: function(query) { 
     this.loadRemoteData(this.buildURL(query));
     this.setState({query: query, data: this.loading});
+    //TODO: two way data binding?
+    //console.log("handle search: " + query)
+    this.refs.searchform.forceUpdateInput(query);
     window.history.pushState({}, "MozTrap", document.URL.split("search/")[0] + "search/" + encodeURI(query));
   },
 
@@ -152,6 +155,10 @@ var SearchForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
     this.props.onSubmit(this.refs.searchbox.getDOMNode().firstChild.value); //FIXME: firstChild is a hack!
+  },
+  forceUpdateInput: function(query){
+    console.log(this.refs.searchbox.getDOMNode())
+    this.refs.searchbox.getDOMNode().firstElementChild.value= query;
   },
   render: function() {
     if (typeof this.props.syntaxlink !== "undefined") {
@@ -230,6 +237,40 @@ var CaseverListItem = React.createClass({
   }
 });
 
+//TODO: using client side sort for now, use this when two way data binding is OK
+var SortableTh = React.createClass({
+  handleSort: function(){
+    //alert('sort by ' + this.props.name)
+    var newOrder = null 
+    if (this.state.order == ""){
+        newOrder = "-"
+    }
+    else if (this.state.order == "-"){
+        newOrder = ""
+    }
+    else {
+        newOrder = ""
+    }
+    this.setState({"order": newOrder})
+    this.props.handleAddFilter(' orderby:' + newOrder + this.props.filter, / orderby:[-\w]+/)
+  },
+  getInitialState: function(){
+    return ({"order": null}) //+ and -
+  },
+  render: function(){
+    var marker=""
+    if (this.state.order == ""){
+      marker = "▼";
+    }
+    else if (this.state.order == "-"){
+      marker = "▲";
+    }
+    return(
+      <th onClick={this.handleSort}>{this.props.name}{marker}</th>
+    )
+  }
+})
+
 var CaseverList = React.createClass({
   render: function() {
     //can use the casevers.meta
@@ -241,7 +282,17 @@ var CaseverList = React.createClass({
       <Row>
       <Table striped condensed hover className="caseverList">
         <tbody>
-        {casevers}
+          <tr>
+            <th></th>
+            <th>status</th>
+            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <th>status</th>
+            <th>status</th>
+            <th>status</th>
+            <th>status</th>
+            <th>status</th>
+          </tr>
+          {casevers}
         </tbody>
       </Table>
       </Row>
@@ -259,13 +310,18 @@ var SearchableCaseverList = React.createClass({
               //"&order_by=" + "-modified_on"
              );
   },
+  handleAddFilter: function(additionalQuery, removeRegex){
+    var newQuery = this.state.query.replace(removeRegex, "")
+    console.log(newQuery)
+    this.handleSearch(newQuery + additionalQuery);
+  },
 
   render: function() {
     //update
     return (
       <Grid>
-        <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
-        <CaseverList casevers={this.state.data}/>
+        <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
+        <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
       </Grid>
     )
