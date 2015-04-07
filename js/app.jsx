@@ -635,6 +635,12 @@ var AddToSuite = React.createClass({
           <h1>{this.state.suite.name}</h1>
         </Row>
         <Row>
+          <Col mdOffset={8}>
+            {credental_not_set_msg}
+            <Button bsStyle="success" block disabled={credental_not_set} id="modifySuiteTop" onClick={this.handleModifySuite}>Submit</Button>
+          </Col>
+        </Row>
+        <Row>
           <Col xs={12} md={6}>
             <h2>Add to suite </h2>
             <SearchableCaseSelectionList isNotIn={true} 
