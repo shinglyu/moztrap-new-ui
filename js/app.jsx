@@ -388,7 +388,7 @@ var SearchableSuiteList = React.createClass({
   render: function() {
     return (
       <Grid>
-        <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
+        <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
         <SuiteList suites={this.state.data}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
       </Grid>
