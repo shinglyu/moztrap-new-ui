@@ -1,6 +1,6 @@
 import unittest
 from selenium import webdriver
-from app import NewUI
+from app import NewUI, NewUIAssertions
 
 
 localURL = "http://0.0.0.0:8888"
@@ -9,7 +9,7 @@ baseURL = localURL
 # baseURL = prodURL
 
 
-class MozTrapNewUISmokeTest(unittest.TestCase):
+class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
 
     def setUp(self):
         self.baseURL = baseURL #FIXME: remove
@@ -96,6 +96,7 @@ class MozTrapNewUISmokeTest(unittest.TestCase):
     def test_add_to_suite(self):
         driver = self.driver
         driver.get(self.baseURL + "/#/settings")
+        # FIXME: extract the locators
         driver.find_element_by_id("usernameInput").send_keys('admin-django')
         driver.find_element_by_id("apikeyInput").send_keys('c67c9af7-7e07-4820-b686-5f92ae94f6c9') #FIXME: how to setup this for easy test
         driver.find_element_by_id("saveBtn").click()
@@ -107,31 +108,37 @@ class MozTrapNewUISmokeTest(unittest.TestCase):
         caseName = case.find_element_by_class_name('name').text
         case.find_element_by_tag_name('input').click()
         driver.find_element_by_id('modifySuite').click()
-        self.newui.titleInCaseSelectionList(caseName, 'in_list')
+        self.titleInCaseSelectionList(caseName, 'in_list')
 
         case = driver.find_element_by_id('in_list').find_element_by_class_name('caseverListItem')
         caseName = case.find_element_by_class_name('name').text
         case.find_element_by_tag_name('input').click()
         driver.find_element_by_id('modifySuite').click()
-        self.newui.titleInCaseSelectionList(caseName, 'ni_list')
+        self.titleInCaseSelectionList(caseName, 'ni_list')
 
     #FIXME: cleanup
     def test_sort_caseversion(self):
         driver = self.driver
         driver.get(self.baseURL + "/#/")
 
-        driver.find_element_by_id("orderby_name").click();
-        self.newui.waitForLoadComplete()
-        self.assertMultiLineEqual(driver.current_url, self.baseURL + "/#/search/product:%22MozTrap%22%20orderby:name")  # FIXME: hardcoded product
-        self.assertMultiLineEqual(driver.find_element_by_id("searchInput").get_attribute('value'), "product:\"MozTrap\" orderby:name")
-        # TODO: assert list is sorted
+        for field in ['status', 'name', 'priority', 'product__productversion',
+                      'modified_on']:
+            self.newui.sortby(field)
+            self.assertTermInSearchQuery(' orderby:name')
 
-        driver.find_element_by_id("orderby_name").click();
-        self.newui.waitForLoadComplete()
-        self.assertMultiLineEqual(driver.current_url, self.baseURL + "/#/search/product:%22MozTrap%22%20orderby:-name")  # FIXME: hardcoded product
-        self.assertMultiLineEqual(driver.find_element_by_id("searchInput").get_attribute('value'), "product:\"MozTrap\" orderby:-name")
-        # TODO: assert list is sorted
+            self.newui.sortby(field)
+            self.assertTermInSearchQuery(' orderby:-name')
+        #driver.find_element_by_id("orderby_name").click();
+        #self.newui.waitForLoadComplete()
+        #self.assertMultiLineEqual(driver.current_url, self.baseURL + "/#/search/product:%22MozTrap%22%20orderby:name")  # FIXME: hardcoded product
+        #self.assertMultiLineEqual(driver.find_element_by_id("searchInput").get_attribute('value'), "product:\"MozTrap\" orderby:name")
+        ## TODO: assert list is sorted
 
+        #driver.find_element_by_id("orderby_name").click();
+        #self.newui.waitForLoadComplete()
+        #self.assertMultiLineEqual(driver.current_url, self.baseURL + "/#/search/product:%22MozTrap%22%20orderby:-name")  # FIXME: hardcoded product
+        #self.assertMultiLineEqual(driver.find_element_by_id("searchInput").get_attribute('value'), "product:\"MozTrap\" orderby:-name")
+        ## TODO: assert list is sorted
 
     def tearDown(self):
         self.driver.close()
