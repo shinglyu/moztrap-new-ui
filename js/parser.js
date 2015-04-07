@@ -1,3 +1,4 @@
+//TODO: replace this with jison generated parser
 function tokenize(query) {
   //var queries = query.split(" ");
   var re = /([^\s"']+"([^"]*)"|[^\s]+)/g;
@@ -23,6 +24,7 @@ function caseversionCodegen(tokens) {
     'product': 'productversion__product__name__icontains=',
     'ver': 'productversion__version__icontains=',
     'status': 'status=',
+    'orderby': 'order_by=',
   };
   //TODO:exact match?
   return tokens.map(function(token){
@@ -43,6 +45,7 @@ function caseselectionCodegen(tokens) {
     'suite': 'case__suites__name__icontains=',
     'product': 'productversion__product__name__icontains=',
     'status': 'status=',
+    'orderby': 'order_by=',
   };
   //TODO:exact match?
   return tokens.map(function(token){
@@ -62,6 +65,7 @@ function suiteCodegen(tokens) {
     'name': 'name__icontains=',
     'product': 'product__name__icontains=',
     'status': 'status=',
+    'orderby': 'order_by=',
   };
   //TODO:exact match?
   return tokens.map(function(token){
@@ -74,15 +78,32 @@ function suiteCodegen(tokens) {
   });
 }
 
+/*
+function urlCodegen(tokens) {
+  return tokens.map(function(token){
+    token.value = token.value.replace('"', '', 'g'); //tirm the \"
+    return token.key + "=" + encodeURI(token.value);
+  });
+}
+*/
+
 function buildQueryUrl(url, query, codegen) {
   //TODO: parse and transform query to tastypie filters
   var queryUrl = url + "?";
   //var queryUrl = url;
-  var queryStrings = codegen(tokenize(query));
+  //console.log(query)
+  var tokens = tokenize(query);
+  //console.log(tokens)
+  if (!tokens.map(function(tok){return tok['key']})
+       .some(function(key){return key == 'orderby'})){
+    tokens.push({'key':'orderby', 'value':'-modified_on'}); //FIXME: use default search term instead?
+  }
+  //console.log(tokens)
+  var queryStrings = codegen(tokens);
   queryStrings.map(function(qs){queryUrl += ("&" + qs);});
 
   //var queryUrl = url + "?order_by=modified_on"
-  console.log(queryUrl);
+  //console.log(queryUrl);
   return queryUrl;
 }
 

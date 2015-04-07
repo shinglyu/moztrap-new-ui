@@ -1,11 +1,13 @@
 var Router = window.ReactRouter;
 var Route = Router.Route;
+var Redirect = Router.Redirect;
 var NotFoundRoute = Router.NotFoundRoute;
 var DefaultRoute = Router.DefaultRoute;
 var Link = Router.Link;
 var RouteHandler = Router.RouteHandler;
 
 var Button = ReactBootstrap.Button
+var ButtonGroup = ReactBootstrap.ButtonGroup
 var Row    = ReactBootstrap.Row
 var Col    = ReactBootstrap.Col
 var Grid   = ReactBootstrap.Grid
@@ -83,9 +85,7 @@ var SearchableRemoteListMixin = {
       FIXME: this doesn't seem to work under jsonp proxy
       statusCode: {
         400: function() {
-          alert.log('bad request');
-        },
-      },
+          alert.log('bad request'); }, },
       */
       error: function(xhr, status, err) {
         this.setState(this.notFound)
@@ -96,14 +96,14 @@ var SearchableRemoteListMixin = {
   //FIXME: Change this to pagination
   loadMore: function() {
     var url = config.baseUrl + this.state.data.meta.next;
-    console.log(this.state.data.meta)
-    console.log(url)
+    //console.log(this.state.data.meta)
+    //console.log(url)
     $.ajax({
       url: url,
 
       success: function(data) {
         data.objects = this.state.data.objects.concat(data.objects)
-        console.log("LOADED!")
+        //console.log("LOADED!")
         this.setState({data: data});
       }.bind(this),
 
@@ -113,7 +113,15 @@ var SearchableRemoteListMixin = {
     });
   },
   getInitialState: function() {
-    return {query: "product:\"" + config.defaultProduct + "\"", data: this.loading};
+    if (typeof this.props.params !== "undefined"
+        && typeof this.props.params.query !== "undefined"){
+      return {query: this.props.params.query, data: this.loading};
+
+    }
+    else {
+      //return {}
+      return {query: "product:\"" + config.defaultProduct + "\"", data: this.loading};
+    }
   },
 
   componentDidMount: function() {
@@ -123,10 +131,20 @@ var SearchableRemoteListMixin = {
   handleSearch: function(query) { 
     this.loadRemoteData(this.buildURL(query));
     this.setState({query: query, data: this.loading});
+    //TODO: two way data binding?
+    //console.log("handle search: " + query)
+    this.refs.searchform.forceUpdateInput(query);
+    window.history.pushState({}, "MozTrap", document.URL.split("search/")[0] + "search/" + encodeURI(query));
   },
 
   handleLoadMore: function() {
     this.loadMore();
+  },
+
+  handleAddFilter: function(additionalQuery, removeRegex){
+    var newQuery = this.state.query.replace(removeRegex, "")
+    console.log(newQuery)
+    this.handleSearch(newQuery + additionalQuery);
   },
 
   /*
@@ -142,6 +160,10 @@ var SearchForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
     this.props.onSubmit(this.refs.searchbox.getDOMNode().firstChild.value); //FIXME: firstChild is a hack!
+  },
+  forceUpdateInput: function(query){
+    console.log(this.refs.searchbox.getDOMNode())
+    this.refs.searchbox.getDOMNode().firstElementChild.value= query;
   },
   render: function() {
     if (typeof this.props.syntaxlink !== "undefined") {
@@ -220,6 +242,40 @@ var CaseverListItem = React.createClass({
   }
 });
 
+//TODO: using client side sort for now, use this when two way data binding is OK
+var SortableTh = React.createClass({
+  handleSort: function(){
+    //alert('sort by ' + this.props.name)
+    var newOrder = null 
+    if (this.state.order == ""){
+        newOrder = "-"
+    }
+    else if (this.state.order == "-"){
+        newOrder = ""
+    }
+    else {
+        newOrder = ""
+    }
+    this.setState({"order": newOrder})
+    this.props.handleAddFilter(' orderby:' + newOrder + this.props.filter, / orderby:[-\w]+/)
+  },
+  getInitialState: function(){
+    return ({"order": null}) //+ and -
+  },
+  render: function(){
+    var marker=""
+    if (this.state.order == ""){
+      marker = "▼";
+    }
+    else if (this.state.order == "-"){
+      marker = "▲";
+    }
+    return(
+      <th id={"orderby_"+ this.props.filter} onClick={this.handleSort}>{this.props.name}{marker}</th>
+    )
+  }
+})
+
 var CaseverList = React.createClass({
   render: function() {
     //can use the casevers.meta
@@ -231,7 +287,17 @@ var CaseverList = React.createClass({
       <Row>
       <Table striped condensed hover className="caseverList">
         <tbody>
-        {casevers}
+          <tr>
+            <th></th>
+            <th>status</th>
+            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <SortableTh name="priority" filter="case__priority" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <SortableTh name="product" filter="productversion" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <th></th>
+            <th></th>
+          </tr>
+          {casevers}
         </tbody>
       </Table>
       </Row>
@@ -245,16 +311,23 @@ var SearchableCaseverList = React.createClass({
   //TODO: migrate to api_url: "https://moztrap.mozilla.org/api/v1/caseversionsearch/",
   buildURL: function(query) {
       return (buildQueryUrl(this.api_url, query, caseversionCodegen) + 
-              "&limit=" + config.defaultListLimit + 
-              "&order_by=" + "-modified_on"
+              "&limit=" + config.defaultListLimit
+              //"&order_by=" + "-modified_on"
              );
   },
-
   render: function() {
+    //update
     return (
       <Grid>
-        <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
-        <CaseverList casevers={this.state.data}/>
+        <Row>
+          <Col md="12">
+          <ButtonGroup id="toolbar"> 
+            <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
+          </ButtonGroup>
+          </Col>
+        </Row>
+        <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
+        <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
       </Grid>
     )
@@ -275,6 +348,9 @@ var SuiteListItem = React.createClass({
           <a href={"./index.html#/suite/" + this.props.suite.id}> 
             {this.props.suite.name}
           </a>
+        </td>
+        <td className="modified_on">
+          {this.props.suite.modified_on}
         </td>
         <td className="edit">
           <a title="edit" href={"./index.html#/suite/" + this.props.suite.id}> 
@@ -301,6 +377,14 @@ var SuiteList = React.createClass({
     return (
       <Table striped condensed hover className="suiteList">
         <tbody>
+          <tr>
+            <th></th>
+            <th>status</th>
+            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <th></th>
+            <th></th>
+          </tr>
           {suites}
         </tbody>
       </Table>
@@ -313,16 +397,23 @@ var SearchableSuiteList = React.createClass({
   api_url: config.baseUrl + "/api/v1/suite/",
   buildURL: function(query) {
       return (buildQueryUrl(this.api_url, query, suiteCodegen) + 
-                           "&limit=" + config.defaultListLimit + 
-                           "&order_by=" + "-modified_on"
+                           "&limit=" + config.defaultListLimit
+                           //"&order_by=" + "-modified_on"
              );
   },
 
   render: function() {
     return (
       <Grid>
-        <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
-        <SuiteList suites={this.state.data}/>
+        <Row>
+          <Col md="12">
+          <ButtonGroup id="toolbar"> 
+            <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/suite/add/' >+ New Suite</Button>
+          </ButtonGroup>
+          </Col>
+        </Row>
+        <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
+        <SuiteList suites={this.state.data} handleAddFilter={this.handleAddFilter}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
       </Grid>
     )
@@ -339,7 +430,7 @@ SearchableCaseverSelectionList = React.createClass({
       var url = buildQueryUrl(this.api_url, query, caseversionCodegen);
       url += "&case__suites" + (this.props.isNotIn?"__ne":"") + "=" + this.props.suiteId;
       url += "&limit=" + config.defaultListLimit;
-      url += "&order_by=" + "-modified_on";
+      //url += "&order_by=" + "-modified_on";
       return url
   },
 
@@ -362,7 +453,7 @@ SearchableCaseSelectionList = React.createClass({
       var url = buildQueryUrl(this.api_url, query, caseselectionCodegen);
       url += "&case__suites" + (this.props.isNotIn?"__ne":"") + "=" + this.props.suiteId;
       url += "&limit=" + config.defaultListLimit;
-      url += "&order_by=" + "-modified_on";
+      //url += "&order_by=" + "-modified_on";
       return url
   },
 
@@ -375,7 +466,7 @@ SearchableCaseSelectionList = React.createClass({
 
   render: function() {
     return (
-      <div>
+      <div id={this.props.id}>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
         <CaseverList casevers={this.state.data} onCheck={this.props.onCheck}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
@@ -435,7 +526,7 @@ var AddToSuite = React.createClass({
 
     /* Helper functions */
     function postSuiteCase(that) {
-      console.log(addDatum)
+      //console.log(addDatum)
       if (addDatum.length == 0) { //update state to trigger refresh
         that.setState({addQueue:[]}); //Cleanup the add queue
         return;
@@ -448,7 +539,7 @@ var AddToSuite = React.createClass({
         contentType:"application/json",
         data: JSON.stringify(data),
         success: function(data) {
-          console.log("succeeded")
+          //console.log("succeeded")
           postSuiteCase(that)
         }.bind(this),
 
@@ -527,19 +618,19 @@ var AddToSuite = React.createClass({
     if (e.target.checked){
       var newState = {};
       newState[queueName] = this.state[queueName].concat(e.target.value);
-      console.log('will set state')
+      //console.log('will set state')
       this.setState(newState);
     }
     else {
       this.state[queueName].splice(this.state[queueName].indexOf(e.target.value), 1);
       var newState = {};
       newState[queueName] = this.state[queueName];
-      console.log('will set state')
+      //console.log('will set state')
       this.setState(newState);
     }
   },
   handleAdd: function(e) {
-    console.log('handladd')
+    //console.log('handladd')
     this.handleQueueUpdate(e, "addQueue")
   },
 
@@ -559,6 +650,12 @@ var AddToSuite = React.createClass({
           <h1>{this.state.suite.name}</h1>
         </Row>
         <Row>
+          <Col mdOffset={8}>
+            {credental_not_set_msg}
+            <Button bsStyle="success" block disabled={credental_not_set} id="modifySuiteTop" onClick={this.handleModifySuite}>Submit</Button>
+          </Col>
+        </Row>
+        <Row>
           <Col xs={12} md={6}>
             <h2>Add to suite </h2>
             <SearchableCaseSelectionList isNotIn={true} 
@@ -566,6 +663,7 @@ var AddToSuite = React.createClass({
                                          onCheck={this.handleAdd}
                                          refresh={this.state.addQueue.length == 0 && 
                                                   this.state.removeQueue.length == 0}
+                                         id="ni_list"
                                                   
             />
           </Col>
@@ -575,6 +673,7 @@ var AddToSuite = React.createClass({
                                        suiteId={this.props.params.id}
                                        onCheck={this.handleRemove}
                                        refresh={this.state.addQueue.length == 0 && this.state.removeQueue.length == 0}
+                                       id="in_list"
           />
           </Col>
         </Row>
@@ -618,9 +717,9 @@ var Settings = React.createClass({
     return (
       <Row>
       <Col md={12}>
-        <Input type="text" label="MozTrap Username" ref='username' placeholder={this.state.username} />
-        <Input type="text" label="API Key" ref='api_key' placeholder={this.state.api_key}/>
-        <Button type="submit" bsStyle="primary" onClick={this.handleUpdate}>Save</Button>
+        <Input type="text" label="MozTrap Username" id="usernameInput" ref='username' placeholder={this.state.username} />
+        <Input type="text" label="API Key" id="apikeyInput" ref='api_key' placeholder={this.state.api_key}/>
+        <Button type="submit" id="saveBtn" bsStyle="primary" onClick={this.handleUpdate}>Save</Button>
       </Col>
       </Row>
     )
@@ -630,11 +729,15 @@ var Settings = React.createClass({
 var routes = (
   <Route name="app" path="/" handler={App}>
     <DefaultRoute handler={SearchableCaseverList}/>
-    <Route name="caseversions" path="/caseversion" handler={SearchableCaseverList}/>
-    <Route name="suites" path="/suite" handler={SearchableSuiteList}/>
-    <Route name="suites_noid" path="/suite/" handler={SearchableSuiteList}/>
-    <Route name="suite" path="/suite/:id" handler={AddToSuite} />
-    <Route name="settings" path="/settings" handler={Settings} />
+    <Route name="caseversions"       path="/caseversion" handler={SearchableCaseverList}/>
+    <Route name="caseversion_search" path="/caseversion/search/:query" handler={SearchableCaseverList}/>
+    <Redirect                        from="/search/:query"  to="/caseversion/search/:query" />
+    <Route name="suites_noid"        path="/suite/" handler={SearchableSuiteList}/>
+    <Redirect                        from="/suite"  to="/suite/" />
+    <Route name="suite_search"       path="/suite/search/:query" handler={SearchableSuiteList}/>
+    <Route name="suite"              path="/suite/:id" handler={AddToSuite} />
+    <Route name="settings"           path="/settings" handler={Settings} />
+    <NotFoundRoute handler={SearchableCaseverList}/>
   </Route>
 );
 

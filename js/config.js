@@ -1,6 +1,7 @@
 var config = {
   baseUrl: "https://moztrap.mozilla.org",
   //baseUrl: "http://localhost:8000",
+  //baseUrl: "http://localhost:8080", //wiremock
   //baseUrl: "https://moztrap.allizom.org",
   defaultProduct: "Firefox OS",
   //defaultProduct: "MozTrap",
