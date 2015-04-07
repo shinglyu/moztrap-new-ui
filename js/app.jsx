@@ -266,7 +266,7 @@ var SortableTh = React.createClass({
       marker = "▲";
     }
     return(
-      <th onClick={this.handleSort}>{this.props.name}{marker}</th>
+      <th id={"orderby_"+ this.props.name} onClick={this.handleSort}>{this.props.name}{marker}</th>
     )
   }
 })

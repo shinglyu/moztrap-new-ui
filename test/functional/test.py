@@ -1,38 +1,21 @@
 import unittest
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from functools import partial
+from app import NewUI
 
 
 localURL = "http://0.0.0.0:8888"
 prodURL  = "http://shinglyu.github.io/moztrap-new-ui"
-# baseURL = localURL
-baseURL = prodURL
-
-def waitForLoadComplete(driver):
-    WebDriverWait(driver, 1000, poll_frequency=0.5).until(
-        EC.invisibility_of_element_located((By.LINK_TEXT, 'Loading...'))
-    )
-
-
-def titleInCaseSelectionList(title, listname, driver):
-    def titleInList(title, listItems, driver):
-        return any(map(lambda x: x.find_element_by_class_name('name').text == title, listItems))
-
-    listItems= driver.find_element_by_id(listname).find_elements_by_class_name('caseverListItem')
-    WebDriverWait(driver, 1000, poll_frequency=0.5).until(
-        partial(titleInList, title, listItems)
-    )
+baseURL = localURL
+# baseURL = prodURL
 
 
 class MozTrapNewUISmokeTest(unittest.TestCase):
 
     def setUp(self):
-        self.baseURL = baseURL
+        self.baseURL = baseURL #FIXME: remove
         self.driver = webdriver.Firefox()
         self.driver.implicitly_wait(5)  # seconds
+        self.newui = NewUI(self.driver, baseURL)
 
     def test_search_caseversion(self):
 
@@ -40,18 +23,16 @@ class MozTrapNewUISmokeTest(unittest.TestCase):
         driver.get(self.baseURL)
 
         # Loads initially
-        waitForLoadComplete(driver)
+        self.newui.waitForLoadComplete()
 
         # Search
-        elem = driver.find_element_by_id("searchInput")
-        elem.send_keys(' tag:test')
-        driver.find_element_by_id("searchSubmit").click()
-
+        self.newui.search(' tag:test')
 
         # Search result loads
-        waitForLoadComplete(driver)
+        self.newui.waitForLoadComplete()
         # TODO: veriyf tag in every result
 
+    #FIXME: cleanup
     def test_shareable_uri_generation_caseversion(self):
 
         driver = self.driver
@@ -64,12 +45,14 @@ class MozTrapNewUISmokeTest(unittest.TestCase):
 
         self.assertEqual(driver.current_url, self.baseURL + "/#/search/product:%22MozTrap%22%20tag:test")  # FIXME: hardcoded product
 
+    #FIXME: cleanup
     def test_shared_uri_caseversion(self):
 
         driver = self.driver
         driver.get(self.baseURL + "/#/search/product:%22MozTrap%22%20tag:foo")  # FIXME: hardcoded product
         self.assertEqual(driver.find_element_by_id("searchInput").get_attribute('value'), "product:\"MozTrap\" tag:foo")
 
+    #FIXME: cleanup
     def test_shareable_uri_generation_suite(self):
 
         driver = self.driver
@@ -88,13 +71,14 @@ class MozTrapNewUISmokeTest(unittest.TestCase):
         driver.get(self.baseURL + "/#/suite/search/product:%22MozTrap%22%20TWO")  # FIXME: hardcoded product
         self.assertEqual(driver.find_element_by_id("searchInput").get_attribute('value'), "product:\"MozTrap\" TWO")
 
+    #FIXME: cleanup
     def test_search_suite(self):
 
         driver = self.driver
         driver.get(self.baseURL + "/#/suite")
 
         # Loads initially
-        waitForLoadComplete(driver)
+        self.newui.waitForLoadComplete()
 
         # Search
         elem = driver.find_element_by_id("searchInput")
@@ -102,11 +86,12 @@ class MozTrapNewUISmokeTest(unittest.TestCase):
         driver.find_element_by_id("searchSubmit").click()
 
         # Search result loads
-        waitForLoadComplete(driver)
+        self.newui.waitForLoadComplete()
         # table = driver.find_element_by_class_name("caseverList")
         # self.assertGreater(len(table.find_elements_by_class_name('caseverListItem')), 1)
         # TODO: Verify ONE is the result
 
+    #FIXME: cleanup
     @unittest.skipIf(baseURL==prodURL, "Skipped for production before we have a test account")
     def test_add_to_suite(self):
         driver = self.driver
@@ -116,22 +101,41 @@ class MozTrapNewUISmokeTest(unittest.TestCase):
         driver.find_element_by_id("saveBtn").click()
 
         driver.get(self.baseURL + "/#/suite/1")  # FIXME: test suite id?
-        waitForLoadComplete(driver)
+        self.newui.waitForLoadComplete()
 
         case = driver.find_element_by_id('ni_list').find_element_by_class_name('caseverListItem')
         caseName = case.find_element_by_class_name('name').text
         case.find_element_by_tag_name('input').click()
         driver.find_element_by_id('modifySuite').click()
-        titleInCaseSelectionList(caseName, 'in_list', driver)
+        self.newui.titleInCaseSelectionList(caseName, 'in_list')
 
         case = driver.find_element_by_id('in_list').find_element_by_class_name('caseverListItem')
         caseName = case.find_element_by_class_name('name').text
         case.find_element_by_tag_name('input').click()
         driver.find_element_by_id('modifySuite').click()
-        titleInCaseSelectionList(caseName, 'ni_list', driver)
+        self.newui.titleInCaseSelectionList(caseName, 'ni_list')
+
+    #FIXME: cleanup
+    def test_sort_caseversion(self):
+        driver = self.driver
+        driver.get(self.baseURL + "/#/")
+
+        driver.find_element_by_id("orderby_name").click();
+        self.newui.waitForLoadComplete()
+        self.assertMultiLineEqual(driver.current_url, self.baseURL + "/#/search/product:%22MozTrap%22%20orderby:name")  # FIXME: hardcoded product
+        self.assertMultiLineEqual(driver.find_element_by_id("searchInput").get_attribute('value'), "product:\"MozTrap\" orderby:name")
+        # TODO: assert list is sorted
+
+        driver.find_element_by_id("orderby_name").click();
+        self.newui.waitForLoadComplete()
+        self.assertMultiLineEqual(driver.current_url, self.baseURL + "/#/search/product:%22MozTrap%22%20orderby:-name")  # FIXME: hardcoded product
+        self.assertMultiLineEqual(driver.find_element_by_id("searchInput").get_attribute('value'), "product:\"MozTrap\" orderby:-name")
+        # TODO: assert list is sorted
+
 
     def tearDown(self):
         self.driver.close()
 
+    #FIXME: cleanup
 if __name__ == "__main__":
     unittest.main()
