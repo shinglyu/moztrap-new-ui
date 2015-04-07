@@ -152,6 +152,8 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
             self.newui.sortby(field)
             self.assertTermInSearchQuery(' orderby:-' + field)
 
+    # TODO: test new case and new suite button
+
     def tearDown(self):
         self.driver.close()
 

@@ -7,6 +7,7 @@ var Link = Router.Link;
 var RouteHandler = Router.RouteHandler;
 
 var Button = ReactBootstrap.Button
+var ButtonGroup = ReactBootstrap.ButtonGroup
 var Row    = ReactBootstrap.Row
 var Col    = ReactBootstrap.Col
 var Grid   = ReactBootstrap.Grid
@@ -318,6 +319,13 @@ var SearchableCaseverList = React.createClass({
     //update
     return (
       <Grid>
+        <Row>
+          <Col md="12">
+          <ButtonGroup id="toolbar"> 
+            <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
+          </ButtonGroup>
+          </Col>
+        </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
         <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
@@ -397,6 +405,13 @@ var SearchableSuiteList = React.createClass({
   render: function() {
     return (
       <Grid>
+        <Row>
+          <Col md="12">
+          <ButtonGroup id="toolbar"> 
+            <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/suite/add/' >+ New Suite</Button>
+          </ButtonGroup>
+          </Col>
+        </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
         <SuiteList suites={this.state.data} handleAddFilter={this.handleAddFilter}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
