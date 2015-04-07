@@ -121,13 +121,13 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
         driver = self.driver
         driver.get(self.baseURL + "/#/")
 
-        for field in ['status', 'name', 'priority', 'product__productversion',
+        for field in ['name', 'case__priority', 'productversion',
                       'modified_on']:
             self.newui.sortby(field)
-            self.assertTermInSearchQuery(' orderby:name')
+            self.assertTermInSearchQuery(' orderby:' + field)
 
             self.newui.sortby(field)
-            self.assertTermInSearchQuery(' orderby:-name')
+            self.assertTermInSearchQuery(' orderby:-' + field)
         #driver.find_element_by_id("orderby_name").click();
         #self.newui.waitForLoadComplete()
         #self.assertMultiLineEqual(driver.current_url, self.baseURL + "/#/search/product:%22MozTrap%22%20orderby:name")  # FIXME: hardcoded product
@@ -139,6 +139,18 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
         #self.assertMultiLineEqual(driver.current_url, self.baseURL + "/#/search/product:%22MozTrap%22%20orderby:-name")  # FIXME: hardcoded product
         #self.assertMultiLineEqual(driver.find_element_by_id("searchInput").get_attribute('value'), "product:\"MozTrap\" orderby:-name")
         ## TODO: assert list is sorted
+
+    def test_sort_suite(self):
+        driver = self.driver
+        # FIXME: extract me
+        driver.get(self.baseURL + "/#/suite")
+
+        for field in ['name', 'modified_on']:
+            self.newui.sortby(field)
+            self.assertTermInSearchQuery(' orderby:' + field)
+
+            self.newui.sortby(field)
+            self.assertTermInSearchQuery(' orderby:-' + field)
 
     def tearDown(self):
         self.driver.close()

@@ -44,9 +44,9 @@ class NewUIAssertions(object):
 
     def assertTermInSearchQuery(self, term):
         self.assertMultiLineEqual(
-            self.driver.current_url,
+            self.driver.current_url.split('search')[1],
             # self.baseURL + "/#/search/product:%22MozTrap%22{0}".format(pathname2url(term))
-            self.baseURL + "/#/search/product:%22MozTrap%22{0}".format(term.replace(" ", "%20"))
+            "/product:%22MozTrap%22{0}".format(term.replace(" ", "%20"))
         )  # FIXME: hardcoded product
         self.assertMultiLineEqual(
             self.driver.find_element(*self.newui._searchInput_locator).get_attribute('value'),

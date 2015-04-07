@@ -84,9 +84,7 @@ var SearchableRemoteListMixin = {
       FIXME: this doesn't seem to work under jsonp proxy
       statusCode: {
         400: function() {
-          alert.log('bad request');
-        },
-      },
+          alert.log('bad request'); }, },
       */
       error: function(xhr, status, err) {
         this.setState(this.notFound)
@@ -140,6 +138,12 @@ var SearchableRemoteListMixin = {
 
   handleLoadMore: function() {
     this.loadMore();
+  },
+
+  handleAddFilter: function(additionalQuery, removeRegex){
+    var newQuery = this.state.query.replace(removeRegex, "")
+    console.log(newQuery)
+    this.handleSearch(newQuery + additionalQuery);
   },
 
   /*
@@ -266,7 +270,7 @@ var SortableTh = React.createClass({
       marker = "▲";
     }
     return(
-      <th id={"orderby_"+ this.props.name} onClick={this.handleSort}>{this.props.name}{marker}</th>
+      <th id={"orderby_"+ this.props.filter} onClick={this.handleSort}>{this.props.name}{marker}</th>
     )
   }
 })
@@ -286,11 +290,11 @@ var CaseverList = React.createClass({
             <th></th>
             <th>status</th>
             <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <th>status</th>
-            <th>status</th>
-            <th>status</th>
-            <th>status</th>
-            <th>status</th>
+            <SortableTh name="priority" filter="case__priority" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <SortableTh name="product" filter="productversion" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <th></th>
+            <th></th>
           </tr>
           {casevers}
         </tbody>
@@ -310,12 +314,6 @@ var SearchableCaseverList = React.createClass({
               //"&order_by=" + "-modified_on"
              );
   },
-  handleAddFilter: function(additionalQuery, removeRegex){
-    var newQuery = this.state.query.replace(removeRegex, "")
-    console.log(newQuery)
-    this.handleSearch(newQuery + additionalQuery);
-  },
-
   render: function() {
     //update
     return (
@@ -343,6 +341,9 @@ var SuiteListItem = React.createClass({
             {this.props.suite.name}
           </a>
         </td>
+        <td className="modified_on">
+          {this.props.suite.modified_on}
+        </td>
         <td className="edit">
           <a title="edit" href={"./index.html#/suite/" + this.props.suite.id}> 
             <Glyphicon glyph="pencil"/>
@@ -368,6 +369,14 @@ var SuiteList = React.createClass({
     return (
       <Table striped condensed hover className="suiteList">
         <tbody>
+          <tr>
+            <th></th>
+            <th>status</th>
+            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <th></th>
+            <th></th>
+          </tr>
           {suites}
         </tbody>
       </Table>
@@ -389,7 +398,7 @@ var SearchableSuiteList = React.createClass({
     return (
       <Grid>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
-        <SuiteList suites={this.state.data}/>
+        <SuiteList suites={this.state.data} handleAddFilter={this.handleAddFilter}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
       </Grid>
     )
