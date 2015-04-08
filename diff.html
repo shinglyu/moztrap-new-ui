@@ -22,17 +22,6 @@ This example demonstrates how to set left and right editors using ajax.
 	<script type="text/javascript" src="./lib/mergely/lib/mergely.js"></script>
 	<link type="text/css" rel="stylesheet" href="./lib/mergely/lib/mergely.css" />
 
-	<style type='text/css'>
-		.drop_zone {
-			border: 2px dashed #BBBBBB;
-			border-radius: 5px 5px 5px 5px;
-			color: #BBBBBB;
-			padding: 10px 25px;
-			text-align: center;
-			align: center;
-			width: 80%;
-		}
-	</style>
 	<script type="text/javascript">
     function formatCaseversion(caseversion){
       //if (typeof caseversion.name == "undefined") {
@@ -153,17 +142,11 @@ This example demonstrates how to set left and right editors using ajax.
 </head>
 <body style="width: 100%;">
 	<table  style="width: 100%;"><tr>
-		<td style="width: 50%;"><div id="drop_zone" class="drop_zone">Drop files here</div></td>
-		<td style="width: 50%;"><input type="checkbox" id="ignorews">ignore witespaces</td>
-	</tr></table>
-	<br/>
-
-	<table  style="width: 100%;"><tr>
 		<td style="width: 50%;"><tt id="path-lhs"></tt> &nbsp; <a id="save-lhs" class="save-link" href="#">save</a></td>
 		<td style="width: 50%;"><tt id="path-rhs"></tt> &nbsp; <a id="save-rhs" class="save-link" href="#">save</a></td>
 	</tr></table>
 
-	<div id="mergely-resizer" style="height: 450px;">
+	<div id="mergely-resizer" style="height: 90vh;">
 		<div id="compare">
 		</div>
 	</div>

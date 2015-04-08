@@ -120,7 +120,7 @@ var SearchableRemoteListMixin = {
     }
     else {
       //return {}
-      return {query: "product:\"" + config.defaultProduct + "\"", data: this.loading};
+      return {query: "product:\"" + config.defaultProduct + "\"", data: this.loading, checked: []};
     }
   },
 
@@ -210,7 +210,7 @@ var CaseverListItem = React.createClass({
     return (
       <tr className="caseverListItem">
         <td>
-          <input type="checkbox" value={this.props.casever.case} onChange={this.props.onChange}/>
+          <input type="checkbox" value={this.props.casever.id} onChange={this.props.onChange}/>
         </td>
         <td className="status">
           {this.props.casever.status}
@@ -280,7 +280,7 @@ var CaseverList = React.createClass({
   render: function() {
     //can use the casevers.meta
     var casevers = this.props.casevers.objects.map(function(casever){
-      return (<CaseverListItem casever={casever} onChange={this.props.onCheck}/>)
+      return (<CaseverListItem casever={casever} onChange={this.props.handleCheck}/>)
     }.bind(this))
 
     return (
@@ -315,19 +315,54 @@ var SearchableCaseverList = React.createClass({
               //"&order_by=" + "-modified_on"
              );
   },
+
+  handleQueueUpdate: function(e) {
+    if (e.target.checked){
+      var newState = {};
+      newState['checked'] = this.state['checked'].concat(e.target.value);
+      //console.log('will set state')
+      this.setState(newState);
+    }
+    else {
+      this.state['checked'].splice(this.state['checked'].indexOf(e.target.value), 1);
+      var newState = {};
+      newState['checked'] = this.state['checked'];
+      //console.log('will set state')
+      this.setState(newState);
+    }
+  },
+  /*
+  diff: function(){
+    alert(this.state.checked)
+  },
+  */
   render: function() {
     //update
+    //
+    var diffURL = ""
+    var diffDisabled = true;
+    if (typeof this.state.checked !== "undefined"){
+      console.log("this.state is not undefined")
+      diffURL = "diff.html?lhs=" + this.state.checked[0] + "&rhs=" + this.state.checked[1]
+      if (this.state.checked.length == 2){
+        var diffDisabled = false;
+      }
+    }
     return (
       <Grid>
         <Row>
           <Col md="12">
           <ButtonGroup id="toolbar"> 
-            <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
+            <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
+            <Button bsStyle="success" target="blank_" href={diffURL}
+                    disabled={diffDisabled}>
+              diff
+            </Button>
           </ButtonGroup>
           </Col>
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
-        <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter}/>
+        <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
       </Grid>
     )
@@ -629,6 +664,7 @@ var AddToSuite = React.createClass({
       this.setState(newState);
     }
   },
+
   handleAdd: function(e) {
     //console.log('handladd')
     this.handleQueueUpdate(e, "addQueue")
