@@ -195,6 +195,40 @@ var MoreLink = React.createClass({
   }
 });
 
+//TODO: using client side sort for now, use this when two way data binding is OK
+var SortableTh = React.createClass({
+  handleSort: function(){
+    //alert('sort by ' + this.props.name)
+    var newOrder = null 
+    if (this.state.order == ""){
+        newOrder = "-"
+    }
+    else if (this.state.order == "-"){
+        newOrder = ""
+    }
+    else {
+        newOrder = ""
+    }
+    this.setState({"order": newOrder})
+    this.props.handleAddFilter(' orderby:' + newOrder + this.props.filter, / orderby:[-\w]+/)
+  },
+  getInitialState: function(){
+    return ({"order": null}) //+ and -
+  },
+  render: function(){
+    var marker=""
+    if (this.state.order == ""){
+      marker = "▼";
+    }
+    else if (this.state.order == "-"){
+      marker = "▲";
+    }
+    return(
+      <th id={"orderby_"+ this.props.filter} onClick={this.handleSort}>{this.props.name}{marker}</th>
+    )
+  }
+})
+
 var CaseverListItem = React.createClass({
   render: function() {
     var detailUrl = config.baseUrl + "/manage/cases/_detail/" + this.props.casever.id;
@@ -242,39 +276,6 @@ var CaseverListItem = React.createClass({
   }
 });
 
-//TODO: using client side sort for now, use this when two way data binding is OK
-var SortableTh = React.createClass({
-  handleSort: function(){
-    //alert('sort by ' + this.props.name)
-    var newOrder = null 
-    if (this.state.order == ""){
-        newOrder = "-"
-    }
-    else if (this.state.order == "-"){
-        newOrder = ""
-    }
-    else {
-        newOrder = ""
-    }
-    this.setState({"order": newOrder})
-    this.props.handleAddFilter(' orderby:' + newOrder + this.props.filter, / orderby:[-\w]+/)
-  },
-  getInitialState: function(){
-    return ({"order": null}) //+ and -
-  },
-  render: function(){
-    var marker=""
-    if (this.state.order == ""){
-      marker = "▼";
-    }
-    else if (this.state.order == "-"){
-      marker = "▲";
-    }
-    return(
-      <th id={"orderby_"+ this.props.filter} onClick={this.handleSort}>{this.props.name}{marker}</th>
-    )
-  }
-})
 
 var CaseverList = React.createClass({
   render: function() {
@@ -480,6 +481,63 @@ SearchableCaseverSelectionList = React.createClass({
   }
 });
 
+var CaseListItem = React.createClass({
+  render: function() {
+    var detailUrl = config.baseUrl + "/manage/cases/_detail/" + this.props.casever.id;
+    //console.log(this.props.casever.tags)
+    // Formatting tags
+    // TODO: make each tag a div
+    if (typeof this.props.casever.tags !== "undefined"){
+      var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
+    }
+    if (typeof this.props.casever.case !== "undefined"){
+      var caseId = this.props.casever.case.split('/')[4]
+    }
+    return (
+      <tr className="caseListItem">
+        <td>
+          <input type="checkbox" value={this.props.casever.case} onChange={this.props.onChange}/>
+        </td>
+        <td className="name">
+          <a href={detailUrl} target="_blank">{this.props.casever.name}</a> <small>{tags}</small>
+        </td>
+        <td className="priority">
+          {this.props.casever.priority}
+        </td>
+        <td className="modified_on">
+          {this.props.casever.modified_on}
+        </td>
+      </tr>
+    )
+  }
+});
+
+
+var CaseList = React.createClass({
+  render: function() {
+    //can use the casevers.meta
+    var casevers = this.props.casevers.objects.map(function(casever){
+      return (<CaseListItem casever={casever} onChange={this.props.handleCheck}/>)
+    }.bind(this))
+
+    return (
+      <Row>
+      <Table striped condensed hover className="caseverList">
+        <tbody>
+          <tr>
+            <th></th>
+            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <SortableTh name="priority" filter="case__priority" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+          </tr>
+          {casevers}
+        </tbody>
+      </Table>
+      </Row>
+    )
+  }
+});
+
 SearchableCaseSelectionList = React.createClass({
   mixins: [SearchableRemoteListMixin],
   api_url: config.baseUrl + "/api/v1/caseselection/",
@@ -503,7 +561,7 @@ SearchableCaseSelectionList = React.createClass({
     return (
       <div id={this.props.id}>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
-        <CaseverList casevers={this.state.data} onCheck={this.props.onCheck}/>
+        <CaseList casevers={this.state.data} handleCheck={this.props.onCheck}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
       </div>
     )
@@ -653,20 +711,20 @@ var AddToSuite = React.createClass({
     if (e.target.checked){
       var newState = {};
       newState[queueName] = this.state[queueName].concat(e.target.value);
-      //console.log('will set state')
+      console.log('will set state')
       this.setState(newState);
     }
     else {
       this.state[queueName].splice(this.state[queueName].indexOf(e.target.value), 1);
       var newState = {};
       newState[queueName] = this.state[queueName];
-      //console.log('will set state')
+      console.log('will set state')
       this.setState(newState);
     }
   },
 
   handleAdd: function(e) {
-    //console.log('handladd')
+    console.log('handladd')
     this.handleQueueUpdate(e, "addQueue")
   },
 
