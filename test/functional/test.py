@@ -6,10 +6,13 @@ from app import NewUI, NewUIAssertions
 localURL = "http://0.0.0.0:8888"
 prodURL  = "http://shinglyu.github.io/moztrap-new-ui"
 baseURL = localURL
-# baseURL = prodURL
+#baseURL = prodURL
 
 
 class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
+# TODO: test new case and new suite button
+# TODO: test load more
+# TODO: test diff
 
     def setUp(self):
         self.baseURL = baseURL #FIXME: remove
@@ -104,13 +107,13 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
         driver.get(self.baseURL + "/#/suite/1")  # FIXME: test suite id?
         self.newui.waitForLoadComplete()
 
-        case = driver.find_element_by_id('ni_list').find_element_by_class_name('caseverListItem')
+        case = driver.find_element_by_id('ni_list').find_element_by_class_name('caseListItem')
         caseName = case.find_element_by_class_name('name').text
         case.find_element_by_tag_name('input').click()
         driver.find_element_by_id('modifySuite').click()
         self.titleInCaseSelectionList(caseName, 'in_list')
 
-        case = driver.find_element_by_id('in_list').find_element_by_class_name('caseverListItem')
+        case = driver.find_element_by_id('in_list').find_element_by_class_name('caseListItem')
         caseName = case.find_element_by_class_name('name').text
         case.find_element_by_tag_name('input').click()
         driver.find_element_by_id('modifySuite').click()
@@ -152,7 +155,6 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
             self.newui.sortby(field)
             self.assertTermInSearchQuery(' orderby:-' + field)
 
-    # TODO: test new case and new suite button
 
     def tearDown(self):
         self.driver.close()

@@ -57,7 +57,7 @@ class NewUIAssertions(object):
         def titleInList(title, listItems, _):
             return any(map(lambda x: x.find_element_by_class_name('name').text == title, listItems))
 
-        listItems= self.driver.find_element_by_id(listname).find_elements_by_class_name('caseverListItem')
-        WebDriverWait(self.driver, 1000, poll_frequency=0.5).until(
+        listItems= self.driver.find_element_by_id(listname).find_elements_by_class_name('caseListItem')
+        WebDriverWait(self.driver, 10, poll_frequency=0.5).until(
             partial(titleInList, title, listItems)
         )

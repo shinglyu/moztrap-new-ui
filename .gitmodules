@@ -1,0 +1,3 @@
+[submodule "lib/mergely"]
+	path = lib/mergely
+	url = https://github.com/wickedest/Mergely

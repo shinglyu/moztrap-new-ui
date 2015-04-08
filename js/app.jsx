@@ -120,7 +120,7 @@ var SearchableRemoteListMixin = {
     }
     else {
       //return {}
-      return {query: "product:\"" + config.defaultProduct + "\"", data: this.loading};
+      return {query: "product:\"" + config.defaultProduct + "\"", data: this.loading, checked: []};
     }
   },
 
@@ -195,53 +195,6 @@ var MoreLink = React.createClass({
   }
 });
 
-var CaseverListItem = React.createClass({
-  render: function() {
-    var detailUrl = config.baseUrl + "/manage/cases/_detail/" + this.props.casever.id;
-    //console.log(this.props.casever.tags)
-    // Formatting tags
-    // TODO: make each tag a div
-    if (typeof this.props.casever.tags !== "undefined"){
-      var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
-    }
-    if (typeof this.props.casever.case !== "undefined"){
-      var caseId = this.props.casever.case.split('/')[4]
-    }
-    return (
-      <tr className="caseverListItem">
-        <td>
-          <input type="checkbox" value={this.props.casever.case} onChange={this.props.onChange}/>
-        </td>
-        <td className="status">
-          {this.props.casever.status}
-        </td>
-        <td className="name">
-          <a href={detailUrl} target="_blank">{this.props.casever.name}</a> <small>{tags}</small>
-        </td>
-        <td className="priority">
-          {this.props.casever.priority}
-        </td>
-        <td className="productversion">
-          {this.props.casever.productversion_name}
-        </td>
-        <td className="modified_on">
-          {this.props.casever.modified_on}
-        </td>
-        <td className="edit">
-          <a title="edit" href={config.baseUrl + "/manage/caseversion/" + this.props.casever.id}>
-            <Glyphicon glyph="pencil"/>
-          </a>
-        </td>
-        <td className="sharelink">
-          <a title="share link" href={config.baseUrl + "/manage/cases/?filter-id=" + caseId}> 
-            <Glyphicon glyph="share"/>
-          </a>
-        </td>
-      </tr>
-    )
-  }
-});
-
 //TODO: using client side sort for now, use this when two way data binding is OK
 var SortableTh = React.createClass({
   handleSort: function(){
@@ -276,11 +229,59 @@ var SortableTh = React.createClass({
   }
 })
 
+var CaseverListItem = React.createClass({
+  render: function() {
+    var detailUrl = config.baseUrl + "/manage/cases/_detail/" + this.props.casever.id;
+    //console.log(this.props.casever.tags)
+    // Formatting tags
+    // TODO: make each tag a div
+    if (typeof this.props.casever.tags !== "undefined"){
+      var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
+    }
+    if (typeof this.props.casever.case !== "undefined"){
+      var caseId = this.props.casever.case.split('/')[4]
+    }
+    return (
+      <tr className="caseverListItem">
+        <td>
+          <input type="checkbox" value={this.props.casever.id} onChange={this.props.onChange}/>
+        </td>
+        <td className="status">
+          {this.props.casever.status}
+        </td>
+        <td className="name">
+          <a href={detailUrl} target="_blank">{this.props.casever.name}</a> <small>{tags}</small>
+        </td>
+        <td className="priority">
+          {this.props.casever.priority}
+        </td>
+        <td className="productversion">
+          {this.props.casever.productversion_name}
+        </td>
+        <td className="modified_on">
+          {this.props.casever.modified_on}
+        </td>
+        <td className="edit">
+          <a title="edit" href={config.baseUrl + "/manage/caseversion/" + this.props.casever.id}>
+            <Glyphicon glyph="pencil"/>
+          </a>
+        </td>
+        <td className="sharelink">
+          <a title="share link" href={config.baseUrl + "/manage/cases/?filter-id=" + caseId}> 
+            <Glyphicon glyph="share"/>
+          </a>
+        </td>
+      </tr>
+    )
+  }
+});
+
+
 var CaseverList = React.createClass({
   render: function() {
     //can use the casevers.meta
     var casevers = this.props.casevers.objects.map(function(casever){
-      return (<CaseverListItem casever={casever} onChange={this.props.onCheck}/>)
+      return (<CaseverListItem casever={casever} onChange={this.props.handleCheck}/>)
     }.bind(this))
 
     return (
@@ -315,19 +316,54 @@ var SearchableCaseverList = React.createClass({
               //"&order_by=" + "-modified_on"
              );
   },
+
+  handleQueueUpdate: function(e) {
+    if (e.target.checked){
+      var newState = {};
+      newState['checked'] = this.state['checked'].concat(e.target.value);
+      //console.log('will set state')
+      this.setState(newState);
+    }
+    else {
+      this.state['checked'].splice(this.state['checked'].indexOf(e.target.value), 1);
+      var newState = {};
+      newState['checked'] = this.state['checked'];
+      //console.log('will set state')
+      this.setState(newState);
+    }
+  },
+  /*
+  diff: function(){
+    alert(this.state.checked)
+  },
+  */
   render: function() {
     //update
+    //
+    var diffURL = ""
+    var diffDisabled = true;
+    if (typeof this.state.checked !== "undefined"){
+      console.log("this.state is not undefined")
+      diffURL = "diff.html?lhs=" + this.state.checked[0] + "&rhs=" + this.state.checked[1]
+      if (this.state.checked.length == 2){
+        var diffDisabled = false;
+      }
+    }
     return (
       <Grid>
         <Row>
           <Col md="12">
           <ButtonGroup id="toolbar"> 
-            <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
+            <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
+            <Button bsStyle="success" target="blank_" href={diffURL}
+                    disabled={diffDisabled}>
+              diff
+            </Button>
           </ButtonGroup>
           </Col>
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
-        <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter}/>
+        <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
       </Grid>
     )
@@ -445,6 +481,63 @@ SearchableCaseverSelectionList = React.createClass({
   }
 });
 
+var CaseListItem = React.createClass({
+  render: function() {
+    var detailUrl = config.baseUrl + "/manage/cases/_detail/" + this.props.casever.id;
+    //console.log(this.props.casever.tags)
+    // Formatting tags
+    // TODO: make each tag a div
+    if (typeof this.props.casever.tags !== "undefined"){
+      var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
+    }
+    if (typeof this.props.casever.case !== "undefined"){
+      var caseId = this.props.casever.case.split('/')[4]
+    }
+    return (
+      <tr className="caseListItem">
+        <td>
+          <input type="checkbox" value={this.props.casever.case} onChange={this.props.onChange}/>
+        </td>
+        <td className="name">
+          <a href={detailUrl} target="_blank">{this.props.casever.name}</a> <small>{tags}</small>
+        </td>
+        <td className="priority">
+          {this.props.casever.priority}
+        </td>
+        <td className="modified_on">
+          {this.props.casever.modified_on}
+        </td>
+      </tr>
+    )
+  }
+});
+
+
+var CaseList = React.createClass({
+  render: function() {
+    //can use the casevers.meta
+    var casevers = this.props.casevers.objects.map(function(casever){
+      return (<CaseListItem casever={casever} onChange={this.props.handleCheck}/>)
+    }.bind(this))
+
+    return (
+      <Row>
+      <Table striped condensed hover className="caseverList">
+        <tbody>
+          <tr>
+            <th></th>
+            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <SortableTh name="priority" filter="case__priority" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+          </tr>
+          {casevers}
+        </tbody>
+      </Table>
+      </Row>
+    )
+  }
+});
+
 SearchableCaseSelectionList = React.createClass({
   mixins: [SearchableRemoteListMixin],
   api_url: config.baseUrl + "/api/v1/caseselection/",
@@ -468,7 +561,7 @@ SearchableCaseSelectionList = React.createClass({
     return (
       <div id={this.props.id}>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
-        <CaseverList casevers={this.state.data} onCheck={this.props.onCheck}/>
+        <CaseList casevers={this.state.data} handleCheck={this.props.onCheck}/>
         <MoreLink onLoadMore={this.handleLoadMore}/>
       </div>
     )
@@ -618,19 +711,20 @@ var AddToSuite = React.createClass({
     if (e.target.checked){
       var newState = {};
       newState[queueName] = this.state[queueName].concat(e.target.value);
-      //console.log('will set state')
+      console.log('will set state')
       this.setState(newState);
     }
     else {
       this.state[queueName].splice(this.state[queueName].indexOf(e.target.value), 1);
       var newState = {};
       newState[queueName] = this.state[queueName];
-      //console.log('will set state')
+      console.log('will set state')
       this.setState(newState);
     }
   },
+
   handleAdd: function(e) {
-    //console.log('handladd')
+    console.log('handladd')
     this.handleQueueUpdate(e, "addQueue")
   },
 
