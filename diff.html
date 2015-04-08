@@ -1,0 +1,172 @@
+<!--
+This example demonstrates how to set left and right editors using ajax.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" /><title>Test case diff</title>
+	<meta http-equiv="X-UA-Compatible" content="chrome=1, IE=edge">
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+  <meta name="description" content="Thanks Jamie Peabody" />
+	<meta name="keywords" content="diff,merge,compare,jsdiff,comparison,difference,file,text,unix,patch,algorithm,saas,longest common subsequence" />
+	<meta name="author" content="Jamie Peabody" />
+
+	<!-- Requires jQuery -->
+  <script src="./bower_components/jquery/dist/jquery.min.js"></script> 
+
+	<!-- Requires CodeMirror -->
+	<script type="text/javascript" src="./lib/mergely/lib/codemirror.js"></script>
+	<link type="text/css" rel="stylesheet" href="./lib/mergely/lib/codemirror.css" />
+
+	<!-- Requires Mergely -->
+	<script type="text/javascript" src="./lib/mergely/lib/mergely.js"></script>
+	<link type="text/css" rel="stylesheet" href="./lib/mergely/lib/mergely.css" />
+
+	<style type='text/css'>
+		.drop_zone {
+			border: 2px dashed #BBBBBB;
+			border-radius: 5px 5px 5px 5px;
+			color: #BBBBBB;
+			padding: 10px 25px;
+			text-align: center;
+			align: center;
+			width: 80%;
+		}
+	</style>
+	<script type="text/javascript">
+    function formatCaseversion(caseversion){
+      //if (typeof caseversion.name == "undefined") {
+      //  return "(This case is empty, you the case id might be wrong)"
+      //}
+      var steps = caseversion.steps.map(function(step){
+        return (
+          "WHEN " + step.instruction + "\n" + 
+          "THEN " + step.expected    + "\n"
+        )
+      })
+
+      return(
+        "TEST THAT " + caseversion.name + "\n\n" + 
+        caseversion.description + "\n\n" + 
+        steps.join("\n")
+      )
+
+      //var text = JSON.stringify(JSON.parse(response), null, "  ");
+    }
+
+    //Thanks http://stackoverflow.com/questions/8486099/how-do-i-parse-a-url-query-parameters-in-javascript
+    function getJsonFromUrl() {
+      var query = location.search.substr(1);
+      var result = {};
+      query.split("&").forEach(function(part) {
+        var item = part.split("=");
+        result[item[0]] = decodeURIComponent(item[1]);
+
+      });
+      return result;
+    }
+
+    var params = getJsonFromUrl()
+
+		$(document).ready(function () {
+			$('#compare').mergely({
+				width: 'auto',
+				height: 'auto', // containing div must be given a height
+				cmsettings: { readOnly: false },
+			});
+			//var lhs_url = 'lhs.txt';
+			//var rhs_url = 'rhs.txt'
+      //var baseURL = "http://0.0.0.0:8000/api/v1/caseversion/"
+      var baseURL = "https://moztrap.mozilla.org/api/v1/caseversion/"
+			var lhs_url = baseURL + params.lhs + "/"
+			var rhs_url = baseURL + params.rhs + "/"
+			$.ajax({
+				type: 'GET', async: true, dataType: 'text',
+				url: lhs_url,
+				success: function (response) {
+					$('#path-lhs').text(lhs_url);
+          //var text = JSON.stringify(JSON.parse(response), null, "  ");
+          var text = formatCaseversion(JSON.parse(response))
+          $('#compare').mergely('lhs', text);
+				}
+			});
+			$.ajax({
+				type: 'GET', async: true, dataType: 'text',
+				url: rhs_url,
+				success: function (response) {
+					$('#path-rhs').text(rhs_url);
+          var text = formatCaseversion(JSON.parse(response))
+					$('#compare').mergely('rhs', text);
+				}
+			});
+
+			function checkFileList(files) {
+				if (typeof window.FileReader !== 'function')
+					error_msg("The file API isn't supported on this browser yet.");
+
+				if (files.length>0) readFile(files[0], "lhs");
+				if (files.length>1) readFile(files[1], "rhs");
+			}
+
+			function readFile(file, side) {
+				var reader = new FileReader();
+				reader.onload = function file_onload() {
+					// document.getElementById('td1').innerHTML = ..
+					$('#path-'+side).text(file.name);
+					$('#compare').mergely(side, reader.result);
+				}
+				reader.readAsBinaryString(file);
+
+			}
+			function handleDragOver(evt) {
+				evt.stopPropagation();
+				evt.preventDefault();
+				evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+			}
+			function handleFileSelect(evt) {
+				document.getElementById('drop_zone').visibility = "collapse";
+				evt.stopPropagation();
+				evt.preventDefault();
+				var files = evt.dataTransfer.files; // FileList object.
+				checkFileList(files);
+			}
+			var dropZone = document.getElementById('drop_zone');
+			document.body.addEventListener('dragover', handleDragOver, false);
+			document.body.addEventListener('drop', handleFileSelect, false);
+
+			function download_content(a, side) {
+				//a.innerHTML = "preparing content..";
+				var txt = $('#compare').mergely('get', side);
+				var datauri = "data:plain/text;charset=UTF-8," + encodeURIComponent(txt);
+				a.setAttribute('download', side+".txt");
+				a.setAttribute('href', datauri);
+				//a.innerHTML = "content ready.";
+			}
+			document.getElementById('save-lhs').addEventListener('mouseover', function() { download_content(this, "lhs"); }, false);
+			document.getElementById('save-rhs').addEventListener('mouseover', function() { download_content(this, "lhs"); }, false);
+			document.getElementById('ignorews').addEventListener('change', function() {
+				$('#compare').mergely('options', { ignorews: this.checked });
+			}, false);
+
+		});
+	</script>
+</head>
+<body style="width: 100%;">
+	<table  style="width: 100%;"><tr>
+		<td style="width: 50%;"><div id="drop_zone" class="drop_zone">Drop files here</div></td>
+		<td style="width: 50%;"><input type="checkbox" id="ignorews">ignore witespaces</td>
+	</tr></table>
+	<br/>
+
+	<table  style="width: 100%;"><tr>
+		<td style="width: 50%;"><tt id="path-lhs"></tt> &nbsp; <a id="save-lhs" class="save-link" href="#">save</a></td>
+		<td style="width: 50%;"><tt id="path-rhs"></tt> &nbsp; <a id="save-rhs" class="save-link" href="#">save</a></td>
+	</tr></table>
+
+	<div id="mergely-resizer" style="height: 450px;">
+		<div id="compare">
+		</div>
+	</div>
+
+</body>
+</html>
