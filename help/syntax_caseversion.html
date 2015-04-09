@@ -39,6 +39,8 @@
       <td>status:active</td>
     </tr>
   </table>
+  <p>Filters across different fields are AND'd together. e.g. tag:gaia suite:smoketest => tag:gaia AND suite:smoketest</p>
+  <p>Tags filters are OR'd together. e.g. tag:gaia tag:rtl suite:smoketest=> (tag:gaia OR tag:rtl) AND suite:smoketest. <a href="https://github.com/shinglyu/moztrap-new-ui/issues/77">Issue 77</a> is trying to add AND support for tags</p>
 
 </body>
 </html>
