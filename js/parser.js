@@ -19,7 +19,7 @@ function caseversionCodegen(tokens) {
   var toRESTQuery = {
     '':     'name__icontains=',
     'name': 'name__icontains=',
-    'tag': 'tags__name__icontains=',
+    'tag': 'tags__name__in=',
     'suite': 'case__suites__name__icontains=',
     'product': 'productversion__product__name__icontains=',
     'ver': 'productversion__version__icontains=',
@@ -41,7 +41,7 @@ function caseselectionCodegen(tokens) {
   var toRESTQuery = {
     '':     'name__icontains=',
     'name': 'name__icontains=',
-    'tag': 'tags__name__icontains=',
+    'tag': 'tags__name__in=',
     'suite': 'case__suites__name__icontains=',
     'product': 'productversion__product__name__icontains=',
     'status': 'status=',
