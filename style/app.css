@@ -18,6 +18,6 @@
 }
 */
 
-td.priority, td.productversion, td.modified_on, td.status{
+td.priority, td.productversion, td.modified_on, td.status, td.id{
   font-size: 12px
 }

@@ -246,6 +246,9 @@ var CaseverListItem = React.createClass({
         <td>
           <input type="checkbox" value={this.props.casever.id} onChange={this.props.onChange}/>
         </td>
+        <td className="id">
+          {this.props.casever.id}
+        </td>
         <td className="status">
           {this.props.casever.status}
         </td>
@@ -290,6 +293,7 @@ var CaseverList = React.createClass({
         <tbody>
           <tr>
             <th></th>
+            <th>ID</th>
             <th>status</th>
             <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
             <SortableTh name="priority" filter="case__priority" handleAddFilter={this.props.handleAddFilter}></SortableTh>
@@ -377,6 +381,9 @@ var SuiteListItem = React.createClass({
         <td>
           <input type="checkbox"/>
         </td>
+        <td className="id">
+          {this.props.suite.id}
+        </td>
         <td className="status">
           {this.props.suite.status}
         </td>
@@ -415,6 +422,7 @@ var SuiteList = React.createClass({
         <tbody>
           <tr>
             <th></th>
+            <th>ID</th>
             <th>status</th>
             <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
             <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
