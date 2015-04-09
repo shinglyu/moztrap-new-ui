@@ -381,7 +381,7 @@ var SuiteListItem = React.createClass({
           {this.props.suite.status}
         </td>
         <td className="name">
-          <a href={"./index.html#/suite/" + this.props.suite.id}> 
+          <a href={"./index.html#/caseversion/search/suite:\"" + this.props.suite.name + "\""}> 
             {this.props.suite.name}
           </a>
         </td>
