@@ -6,12 +6,14 @@ var DefaultRoute = Router.DefaultRoute;
 var Link = Router.Link;
 var RouteHandler = Router.RouteHandler;
 
+var Badge = ReactBootstrap.Badge
 var Button = ReactBootstrap.Button
 var ButtonGroup = ReactBootstrap.ButtonGroup
 var Row    = ReactBootstrap.Row
 var Col    = ReactBootstrap.Col
 var Grid   = ReactBootstrap.Grid
 var Input  = ReactBootstrap.Input
+var Label  = ReactBootstrap.Label
 var Table  = ReactBootstrap.Table
 var Navbar  = ReactBootstrap.Navbar
 var CollapsableNav= ReactBootstrap.CollapsableNav
@@ -115,7 +117,7 @@ var SearchableRemoteListMixin = {
   getInitialState: function() {
     if (typeof this.props.params !== "undefined"
         && typeof this.props.params.query !== "undefined"){
-      return {query: this.props.params.query, data: this.loading};
+      return {query: this.props.params.query, data: this.loading, checked: []};
 
     }
     else {
@@ -236,7 +238,8 @@ var CaseverListItem = React.createClass({
     // Formatting tags
     // TODO: make each tag a div
     if (typeof this.props.casever.tags !== "undefined"){
-      var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
+      //var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
+      var tags = this.props.casever.tags.map(function(tag){return <Badge>{tag.name}</Badge>})//.join(", ")
     }
     if (typeof this.props.casever.case !== "undefined"){
       var caseId = this.props.casever.case.split('/')[4]
@@ -245,6 +248,9 @@ var CaseverListItem = React.createClass({
       <tr className="caseverListItem">
         <td>
           <input type="checkbox" value={this.props.casever.id} onChange={this.props.onChange}/>
+        </td>
+        <td className="id">
+          {this.props.casever.id}
         </td>
         <td className="status">
           {this.props.casever.status}
@@ -290,6 +296,7 @@ var CaseverList = React.createClass({
         <tbody>
           <tr>
             <th></th>
+            <th>ID</th>
             <th>status</th>
             <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
             <SortableTh name="priority" filter="case__priority" handleAddFilter={this.props.handleAddFilter}></SortableTh>
@@ -377,11 +384,14 @@ var SuiteListItem = React.createClass({
         <td>
           <input type="checkbox"/>
         </td>
+        <td className="id">
+          {this.props.suite.id}
+        </td>
         <td className="status">
           {this.props.suite.status}
         </td>
         <td className="name">
-          <a href={"./index.html#/suite/" + this.props.suite.id}> 
+          <a href={"./index.html#/caseversion/search/suite:\"" + this.props.suite.name + "\""}> 
             {this.props.suite.name}
           </a>
         </td>
@@ -415,6 +425,7 @@ var SuiteList = React.createClass({
         <tbody>
           <tr>
             <th></th>
+            <th>ID</th>
             <th>status</th>
             <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
             <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
@@ -488,7 +499,8 @@ var CaseListItem = React.createClass({
     // Formatting tags
     // TODO: make each tag a div
     if (typeof this.props.casever.tags !== "undefined"){
-      var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
+      //var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
+      var tags = this.props.casever.tags.map(function(tag){return <Badge>{tag.name}</Badge>})//.join(", ")
     }
     if (typeof this.props.casever.case !== "undefined"){
       var caseId = this.props.casever.case.split('/')[4]
