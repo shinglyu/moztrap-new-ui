@@ -6,12 +6,14 @@ var DefaultRoute = Router.DefaultRoute;
 var Link = Router.Link;
 var RouteHandler = Router.RouteHandler;
 
+var Badge = ReactBootstrap.Badge
 var Button = ReactBootstrap.Button
 var ButtonGroup = ReactBootstrap.ButtonGroup
 var Row    = ReactBootstrap.Row
 var Col    = ReactBootstrap.Col
 var Grid   = ReactBootstrap.Grid
 var Input  = ReactBootstrap.Input
+var Label  = ReactBootstrap.Label
 var Table  = ReactBootstrap.Table
 var Navbar  = ReactBootstrap.Navbar
 var CollapsableNav= ReactBootstrap.CollapsableNav
@@ -236,7 +238,8 @@ var CaseverListItem = React.createClass({
     // Formatting tags
     // TODO: make each tag a div
     if (typeof this.props.casever.tags !== "undefined"){
-      var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
+      //var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
+      var tags = this.props.casever.tags.map(function(tag){return <Badge>{tag.name}</Badge>})//.join(", ")
     }
     if (typeof this.props.casever.case !== "undefined"){
       var caseId = this.props.casever.case.split('/')[4]
@@ -496,7 +499,8 @@ var CaseListItem = React.createClass({
     // Formatting tags
     // TODO: make each tag a div
     if (typeof this.props.casever.tags !== "undefined"){
-      var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
+      //var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
+      var tags = this.props.casever.tags.map(function(tag){return <Badge>{tag.name}</Badge>})//.join(", ")
     }
     if (typeof this.props.casever.case !== "undefined"){
       var caseId = this.props.casever.case.split('/')[4]

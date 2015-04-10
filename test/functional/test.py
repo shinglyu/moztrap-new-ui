@@ -13,6 +13,8 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
 # TODO: test new case and new suite button
 # TODO: test load more
 # TODO: test diff
+# TODO: test suite title link
+# TODO: test search syntax
 
     def setUp(self):
         self.baseURL = baseURL #FIXME: remove
