@@ -362,7 +362,7 @@ var SearchableCaseverList = React.createClass({
           <Col md="12">
           <ButtonGroup id="toolbar"> 
             <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
-            <Button bsStyle="success" target="blank_" href={diffURL}
+            <Button bsStyle="success" id="diffBtn" target="blank_" href={diffURL}
                     disabled={diffDisabled}>
               diff
             </Button>
