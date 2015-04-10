@@ -67,12 +67,22 @@ var SearchableCaseverList = React.createClass({
   render: function() {
     return (
       <div>
+        {/* Pass down the function here vvvvvvv*/}
         <SearchForm onSearch={this.handleSearch}/>
         <CaseverList casevers={this.state.casevers}/>
       </div>
     )
   }
 })
+
+/* 
+ + SearchableCaseverList <= owns the state, pass a update state function to its children
+ ├- SearchForm <= need to update SeachableCaseverList's state, need to use the function given by SearchableCaseverList
+ └+ CaseverList
+  ├- CaseverListItem
+  ├- CaseverListItem
+  └- CaseverListItem
+*/
 
 
 React.render(<SearchableCaseverList/>, document.body);
