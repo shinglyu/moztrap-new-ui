@@ -117,7 +117,7 @@ var SearchableRemoteListMixin = {
   getInitialState: function() {
     if (typeof this.props.params !== "undefined"
         && typeof this.props.params.query !== "undefined"){
-      return {query: this.props.params.query, data: this.loading};
+      return {query: this.props.params.query, data: this.loading, checked: []};
 
     }
     else {
