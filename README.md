@@ -19,6 +19,7 @@ Check out the [Live Demo](http://shinglyu.github.io/moztrap-new-ui/#/)(only test
 * Unit test: open `test/unit/unittest.html` in the browser
 * Functional test: run `test/functional/run.sh` (Python + Selenium required)
   * Run `pip install selenium`
+  
 # Tutorial
 * [Presentation Slides](https://dl.dropboxusercontent.com/u/7281903/slides-4d90fc/tutorial.md.html#/)
 * [React.js Tutorial](http://shinglyu.github.io/moztrap-new-ui/tutorial.html): A step-by-step guide on how the site is built using React.js, with live demo and commented code.
