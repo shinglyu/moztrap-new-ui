@@ -80,7 +80,10 @@ var SearchableRemoteListMixin = {
       timeout: 10000, // Force trigger the error callback
 
       success: function(data) {
-        this.setState({data: data});
+        if (data.meta.next == null || typeof data.meta.next == 'undefined') 
+            this.setState({data: data, hasNoLinkToShow: true});
+        else
+            this.setState({data: data, hasNoLinkToShow: false});
       }.bind(this),
 
       /*
@@ -106,7 +109,12 @@ var SearchableRemoteListMixin = {
       success: function(data) {
         data.objects = this.state.data.objects.concat(data.objects)
         //console.log("LOADED!")
-        this.setState({data: data});
+
+        if (data.meta.next == null || typeof data.meta.next == 'undefined') 
+            this.setState({data: data, hasNoLinkToShow: true});
+        else 
+            this.setState({data: data, hasNoLinkToShow: false});
+
       }.bind(this),
 
       error: function(xhr, status, err) {
@@ -190,7 +198,7 @@ var SearchForm = React.createClass({
 var MoreLink = React.createClass({
   render: function() {
     return (
-      <Button block onClick={this.props.onLoadMore}>
+      <Button block onClick={this.props.onLoadMore} disabled={this.props.buttonDisabled}>
         load more
       </Button>
     );
@@ -356,6 +364,7 @@ var SearchableCaseverList = React.createClass({
         var diffDisabled = false;
       }
     }
+
     return (
       <Grid>
         <Row>
@@ -371,7 +380,7 @@ var SearchableCaseverList = React.createClass({
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
         <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
-        <MoreLink onLoadMore={this.handleLoadMore}/>
+        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
       </Grid>
     )
   }
@@ -461,7 +470,7 @@ var SearchableSuiteList = React.createClass({
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
         <SuiteList suites={this.state.data} handleAddFilter={this.handleAddFilter}/>
-        <MoreLink onLoadMore={this.handleLoadMore}/>
+        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
       </Grid>
     )
   }
@@ -486,7 +495,7 @@ SearchableCaseverSelectionList = React.createClass({
       <div>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch} />
         <CaseverList casevers={this.state.data}/>
-        <MoreLink onLoadMore={this.handleLoadMore}/>
+        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
       </div>
     )
   }
@@ -574,7 +583,7 @@ SearchableCaseSelectionList = React.createClass({
       <div id={this.props.id}>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
         <CaseList casevers={this.state.data} handleCheck={this.props.onCheck}/>
-        <MoreLink onLoadMore={this.handleLoadMore}/>
+        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
       </div>
     )
   }
