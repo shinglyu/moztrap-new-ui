@@ -123,15 +123,15 @@ var SearchableRemoteListMixin = {
     });
   },
   getInitialState: function() {
-    if (typeof this.props.params !== "undefined"
-        && typeof this.props.params.query !== "undefined"){
-      return {query: this.props.params.query, data: this.loading, checked: []};
-
+    var defaultQuery = ""
+    if (typeof this.props.params !== "undefined" && 
+        typeof this.props.params.query !== "undefined") {
+      defaultQuery = this.props.params.query;
+    } else {
+      defaultQuery = "product:\"" + config.defaultProduct + "\"";
     }
-    else {
-      //return {}
-      return {query: "product:\"" + config.defaultProduct + "\"", data: this.loading, checked: []};
-    }
+  
+    return {query: defaultQuery, data: this.loading, checked: [], hasNoLinkToShow: true};
   },
 
   componentDidMount: function() {
