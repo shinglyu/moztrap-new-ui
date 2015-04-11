@@ -81,9 +81,9 @@ var SearchableRemoteListMixin = {
 
       success: function(data) {
         if (data.meta.next == null || typeof data.meta.next == 'undefined') 
-            this.setState({data: data, hasNoLinkToShow: true});
+          this.setState({data: data, hasNoLinkToShow: true});
         else
-            this.setState({data: data, hasNoLinkToShow: false});
+          this.setState({data: data, hasNoLinkToShow: false});
       }.bind(this),
 
       /*
@@ -111,9 +111,9 @@ var SearchableRemoteListMixin = {
         //console.log("LOADED!")
 
         if (data.meta.next == null || typeof data.meta.next == 'undefined') 
-            this.setState({data: data, hasNoLinkToShow: true});
+          this.setState({data: data, hasNoLinkToShow: true});
         else 
-            this.setState({data: data, hasNoLinkToShow: false});
+          this.setState({data: data, hasNoLinkToShow: false});
 
       }.bind(this),
 
