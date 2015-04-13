@@ -2,7 +2,21 @@ testclasspath=$1
 
 echo "Remember to edit js/config.js to fit your testing env"
 cd ../..
-python -m SimpleHTTPServer 8888 > /dev/null 2>&1 &
+
+# Detect python version
+PYV=`python -c "import sys; print(sys.version_info[0])";`
+echo "python version: $PYV"
+
+# Run python server
+if [ "$PYV" -eq "3" ]; then
+  python -m http.server 8888 > /dev/null 2>&1 &
+elif [ $PYV = "2" ]; then
+  python -m SimpleHTTPServer 8888 > /dev/null 2>&1 &
+else
+  echo "Unknown python version"
+  exit 1
+fi
+
 serverpid=$!
 cd -
 python test.py $testclasspath

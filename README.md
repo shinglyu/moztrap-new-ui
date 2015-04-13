@@ -3,18 +3,23 @@ moztrap-new-ui
 
 A new frontend UI for [MozTrap](https://moztrap.mozilla.org/) that levarages on its REST API
 
-# Live Demo (only tested on [Firefox](https://www.mozilla.org/en-US/firefox/new/))
-Check out the [Live Demo](http://shinglyu.github.io/moztrap-new-ui/#/)
+# [Live Demo](http://shinglyu.github.io/moztrap-new-ui/#/)
+
+Check out the [Live Demo](http://shinglyu.github.io/moztrap-new-ui/#/)(only tested on [Firefox](https://www.mozilla.org/en-US/firefox/new/))
 
 # Dependencies
 * bower (`npm install -g bower` if you have Node.js and npm)
   
-
 # Installation 
 * `git clone` this repo.
 * Run `bower install` to install the 3rd party dependencies 
 * Open the `index.html` in the browser
 
+# Testing
+* Unit test: open `test/unit/unittest.html` in the browser
+* Functional test: run `test/functional/run.sh` (Python + Selenium required)
+  * Run `pip install selenium`
+  
 # Tutorial
 * [Presentation Slides](https://dl.dropboxusercontent.com/u/7281903/slides-4d90fc/tutorial.md.html#/)
 * [React.js Tutorial](http://shinglyu.github.io/moztrap-new-ui/tutorial.html): A step-by-step guide on how the site is built using React.js, with live demo and commented code.
