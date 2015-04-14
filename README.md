@@ -12,8 +12,16 @@ Check out the [Live Demo](http://shinglyu.github.io/moztrap-new-ui/#/)(only test
   
 # Installation 
 * `git clone` this repo.
-* Run `bower install` to install the 3rd party dependencies 
-* Open the `index.html` in the browser
+* Run `bower install` to install 3rd party dependencies. ( A `bower_components` folder should be created.)
+* Open the `index.html` in the browser.
+* e.g.<div>
+```
+git clone https://github.com/shinglyu/moztrap-new-ui.git
+cd moztrap-new-ui/
+bower install
+firefox index.html &
+```
+</div>
 
 # Testing
 * Unit test: open `test/unit/unittest.html` in the browser
