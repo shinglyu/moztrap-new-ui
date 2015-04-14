@@ -240,6 +240,10 @@ var SortableTh = React.createClass({
 })
 
 var CaseverListItem = React.createClass({
+  handleTagClick: function(e){
+    tagname = e.target.innerHTML;
+    this.props.handleAddFilter(" tag:\"" + tagname + "\"");
+  },
   render: function() {
     var detailUrl = config.baseUrl + "/manage/cases/_detail/" + this.props.casever.id;
     //console.log(this.props.casever.tags)
@@ -247,7 +251,10 @@ var CaseverListItem = React.createClass({
     // TODO: make each tag a div
     if (typeof this.props.casever.tags !== "undefined"){
       //var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
-      var tags = this.props.casever.tags.map(function(tag){return <Badge>{tag.name}</Badge>})//.join(", ")
+      var tags = this.props.casever.tags.map(function(tag){
+        console.log(this)
+        return <Badge className="tag" onClick={this.handleTagClick}>{tag.name}</Badge>
+      }, this)
     }
     if (typeof this.props.casever.case !== "undefined"){
       var caseId = this.props.casever.case.split('/')[4]
@@ -295,7 +302,7 @@ var CaseverList = React.createClass({
   render: function() {
     //can use the casevers.meta
     var casevers = this.props.casevers.objects.map(function(casever){
-      return (<CaseverListItem casever={casever} onChange={this.props.handleCheck}/>)
+      return (<CaseverListItem casever={casever} onChange={this.props.handleCheck} handleAddFilter={this.props.handleAddFilter}/>)
     }.bind(this))
 
     return (

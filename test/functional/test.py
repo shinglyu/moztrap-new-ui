@@ -201,6 +201,14 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
         self.newui.suiteListItems[0].find_element_by_css_selector('td.name>a').click()
         self.assertMultiLineEqual(self.newui.searchQuery, 'suite:"' + title + '"')
 
+    def test_tag(self):
+        self.driver.get(self.baseURL + "/#/")
+        self.newui.waitForLoadComplete()
+        tag = self.driver.find_element_by_css_selector('span.tag')
+        tag_name = tag.text
+        tag.click()
+        self.assertTermInSearchQuery(' tag:"' + tag_name+ '"')
+
     def tearDown(self):
         for window in self.driver.window_handles:
             self.driver.switch_to_window(window)
