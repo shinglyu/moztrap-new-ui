@@ -24,6 +24,12 @@ Check out the [Live Demo](http://shinglyu.github.io/moztrap-new-ui/#/)(only test
 * [Presentation Slides](https://dl.dropboxusercontent.com/u/7281903/slides-4d90fc/tutorial.md.html#/)
 * [React.js Tutorial](http://shinglyu.github.io/moztrap-new-ui/tutorial.html): A step-by-step guide on how the site is built using React.js, with live demo and commented code.
 
+# Related Projects
+* [MozTrap](https://github.com/mozilla/moztrap/) - The upstream project. The MozTrap test case management system.
+* [MozTrap API Tester](https://github.com/shinglyu/moztrap-api-tester) - Help you test and explore MozTrap's REST API
+* [MozTrap CLI](https://github.com/shinglyu/moztrap-cli) - A MozTrap commandline interface for editing test cases offline. 
+* [MozTrapHelper](https://github.com/shinglyu/MozTrapHelper) - An addon to workaround old MozTrap's performance issue. We might levarage this to combine the old and new UI.
+
 # Contributing
 We are migrating our backlog from Trello to GitHub. Simply submit bugs or feature requests using the GitHub "issues" to the right side of the page.
 
