@@ -832,6 +832,7 @@ var Settings = React.createClass({
       localforage.setItem('api_key', this.refs.api_key.getValue()).then(refreshConfig)
     }
     //TODO: change button color when all saved
+    alert("User credental saved!")
     //this.setState({'buttonStyle': "success"})
 
   },
