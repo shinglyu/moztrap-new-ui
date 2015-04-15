@@ -161,26 +161,40 @@ var SearchableRemoteListMixin = {
 
 var ListToolbar = React.createClass({
   render: function() {
-    var newButton;
+    var newButton = <div></div>;
+    var diffButton = <div></div>;
+
     var diffURL = "";
     var diffDisabled = true;
 
+    //create diff button
+    if (this.props.pagename =="caseversion") {
+      if (typeof this.props.checked !== "undefined"){
+        diffURL = "diff.html?lhs=" + this.props.checked[0] + "&rhs=" + this.props.checked[1]
+        if (this.props.checked.length == 2){
+          var diffDisabled = false;
+        }
+      }
+      diffButton = <Button bsStyle="success" target="blank_" href={diffURL} disabled={diffDisabled}>diff</Button>
+    }
+
+    //create new button
     if (this.props.pagename == "caseversion") {
       newButton = <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
     } else if (this.props.pagename == "suite") {
       newButton = <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/suite/add/' >+ New Suite</Button>
-    } else {
-      newButton = <div></div>
     }
     return (
       <Row>
         <Col md="12">
           {newButton}
+          {diffButton}
         </Col>
       </Row>
     )
   }
 })
+
 
 var SearchableList = React.createClass({
   mixins: [SearchableRemoteListMixin],
@@ -193,25 +207,21 @@ var SearchableList = React.createClass({
   },
 
   handleQueueUpdate: function(e) {
+    var newState = {};
     if (e.target.checked){
-      var newState = {};
       newState['checked'] = this.state['checked'].concat(e.target.value);
-      //console.log('will set state')
-      this.setState(newState);
     }
     else {
       this.state['checked'].splice(this.state['checked'].indexOf(e.target.value), 1);
-      var newState = {};
       newState['checked'] = this.state['checked'];
-      //console.log('will set state')
-      this.setState(newState);
     }
+    this.setState(newState);
   },
 
   render: function() {
     return (
       <div>
-        <ListToolbar pagename={this.props.pagename} />
+        <ListToolbar pagename={this.props.pagename} checked={this.state.checked} />
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
         <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
         <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
