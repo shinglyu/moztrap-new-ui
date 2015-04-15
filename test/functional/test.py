@@ -18,6 +18,7 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
 # TODO: test diff
 # TODO: test suite title link
 # TODO: test search syntax
+# TODO: test a shared link can perform as usual
 
     def setUp(self):
         self.baseURL = baseURL #FIXME: remove
