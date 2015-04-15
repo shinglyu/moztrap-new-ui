@@ -159,11 +159,71 @@ var SearchableRemoteListMixin = {
 
 }
 
+var SearchableList = React.createClass({
+  mixins: [SearchableRemoteListMixin],
+
+  buildURL: function(query) {
+      var api_url =  config.baseUrl + "/api/v1/" + this.props.pagename;
+      return (buildQueryUrl(api_url, query, caseversionCodegen) +
+              "&limit=" + config.defaultListLimit
+             );
+  },
+
+  handleQueueUpdate: function(e) {
+    if (e.target.checked){
+      var newState = {};
+      newState['checked'] = this.state['checked'].concat(e.target.value);
+      //console.log('will set state')
+      this.setState(newState);
+    }
+    else {
+      this.state['checked'].splice(this.state['checked'].indexOf(e.target.value), 1);
+      var newState = {};
+      newState['checked'] = this.state['checked'];
+      //console.log('will set state')
+      this.setState(newState);
+    }
+  },
+
+  render: function() {
+    console.log(this.props.searchname);
+
+    var diffURL = "";
+    var diffDisabled = true;
+    if (typeof this.state.checked !== "undefined"){
+      console.log("this.state is not undefined")
+      diffURL = "diff.html?lhs=" + this.state.checked[0] + "&rhs=" + this.state.checked[1]
+      if (this.state.checked.length == 2){
+        var diffDisabled = false;
+      }
+    }
+
+    return (
+      <Grid>
+        <Row>
+          <Col md="12">
+          <ButtonGroup id="toolbar"> 
+            <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
+            <Button bsStyle="success" target="blank_" href={diffURL}
+                    disabled={diffDisabled}>
+              diff
+            </Button>
+          </ButtonGroup>
+          </Col>
+        </Row>
+        <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
+        <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
+        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
+      </Grid>
+    )
+  }
+})
+
 // http://stackoverflow.com/questions/27864720/react-router-pass-props-to-handler-component
 var CaseVerWrapper = React.createClass({
   render: function() {
     return (
-      <SearchableCaseverList props="case" />
+      <SearchableList pagename="caseversion" />
     )
   }
 })
@@ -171,7 +231,7 @@ var CaseVerWrapper = React.createClass({
 var SuiteWrapper = React.createClass({
   render: function() {
     return (
-      <SearchableSuiteList/>
+      <SearchableList pagename="suite"/>
     )
   }
 })
