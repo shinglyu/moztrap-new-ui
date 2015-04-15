@@ -159,6 +159,23 @@ var SearchableRemoteListMixin = {
 
 }
 
+// http://stackoverflow.com/questions/27864720/react-router-pass-props-to-handler-component
+var CaseVerWrapper = React.createClass({
+  render: function() {
+    return (
+      <SearchableCaseverList props="case" />
+    )
+  }
+})
+
+var SuiteWrapper = React.createClass({
+  render: function() {
+    return (
+      <SearchableSuiteList/>
+    )
+  }
+})
+
 var SearchForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
@@ -802,16 +819,19 @@ var Settings = React.createClass({
 
 var routes = (
   <Route name="app" path="/" handler={App}>
-    <DefaultRoute handler={SearchableCaseverList}/>
-    <Route name="caseversions"       path="/caseversion" handler={SearchableCaseverList}/>
-    <Route name="caseversion_search" path="/caseversion/search/:query" handler={SearchableCaseverList}/>
+    <DefaultRoute handler={CaseVerWrapper}/>
+    <Route name="caseversion" path="/caseversion" handler={CaseVerWrapper}/>
+    <Route name="caseversion_search" path="/caseversion/search/:query" handler={CaseVerWrapper}/>
     <Redirect                        from="/search/:query"  to="/caseversion/search/:query" />
-    <Route name="suites_noid"        path="/suite/" handler={SearchableSuiteList}/>
+
+    <Route name="suites_noid"        path="/suite/" handler={SuiteWrapper}/>
     <Redirect                        from="/suite"  to="/suite/" />
-    <Route name="suite_search"       path="/suite/search/:query" handler={SearchableSuiteList}/>
+    <Route name="suite_search"       path="/suite/search/:query" handler={SuiteWrapper}/>
+
     <Route name="suite"              path="/suite/:id" handler={AddToSuite} />
+
     <Route name="settings"           path="/settings" handler={Settings} />
-    <NotFoundRoute handler={SearchableCaseverList}/>
+    <NotFoundRoute handler={CaseVerWrapper}/>
   </Route>
 );
 
