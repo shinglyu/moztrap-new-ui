@@ -1,5 +1,8 @@
 import unittest
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from app import NewUI, NewUIAssertions
 
 
@@ -15,6 +18,7 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
 # TODO: test diff
 # TODO: test suite title link
 # TODO: test search syntax
+# TODO: test a shared link can perform as usual
 
     def setUp(self):
         self.baseURL = baseURL #FIXME: remove
@@ -157,9 +161,59 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
             self.newui.sortby(field)
             self.assertTermInSearchQuery(' orderby:-' + field)
 
+    def test_diff(self):
+
+        self.driver.get(self.baseURL + "/#/")
+        self.newui.waitForLoadComplete()
+        self.newui.checkNthCaseverListItem(0)
+        self.newui.checkNthCaseverListItem(1)
+        self.newui.diffBtn.click()
+
+        windows = self.driver.window_handles
+        self.driver.switch_to_window(windows[1])
+
+        WebDriverWait(self.driver, 1000, poll_frequency=0.5).until(
+            EC.text_to_be_present_in_element((By.ID, 'path-lhs'), "http")
+        )
+        #self.assertNotEqual(self.driver.find_element_by_id('path-lhs').text, "")
+        self.assertNotEqual(self.driver.find_element_by_id('path-rhs').text, "")
+
+    def test_diff_search(self):
+
+        self.driver.get(self.baseURL + "/#/search/product:\"MozTrap\" log")
+        self.newui.waitForLoadComplete()
+        self.newui.checkNthCaseverListItem(0)
+        self.newui.checkNthCaseverListItem(1)
+        self.newui.diffBtn.click()
+
+        windows = self.driver.window_handles
+        self.driver.switch_to_window(windows[1])
+
+        WebDriverWait(self.driver, 1000, poll_frequency=0.5).until(
+            EC.text_to_be_present_in_element((By.ID, 'path-lhs'), "http")
+        )
+        #self.assertNotEqual(self.driver.find_element_by_id('path-lhs').text, "")
+        self.assertNotEqual(self.driver.find_element_by_id('path-rhs').text, "")
+
+    def test_suite_title(self):
+        self.driver.get(self.baseURL + "/#/suite")
+        self.newui.waitForLoadComplete()
+        title = self.newui.suiteListItems[0].find_element_by_css_selector('td.name>a').text
+        self.newui.suiteListItems[0].find_element_by_css_selector('td.name>a').click()
+        self.assertMultiLineEqual(self.newui.searchQuery, 'suite:"' + title + '"')
+
+    def test_tag(self):
+        self.driver.get(self.baseURL + "/#/")
+        self.newui.waitForLoadComplete()
+        tag = self.driver.find_element_by_css_selector('span.tag')
+        tag_name = tag.text
+        tag.click()
+        self.assertTermInSearchQuery(' tag:"' + tag_name+ '"')
 
     def tearDown(self):
-        self.driver.close()
+        for window in self.driver.window_handles:
+            self.driver.switch_to_window(window)
+            self.driver.close()
 
     #FIXME: cleanup
 if __name__ == "__main__":

@@ -21,6 +21,8 @@ This example demonstrates how to set left and right editors using ajax.
 	<!-- Requires Mergely -->
 	<script type="text/javascript" src="./lib/mergely/lib/mergely.js"></script>
 	<link type="text/css" rel="stylesheet" href="./lib/mergely/lib/mergely.css" />
+  
+	<script type="text/javascript" src="./js/config.js"></script>
 
 	<script type="text/javascript">
     function formatCaseversion(caseversion){
@@ -66,7 +68,8 @@ This example demonstrates how to set left and right editors using ajax.
 			//var lhs_url = 'lhs.txt';
 			//var rhs_url = 'rhs.txt'
       //var baseURL = "http://0.0.0.0:8000/api/v1/caseversion/"
-      var baseURL = "https://moztrap.mozilla.org/api/v1/caseversion/"
+      //var baseURL = "https://moztrap.mozilla.org/api/v1/caseversion/"
+      var baseURL = config.baseUrl + "/api/v1/caseversion/"
 			var lhs_url = baseURL + params.lhs + "/"
 			var rhs_url = baseURL + params.rhs + "/"
 			$.ajax({
@@ -133,9 +136,11 @@ This example demonstrates how to set left and right editors using ajax.
 			}
 			document.getElementById('save-lhs').addEventListener('mouseover', function() { download_content(this, "lhs"); }, false);
 			document.getElementById('save-rhs').addEventListener('mouseover', function() { download_content(this, "lhs"); }, false);
+      /*
 			document.getElementById('ignorews').addEventListener('change', function() {
 				$('#compare').mergely('options', { ignorews: this.checked });
 			}, false);
+      */
 
 		});
 	</script>

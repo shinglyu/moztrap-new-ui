@@ -1,8 +1,9 @@
 //TODO: replace this with jison generated parser
 function tokenize(query) {
-  //var queries = query.split(" ");
-  var re = /([^\s"']+"([^"]*)"|[^\s]+)/g;
-  var results = query.match(re);
+  // separate qeury with space
+  var re_tokenize = /([^\s"']+"([^"]*)"|[^\s]+)/g;
+  var results = query.match(re_tokenize);
+
   var resultList = results.map(function(result) {
     var keyVal = result.split(":");
     if (keyVal.length < 2) {
@@ -26,9 +27,10 @@ function caseversionCodegen(tokens) {
     'status': 'status=',
     'orderby': 'order_by=',
   };
-  //TODO:exact match?
+  var re_replace = /["']/g;
+
   return tokens.map(function(token){
-    token.value = token.value.replace(/"/g, '', 'g'); //tirm the \"
+    token.value = token.value.replace(re_replace, ""); //tirm the \"
     if (typeof toRESTQuery[token.key] === "undefined") {
       return '';
     } else {
@@ -47,16 +49,17 @@ function caseselectionCodegen(tokens) {
     'status': 'status=',
     'orderby': 'order_by=',
   };
+  var re_replace = /["']/g;
+
   //TODO:exact match?
   return tokens.map(function(token){
-    token.value = token.value.replace(/"/g, '', 'g'); //tirm the \"
+    token.value = token.value.replace(re_replace, ""); //tirm the \"
     if (typeof toRESTQuery[token.key] === "undefined") {
       return '';
     } else {
       return toRESTQuery[token.key] + encodeURI(token.value);
     }
   });
-  
 }
 
 function suiteCodegen(tokens) {
@@ -67,9 +70,12 @@ function suiteCodegen(tokens) {
     'status': 'status=',
     'orderby': 'order_by=',
   };
+
+  var re_replace = /["']/g;
+
   //TODO:exact match?
   return tokens.map(function(token){
-    token.value = token.value.replace(/"/g, '', 'g'); //tirm the \"
+    token.value = token.value.replace(re_replace, ""); //tirm the \"
     if (typeof toRESTQuery[token.key] === "undefined") {
       return '';
     } else {

@@ -80,7 +80,10 @@ var SearchableRemoteListMixin = {
       timeout: 10000, // Force trigger the error callback
 
       success: function(data) {
-        this.setState({data: data});
+        if (data.meta.next == null || typeof data.meta.next == 'undefined') 
+          this.setState({data: data, hasNoLinkToShow: true});
+        else
+          this.setState({data: data, hasNoLinkToShow: false});
       }.bind(this),
 
       /*
@@ -106,7 +109,12 @@ var SearchableRemoteListMixin = {
       success: function(data) {
         data.objects = this.state.data.objects.concat(data.objects)
         //console.log("LOADED!")
-        this.setState({data: data});
+
+        if (data.meta.next == null || typeof data.meta.next == 'undefined') 
+          this.setState({data: data, hasNoLinkToShow: true});
+        else 
+          this.setState({data: data, hasNoLinkToShow: false});
+
       }.bind(this),
 
       error: function(xhr, status, err) {
@@ -115,15 +123,15 @@ var SearchableRemoteListMixin = {
     });
   },
   getInitialState: function() {
-    if (typeof this.props.params !== "undefined"
-        && typeof this.props.params.query !== "undefined"){
-      return {query: this.props.params.query, data: this.loading, checked: []};
-
+    var defaultQuery = ""
+    if (typeof this.props.params !== "undefined" && 
+        typeof this.props.params.query !== "undefined") {
+      defaultQuery = this.props.params.query;
+    } else {
+      defaultQuery = "product:\"" + config.defaultProduct + "\"";
     }
-    else {
-      //return {}
-      return {query: "product:\"" + config.defaultProduct + "\"", data: this.loading, checked: []};
-    }
+  
+    return {query: defaultQuery, data: this.loading, checked: [], hasNoLinkToShow: true};
   },
 
   componentDidMount: function() {
@@ -190,7 +198,7 @@ var SearchForm = React.createClass({
 var MoreLink = React.createClass({
   render: function() {
     return (
-      <Button block onClick={this.props.onLoadMore}>
+      <Button block onClick={this.props.onLoadMore} disabled={this.props.buttonDisabled}>
         load more
       </Button>
     );
@@ -232,6 +240,10 @@ var SortableTh = React.createClass({
 })
 
 var CaseverListItem = React.createClass({
+  handleTagClick: function(e){
+    tagname = e.target.innerHTML;
+    this.props.handleAddFilter(" tag:\"" + tagname + "\"");
+  },
   render: function() {
     var detailUrl = config.baseUrl + "/manage/cases/_detail/" + this.props.casever.id;
     //console.log(this.props.casever.tags)
@@ -239,7 +251,10 @@ var CaseverListItem = React.createClass({
     // TODO: make each tag a div
     if (typeof this.props.casever.tags !== "undefined"){
       //var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
-      var tags = this.props.casever.tags.map(function(tag){return <Badge>{tag.name}</Badge>})//.join(", ")
+      var tags = this.props.casever.tags.map(function(tag){
+        console.log(this)
+        return <Badge className="tag" onClick={this.handleTagClick}>{tag.name}</Badge>
+      }, this)
     }
     if (typeof this.props.casever.case !== "undefined"){
       var caseId = this.props.casever.case.split('/')[4]
@@ -287,7 +302,7 @@ var CaseverList = React.createClass({
   render: function() {
     //can use the casevers.meta
     var casevers = this.props.casevers.objects.map(function(casever){
-      return (<CaseverListItem casever={casever} onChange={this.props.handleCheck}/>)
+      return (<CaseverListItem casever={casever} onChange={this.props.handleCheck} handleAddFilter={this.props.handleAddFilter}/>)
     }.bind(this))
 
     return (
@@ -356,13 +371,14 @@ var SearchableCaseverList = React.createClass({
         var diffDisabled = false;
       }
     }
+
     return (
       <Grid>
         <Row>
           <Col md="12">
           <ButtonGroup id="toolbar"> 
             <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
-            <Button bsStyle="success" target="blank_" href={diffURL}
+            <Button bsStyle="success" id="diffBtn" target="blank_" href={diffURL}
                     disabled={diffDisabled}>
               diff
             </Button>
@@ -371,7 +387,7 @@ var SearchableCaseverList = React.createClass({
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
         <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
-        <MoreLink onLoadMore={this.handleLoadMore}/>
+        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
       </Grid>
     )
   }
@@ -461,7 +477,7 @@ var SearchableSuiteList = React.createClass({
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
         <SuiteList suites={this.state.data} handleAddFilter={this.handleAddFilter}/>
-        <MoreLink onLoadMore={this.handleLoadMore}/>
+        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
       </Grid>
     )
   }
@@ -486,7 +502,7 @@ SearchableCaseverSelectionList = React.createClass({
       <div>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch} />
         <CaseverList casevers={this.state.data}/>
-        <MoreLink onLoadMore={this.handleLoadMore}/>
+        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
       </div>
     )
   }
@@ -574,7 +590,7 @@ SearchableCaseSelectionList = React.createClass({
       <div id={this.props.id}>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
         <CaseList casevers={this.state.data} handleCheck={this.props.onCheck}/>
-        <MoreLink onLoadMore={this.handleLoadMore}/>
+        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
       </div>
     )
   }

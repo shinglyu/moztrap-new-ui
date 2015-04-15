@@ -9,6 +9,9 @@ class NewUI(object):
     """Docstring for NewUI. """
     _searchInput_locator = (By.ID, "searchInput")
     _searchBtn_locator = (By.ID, "searchSubmit")
+    _suiteListItems_locator= (By.CSS_SELECTOR, "tr.suiteListItem")
+    _caseverListItems_locator= (By.CSS_SELECTOR, "tr.caseverListItem")
+    _diffBtn_locator = (By.ID, "diffBtn")
 
     def __init__(self, driver, baseURL):
         """TODO: to be defined1.
@@ -23,14 +26,41 @@ class NewUI(object):
     def search(self, query):
         searchInput = self._driver.find_element(*self._searchInput_locator)
         searchInput.send_keys(query)
-        self._driver.find_element(*self._searchBtn_locator)
+        self._driver.find_element(*self._searchBtn_locator).click()
 
 
     def waitForLoadComplete(self):
-        WebDriverWait(self._driver, 1000, poll_frequency=0.5).until(
-            EC.invisibility_of_element_located((By.LINK_TEXT, 'Loading...'))
+        #self._driver.find_element_by_class_name('glyphicon-pencil')
+        WebDriverWait(self._driver, 10, poll_frequency=0.5).until(
+        #    EC.invisibility_of_element_located((By.LINK_TEXT, 'Loading...'))
+            EC.text_to_be_present_in_element((By.CLASS_NAME, 'modified_on'), 'T')
         )
 
+    @property
+    def suiteListItems(self):
+        return self._driver.find_elements(*self._suiteListItems_locator)
+
+    def checkNthSuiteListItem(self, n):
+        items = self.suiteListItems
+        items[n].find_element_by_tag_name("input").click()
+
+    @property
+    def caseverListItems(self):
+        return self._driver.find_elements(*self._caseverListItems_locator)
+
+    def checkNthCaseverListItem(self, n):
+        items = self.caseverListItems
+        items[n].find_element_by_tag_name("input").click()
+
+    @property
+    def searchQuery(self):
+        return self._driver.find_element_by_id("searchInput").get_attribute('value')
+        #return self._driver.find_elements(*self._suiteListItems_locator)
+
+    @property
+    def diffBtn(self):
+        return self._driver.find_element(*self._diffBtn_locator)
+        #return self._driver.find_elements(*self._suiteListItems_locator)
 
     def sortby(self, field):
         self._driver.find_element_by_id("orderby_" + field).click();
@@ -43,10 +73,11 @@ class NewUIAssertions(object):
         #self.newui = NewUI(None, None) # for the locators
 
     def assertTermInSearchQuery(self, term):
+    # FIXME: this name is bad, it's a exact string match with product
         self.assertMultiLineEqual(
             self.driver.current_url.split('search')[1],
             # self.baseURL + "/#/search/product:%22MozTrap%22{0}".format(pathname2url(term))
-            "/product:%22MozTrap%22{0}".format(term.replace(" ", "%20"))
+            "/product:%22MozTrap%22{0}".format(term.replace(" ", "%20").replace('"', "%22"))
         )  # FIXME: hardcoded product
         self.assertMultiLineEqual(
             self.driver.find_element(*self.newui._searchInput_locator).get_attribute('value'),
