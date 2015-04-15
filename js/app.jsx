@@ -159,6 +159,29 @@ var SearchableRemoteListMixin = {
 
 }
 
+var ListToolbar = React.createClass({
+  render: function() {
+    var newButton;
+    var diffURL = "";
+    var diffDisabled = true;
+
+    if (this.props.pagename == "caseversion") {
+      newButton = <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
+    } else if (this.props.pagename == "suite") {
+      newButton = <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/suite/add/' >+ New Suite</Button>
+    } else {
+      newButton = <div></div>
+    }
+    return (
+      <Row>
+        <Col md="12">
+          {newButton}
+        </Col>
+      </Row>
+    )
+  }
+})
+
 var SearchableList = React.createClass({
   mixins: [SearchableRemoteListMixin],
 
@@ -186,35 +209,13 @@ var SearchableList = React.createClass({
   },
 
   render: function() {
-    console.log(this.props.searchname);
-
-    var diffURL = "";
-    var diffDisabled = true;
-    if (typeof this.state.checked !== "undefined"){
-      console.log("this.state is not undefined")
-      diffURL = "diff.html?lhs=" + this.state.checked[0] + "&rhs=" + this.state.checked[1]
-      if (this.state.checked.length == 2){
-        var diffDisabled = false;
-      }
-    }
-
     return (
-      <Grid>
-        <Row>
-          <Col md="12">
-          <ButtonGroup id="toolbar"> 
-            <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
-            <Button bsStyle="success" target="blank_" href={diffURL}
-                    disabled={diffDisabled}>
-              diff
-            </Button>
-          </ButtonGroup>
-          </Col>
-        </Row>
+      <div>
+        <ListToolbar pagename={this.props.pagename} />
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
         <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
         <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
-      </Grid>
+      </div>
     )
   }
 })
