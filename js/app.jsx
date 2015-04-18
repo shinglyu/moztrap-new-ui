@@ -5,7 +5,6 @@ var NotFoundRoute = Router.NotFoundRoute;
 var DefaultRoute = Router.DefaultRoute;
 var Link = Router.Link;
 var RouteHandler = Router.RouteHandler;
-
 var Badge = ReactBootstrap.Badge
 var Button = ReactBootstrap.Button
 var ButtonGroup = ReactBootstrap.ButtonGroup
@@ -20,7 +19,6 @@ var CollapsableNav= ReactBootstrap.CollapsableNav
 var Nav= ReactBootstrap.Nav
 var NavItem= ReactBootstrap.NavItem
 var Glyphicon= ReactBootstrap.Glyphicon
-
 
 var Header = React.createClass({
   render: function() {
@@ -74,54 +72,57 @@ var SearchableRemoteListMixin = {
   //need to implement `function buildURL(query) {...}`
   loading: {meta:{}, objects: [{name:"Loading..."}]},
   notFound: {data:{objects:[{name:"Can't find anything. Try loosen the search criteria."}]}},
-  loadRemoteData: function(url) {
+  
+  updateListUIState: function(data) {
+    // 1. Hightlight the loaded page.
+    $('li.pre-active').attr('class', 'active'); 
+
+    // 2. Unchecked all boxes.
+    $.each($('tr td input[type=checkbox]:checked'), function() {
+      $(this).prop('checked', false);
+    });
+
+    // 3. Check boxes whose ID matches checkedIDs.
+    var checkedIDs = this.state['checked'];
+    $.each($('tr td input[type=checkbox]'), 
+      function() { 
+        for (i = 0; i < checkedIDs.length; i++) { 
+          if ($(this).val() == checkedIDs[i])
+            $(this).prop('checked', true);
+        }
+    });
+  }, 
+
+  loadOnePage: function(url, clickedPageNum) {
+    clickedPageNum = typeof clickedPageNum !== 'undefined' ? clickedPageNum : 1;
+    var selectedPageOffset = (clickedPageNum-1) * this.state.data.meta.limit;
+    url = url.replace(/offset=[0-9]+/, "offset=" + selectedPageOffset);
+
+    console.log("===> loadOnePage URL = ", url)
+
     $.ajax({
       url: url,
       timeout: 10000, // Force trigger the error callback
 
       success: function(data) {
-        if (data.meta.next == null || typeof data.meta.next == 'undefined') 
-          this.setState({data: data, hasNoLinkToShow: true});
-        else
-          this.setState({data: data, hasNoLinkToShow: false});
+        var availablePages = 0;
+        if (data.meta.next != null && typeof data.meta.next != 'undefined') {
+          availablePages = parseInt(data.meta.total_count / data.meta.limit)
+          if (data.meta.total_count % data.meta.limit != 0)
+            availablePages += 1;
+        }
+        this.setState({data: data, queriedPageCount: availablePages});
+        
+        this.updateListUIState(data);
       }.bind(this),
 
-      /*
-      FIXME: this doesn't seem to work under jsonp proxy
-      statusCode: {
-        400: function() {
-          alert.log('bad request'); }, },
-      */
       error: function(xhr, status, err) {
         this.setState(this.notFound)
-        console.error(xhr, status, err.toString());
-      }.bind(this)
-    });
-  },
-  //FIXME: Change this to pagination
-  loadMore: function() {
-    var url = config.baseUrl + this.state.data.meta.next;
-    //console.log(this.state.data.meta)
-    //console.log(url)
-    $.ajax({
-      url: url,
-
-      success: function(data) {
-        data.objects = this.state.data.objects.concat(data.objects)
-        //console.log("LOADED!")
-
-        if (data.meta.next == null || typeof data.meta.next == 'undefined') 
-          this.setState({data: data, hasNoLinkToShow: true});
-        else 
-          this.setState({data: data, hasNoLinkToShow: false});
-
-      }.bind(this),
-
-      error: function(xhr, status, err) {
         console.error(this.props.url, status, err.toString());
       }.bind(this)
     });
   },
+
   getInitialState: function() {
     var defaultQuery = ""
     if (typeof this.props.params !== "undefined" && 
@@ -131,15 +132,15 @@ var SearchableRemoteListMixin = {
       defaultQuery = "product:\"" + config.defaultProduct + "\"";
     }
   
-    return {query: defaultQuery, data: this.loading, checked: [], hasNoLinkToShow: true};
+    return {query: defaultQuery, data: this.loading, checked: [], queriedPageCount: 0};
   },
 
   componentDidMount: function() {
-    this.loadRemoteData(this.buildURL(this.state.query));
+    this.loadOnePage(this.buildURL(this.state.query));
   }, 
   
   handleSearch: function(query) { 
-    this.loadRemoteData(this.buildURL(query));
+    this.loadOnePage(this.buildURL(query));
     this.setState({query: query, data: this.loading});
     //TODO: two way data binding?
     //console.log("handle search: " + query)
@@ -147,8 +148,8 @@ var SearchableRemoteListMixin = {
     window.history.pushState({}, "MozTrap", document.URL.split("search/")[0] + "search/" + encodeURI(query));
   },
 
-  handleLoadMore: function() {
-    this.loadMore();
+  handlePageLoading: function(page) {
+    this.loadOnePage(config.baseUrl + this.state.data.meta.next, page);
   },
 
   handleAddFilter: function(additionalQuery, removeRegex){
@@ -160,7 +161,7 @@ var SearchableRemoteListMixin = {
   /*
   componentWillReceiveProps: function() {
     this.setState({data: this.loading})
-    this.loadRemoteData(this.buildURL(this.state.query));
+    this.loadOnePage(this.buildURL(this.state.query));
   },
   */
 
@@ -195,14 +196,22 @@ var SearchForm = React.createClass({
   }
 });
 
-var MoreLink = React.createClass({
-  render: function() {
-    return (
-      <Button block onClick={this.props.onLoadMore} disabled={this.props.buttonDisabled}>
-        load more
-      </Button>
-    );
-  }
+var PaginationContainer = React.createClass({
+   getInitialState: function() {
+     return {
+       maxDisplayPages: 10,
+       totalPageCount: 0
+     };
+   },
+ 
+   render: function() {
+   return  (
+     <div id="react-paginator">
+       <Pagination numPages={this.props.totalPageCount} maxDisplayPages={this.props.maxDisplayPages} onClick={this.props.onPageSelected} />
+     </div>
+     );
+   }
+
 });
 
 //TODO: using client side sort for now, use this when two way data binding is OK
@@ -252,7 +261,7 @@ var CaseverListItem = React.createClass({
     if (typeof this.props.casever.tags !== "undefined"){
       //var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
       var tags = this.props.casever.tags.map(function(tag){
-        console.log(this)
+//console.log(this)
         return <Badge className="tag" onClick={this.handleTagClick}>{tag.name}</Badge>
       }, this)
     }
@@ -340,7 +349,7 @@ var SearchableCaseverList = React.createClass({
   },
 
   handleQueueUpdate: function(e) {
-    if (e.target.checked){
+    if (e.target.checked) {
       var newState = {};
       newState['checked'] = this.state['checked'].concat(e.target.value);
       //console.log('will set state')
@@ -353,6 +362,7 @@ var SearchableCaseverList = React.createClass({
       //console.log('will set state')
       this.setState(newState);
     }
+console.log("===> handleQueueUpdate: ", newState);
   },
   /*
   diff: function(){
@@ -365,7 +375,6 @@ var SearchableCaseverList = React.createClass({
     var diffURL = ""
     var diffDisabled = true;
     if (typeof this.state.checked !== "undefined"){
-      console.log("this.state is not undefined")
       diffURL = "diff.html?lhs=" + this.state.checked[0] + "&rhs=" + this.state.checked[1]
       if (this.state.checked.length == 2){
         var diffDisabled = false;
@@ -387,7 +396,7 @@ var SearchableCaseverList = React.createClass({
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
         <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
-        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
+        <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
       </Grid>
     )
   }
@@ -395,6 +404,7 @@ var SearchableCaseverList = React.createClass({
 
 var SuiteListItem = React.createClass({
   render: function() {
+    // TODO: handleQueueUpdate should also be called by SuiteListItem.
     return (
       <tr className="suiteListItem">
         <td>
@@ -477,7 +487,7 @@ var SearchableSuiteList = React.createClass({
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
         <SuiteList suites={this.state.data} handleAddFilter={this.handleAddFilter}/>
-        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
+        <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
       </Grid>
     )
   }
@@ -502,7 +512,7 @@ SearchableCaseverSelectionList = React.createClass({
       <div>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch} />
         <CaseverList casevers={this.state.data}/>
-        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
+        <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
       </div>
     )
   }
@@ -581,7 +591,7 @@ SearchableCaseSelectionList = React.createClass({
   componentWillReceiveProps: function(nextProps) {
     //load remote suite case list
     if (nextProps.refresh){
-      this.loadRemoteData(this.buildURL(this.state.query)); //FIXME: this causes unwanted update when checked
+      this.loadOnePage(this.buildURL(this.state.query)); //FIXME: this causes unwanted update when checked
     }
   },
 
@@ -590,7 +600,7 @@ SearchableCaseSelectionList = React.createClass({
       <div id={this.props.id}>
         <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
         <CaseList casevers={this.state.data} handleCheck={this.props.onCheck}/>
-        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
+        <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
       </div>
     )
   }
@@ -736,6 +746,7 @@ var AddToSuite = React.createClass({
   },
 
   handleQueueUpdate: function(e, queueName) {
+alert("dddd");
     if (e.target.checked){
       var newState = {};
       newState[queueName] = this.state[queueName].concat(e.target.value);
