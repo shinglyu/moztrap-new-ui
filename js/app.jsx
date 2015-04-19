@@ -143,7 +143,6 @@ var SearchableRemoteListMixin = {
     this.loadOnePage(this.buildURL(query));
     this.setState({query: query, data: this.loading});
     //TODO: two way data binding?
-    //console.log("handle search: " + query)
     this.refs.searchform.forceUpdateInput(query);
     window.history.pushState({}, "MozTrap", document.URL.split("search/")[0] + "search/" + encodeURI(query));
   },
@@ -157,13 +156,6 @@ var SearchableRemoteListMixin = {
     console.log(newQuery)
     this.handleSearch(newQuery + additionalQuery);
   },
-
-  /*
-  componentWillReceiveProps: function() {
-    this.setState({data: this.loading})
-    this.loadOnePage(this.buildURL(this.state.query));
-  },
-  */
 
 }
 
@@ -255,13 +247,10 @@ var CaseverListItem = React.createClass({
   },
   render: function() {
     var detailUrl = config.baseUrl + "/manage/cases/_detail/" + this.props.casever.id;
-    //console.log(this.props.casever.tags)
     // Formatting tags
     // TODO: make each tag a div
     if (typeof this.props.casever.tags !== "undefined"){
-      //var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
       var tags = this.props.casever.tags.map(function(tag){
-//console.log(this)
         return <Badge className="tag" onClick={this.handleTagClick}>{tag.name}</Badge>
       }, this)
     }
@@ -344,7 +333,6 @@ var SearchableCaseverList = React.createClass({
   buildURL: function(query) {
       return (buildQueryUrl(this.api_url, query, caseversionCodegen) + 
               "&limit=" + config.defaultListLimit
-              //"&order_by=" + "-modified_on"
              );
   },
 
@@ -352,26 +340,18 @@ var SearchableCaseverList = React.createClass({
     if (e.target.checked) {
       var newState = {};
       newState['checked'] = this.state['checked'].concat(e.target.value);
-      //console.log('will set state')
       this.setState(newState);
     }
     else {
       this.state['checked'].splice(this.state['checked'].indexOf(e.target.value), 1);
       var newState = {};
       newState['checked'] = this.state['checked'];
-      //console.log('will set state')
       this.setState(newState);
     }
 console.log("===> handleQueueUpdate: ", newState);
   },
-  /*
-  diff: function(){
-    alert(this.state.checked)
-  },
-  */
+
   render: function() {
-    //update
-    //
     var diffURL = ""
     var diffDisabled = true;
     if (typeof this.state.checked !== "undefined"){
@@ -471,7 +451,6 @@ var SearchableSuiteList = React.createClass({
   buildURL: function(query) {
       return (buildQueryUrl(this.api_url, query, suiteCodegen) + 
                            "&limit=" + config.defaultListLimit
-                           //"&order_by=" + "-modified_on"
              );
   },
 
@@ -493,39 +472,12 @@ var SearchableSuiteList = React.createClass({
   }
 });
 
-//TODO: can we remove this?
-SearchableCaseverSelectionList = React.createClass({
-  mixins: [SearchableRemoteListMixin],
-  api_url: config.baseUrl + "/api/v1/caseversionselection/",
-  //api_url: config.baseUrl + "/api/v1/caseselection/",
-  //api_url: config.baseUrl + "/api/speedy/caseselection/",
-  buildURL: function(query) {
-      var url = buildQueryUrl(this.api_url, query, caseversionCodegen);
-      url += "&case__suites" + (this.props.isNotIn?"__ne":"") + "=" + this.props.suiteId;
-      url += "&limit=" + config.defaultListLimit;
-      //url += "&order_by=" + "-modified_on";
-      return url
-  },
-
-  render: function() {
-    return (
-      <div>
-        <SearchForm query={this.state.query} onSubmit={this.handleSearch} />
-        <CaseverList casevers={this.state.data}/>
-        <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
-      </div>
-    )
-  }
-});
-
 var CaseListItem = React.createClass({
   render: function() {
     var detailUrl = config.baseUrl + "/manage/cases/_detail/" + this.props.casever.id;
-    //console.log(this.props.casever.tags)
     // Formatting tags
     // TODO: make each tag a div
     if (typeof this.props.casever.tags !== "undefined"){
-      //var tags = this.props.casever.tags.map(function(tag){return "(" + tag.name + ")"}).join(", ")
       var tags = this.props.casever.tags.map(function(tag){return <Badge>{tag.name}</Badge>})//.join(", ")
     }
     if (typeof this.props.casever.case !== "undefined"){
@@ -579,17 +531,14 @@ var CaseList = React.createClass({
 SearchableCaseSelectionList = React.createClass({
   mixins: [SearchableRemoteListMixin],
   api_url: config.baseUrl + "/api/v1/caseselection/",
-  //api_url: config.baseUrl + "/api/speedy/caseselection/",
   buildURL: function(query) {
       var url = buildQueryUrl(this.api_url, query, caseselectionCodegen);
       url += "&case__suites" + (this.props.isNotIn?"__ne":"") + "=" + this.props.suiteId;
       url += "&limit=" + config.defaultListLimit;
-      //url += "&order_by=" + "-modified_on";
       return url
   },
 
   componentWillReceiveProps: function(nextProps) {
-    //load remote suite case list
     if (nextProps.refresh){
       this.loadOnePage(this.buildURL(this.state.query)); //FIXME: this causes unwanted update when checked
     }
@@ -608,7 +557,6 @@ SearchableCaseSelectionList = React.createClass({
 
 //FIXME: rename to something like SuiteManagement or similar
 var AddToSuite = React.createClass({
-  //mixins: [Router.State],
   api_url: config.baseUrl + "/api/v1/suite/",
   loadSuite: function(id) {
     $.ajax({
@@ -693,7 +641,6 @@ var AddToSuite = React.createClass({
         url: config.baseUrl + "/api/v1/suitecase/" + data + "/?permanent=True&username=" + config.username + "&api_key=" + config.api_key,
 
         success: function(data) {
-          //if (removeDatum.length == 0){return;}
           removeSuiteCase(removeDatum, that)
         }.bind(this),
 
@@ -708,7 +655,6 @@ var AddToSuite = React.createClass({
       return ({
         case: caseuri,
         suite: this.state.suite.resource_uri,
-        //order: 0,
       });
     }, this)
 
@@ -739,10 +685,6 @@ var AddToSuite = React.createClass({
     [].forEach.call(document.querySelectorAll('input[type=checkbox]'), function(checkbox){
       checkbox.checked = false;
     });
-
-    //this.loadSuite(this.props.params.id) //
-    //this.setState({ addQueue:[], removeQueue:[] });
-
   },
 
   handleQueueUpdate: function(e, queueName) {
@@ -831,7 +773,6 @@ var Settings = React.createClass({
       this.setState({'api_key':val})
     }.bind(this))
     return ({'username': "Loading...", 'api_key':"Loading...",
-             //'buttonStyle': "primary"
             });
 
   },
