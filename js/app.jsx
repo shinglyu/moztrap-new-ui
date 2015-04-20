@@ -244,6 +244,7 @@ var SearchableList = React.createClass({
       newState['checked'] = this.state['checked'];
     }
     this.setState(newState);
+    console.log("===> handleQueueUpdate: ", newState);
   },
 
   render: function() {
@@ -252,7 +253,7 @@ var SearchableList = React.createClass({
         <ListToolbar setting={this.props.setting} checked={this.state.checked} />
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} setting={this.props.setting}/>
         <MTTable setting={this.props.setting} data={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
-        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
+        <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
       </div>
     )
   }
@@ -412,7 +413,6 @@ var CaseverListItem = React.createClass({
 });
 
 
-//this.props.handleAddFilter(' orderby:' + newOrder + this.props.filter, / orderby:[-\w]+/)
 var MTTableHeadTh = React.createClass({
   handleSort: function(){
     var newOrder = "";
@@ -439,7 +439,6 @@ var MTTableHeadTh = React.createClass({
   }
 })
 
-//return (<CaseverListItem casever={casever} onChange={this.props.handleCheck} handleAddFilter={this.props.handleAddFilter}/>)
 var MTTableHead = React.createClass({
   render: function() {
     var obj = this.props.setting.header;
@@ -494,93 +493,6 @@ var MTTable = React.createClass({
 });
 //{casevers}
 
-
-var CaseverList = React.createClass({
-  render: function() {
-    //can use the casevers.meta
-    var casevers = this.props.casevers.objects.map(function(casever){
-      return (<CaseverListItem casever={casever} onChange={this.props.handleCheck} handleAddFilter={this.props.handleAddFilter}/>)
-    }.bind(this))
-
-    return (
-      <Row>
-      <Table striped condensed hover className="caseverList">
-        <tbody>
-          <tr>
-            <th></th>
-            <th>ID</th>
-            <th>status</th>
-            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="priority" filter="case__priority" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="product" filter="productversion" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <th></th>
-            <th></th>
-          </tr>
-          {casevers}
-        </tbody>
-      </Table>
-      </Row>
-    )
-  }
-});
-
-var SearchableCaseverList = React.createClass({
-  mixins: [SearchableRemoteListMixin],
-  api_url: config.baseUrl + "/api/v1/caseversion/",
-  //TODO: migrate to api_url: "https://moztrap.mozilla.org/api/v1/caseversionsearch/",
-  buildURL: function(query) {
-      return (buildQueryUrl(this.api_url, query, caseversionCodegen) + 
-              "&limit=" + config.defaultListLimit
-             );
-  },
-
-  handleQueueUpdate: function(e) {
-    if (e.target.checked) {
-      var newState = {};
-      newState['checked'] = this.state['checked'].concat(e.target.value);
-      this.setState(newState);
-    }
-    else {
-      this.state['checked'].splice(this.state['checked'].indexOf(e.target.value), 1);
-      var newState = {};
-      newState['checked'] = this.state['checked'];
-      this.setState(newState);
-    }
-console.log("===> handleQueueUpdate: ", newState);
-  },
-
-  render: function() {
-    var diffURL = ""
-    var diffDisabled = true;
-    if (typeof this.state.checked !== "undefined"){
-      diffURL = "diff.html?lhs=" + this.state.checked[0] + "&rhs=" + this.state.checked[1]
-      if (this.state.checked.length == 2){
-        var diffDisabled = false;
-      }
-    }
-
-    return (
-      <Grid>
-        <Row>
-          <Col md="12">
-          <ButtonGroup id="toolbar"> 
-            <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
-            <Button bsStyle="success" id="diffBtn" target="blank_" href={diffURL}
-                    disabled={diffDisabled}>
-              diff
-            </Button>
-          </ButtonGroup>
-          </Col>
-        </Row>
-        <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
-        <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
-        <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
-      </Grid>
-    )
-  }
-})
-
 var SuiteListItem = React.createClass({
   render: function() {
     // TODO: handleQueueUpdate should also be called by SuiteListItem.
@@ -618,32 +530,6 @@ var SuiteListItem = React.createClass({
   }
 });
 
-var SuiteList = React.createClass({
-  render: function() {
-
-    var suites = this.props.suites.objects.map(function(suite){
-      return (<SuiteListItem suite={suite} />)
-    })
-
-    return (
-      <Table striped condensed hover className="suiteList">
-        <tbody>
-          <tr>
-            <th></th>
-            <th>ID</th>
-            <th>status</th>
-            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <th></th>
-            <th></th>
-          </tr>
-          {suites}
-        </tbody>
-      </Table>
-    )
-  }
-});
-
 var SearchableSuiteList = React.createClass({
   mixins: [SearchableRemoteListMixin],
   api_url: config.baseUrl + "/api/v1/suite/",
@@ -655,18 +541,12 @@ var SearchableSuiteList = React.createClass({
 
   render: function() {
     return (
-      <Grid>
-        <Row>
-          <Col md="12">
-          <ButtonGroup id="toolbar"> 
-            <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/suite/add/' >+ New Suite</Button>
-          </ButtonGroup>
-          </Col>
-        </Row>
-        <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
-        <SuiteList suites={this.state.data} handleAddFilter={this.handleAddFilter}/>
+      <div>
+        <SearchForm query={this.state.query} onSubmit={this.handleSearch} />
+        <CaseverList casevers={this.state.data}/>
+        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
-      </Grid>
+      </div>
     )
   }
 });
