@@ -26,10 +26,10 @@ caseverSetting.syntaxlink = "help/syntax_caseversion.html";
 caseverSetting.header = [
 {text: ""},
 {text: "ID"},
-{text: "name"},
-{text: "priority"},
-{text: "product"},
-{text: "modified"},
+{text: "name", sortable: true, filtername: "name"},
+{text: "priority", sortable: true, filtername: "case__priority"},
+{text: "product", sortable: true, filtername: "productversion"},
+{text: "modified", sortable: true, filtername: "modified_on"},
 {text: ""},
 {text: ""},
 ];
@@ -41,8 +41,8 @@ suiteSetting.header = [
 {text: ""},
 {text: "ID"},
 {text: "status"},
-{text: "name"},
-{text: "modified"},
+{text: "name", sortable: true, filtername: "name"},
+{text: "modified", sortable: true, filtername: "modified_on"},
 {text: ""},
 {text: ""},
 ]
@@ -411,6 +411,7 @@ var CaseverListItem = React.createClass({
   }
 });
 
+
 //this.props.handleAddFilter(' orderby:' + newOrder + this.props.filter, / orderby:[-\w]+/)
 var MTTableHeadTh = React.createClass({
   handleSort: function(){
@@ -419,6 +420,7 @@ var MTTableHeadTh = React.createClass({
       newOrder = "-";
     }
     this.setState({"order": newOrder})
+    this.props.handleAddFilter(' orderby:' + newOrder + this.props.filter, / orderby:[-\w]+/)
   },
   getInitialState: function(){
     return ({"order": null}) //+ and -
@@ -443,9 +445,15 @@ var MTTableHead = React.createClass({
     var obj = this.props.setting.header;
     var tableheader = obj.map(
       function(setting){
-        return <MTTableHeadTh text={setting["text"]} />
-      }
-    );
+        if (setting["sortable"]) {
+          return (
+            <MTTableHeadTh text={setting["text"]} filter={setting["filtername"]}
+            handleAddFilter={this.props.handleAddFilter} />
+          )
+        } else {
+          return <th>{setting["text"]}</th>
+        }
+      }.bind(this))
 
     return (
       <tr>{tableheader}</tr>
@@ -457,9 +465,10 @@ var MTTable = React.createClass({
   render: function() {
     return (
       <Row>
-      <Table striped condensed hover className="caseverList">
+      <Table striped condensed hover className={this.props.setting.pagename}>
         <tbody>
-          <MTTableHead setting={this.props.setting}/>
+          <MTTableHead setting={this.props.setting}
+            handleAddFilter={this.props.handleAddFilter}/>
         </tbody>
       </Table>
       </Row>
