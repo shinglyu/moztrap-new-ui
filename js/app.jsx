@@ -20,6 +20,15 @@ var Nav= ReactBootstrap.Nav
 var NavItem= ReactBootstrap.NavItem
 var Glyphicon= ReactBootstrap.Glyphicon
 
+var caseverSetting = new Array();
+caseverSetting.pagename = "caseversion";
+caseverSetting.syntaxlink = "help/syntax_caseversion.html";
+
+var suiteSetting = new Array();
+suiteSetting.pagename = "suite";
+suiteSetting.syntaxlink = "help/syntax_suite.html";
+
+
 var Header = React.createClass({
   render: function() {
     return (
@@ -168,7 +177,7 @@ var ListToolbar = React.createClass({
     var diffDisabled = true;
 
     //create diff button
-    if (this.props.pagename =="caseversion") {
+    if (this.props.setting.pagename =="caseversion") {
       if (typeof this.props.checked !== "undefined"){
         diffURL = "diff.html?lhs=" + this.props.checked[0] + "&rhs=" + this.props.checked[1]
         if (this.props.checked.length == 2){
@@ -179,9 +188,9 @@ var ListToolbar = React.createClass({
     }
 
     //create new button
-    if (this.props.pagename == "caseversion") {
+    if (this.props.setting.pagename == "caseversion") {
       newButton = <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
-    } else if (this.props.pagename == "suite") {
+    } else if (this.props.setting.pagename == "suite") {
       newButton = <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/suite/add/' >+ New Suite</Button>
     }
     return (
@@ -200,7 +209,7 @@ var SearchableList = React.createClass({
   mixins: [SearchableRemoteListMixin],
 
   buildURL: function(query) {
-      var api_url =  config.baseUrl + "/api/v1/" + this.props.pagename;
+      var api_url =  config.baseUrl + "/api/v1/" + this.props.setting.pagename;
       return (buildQueryUrl(api_url, query, caseversionCodegen) +
               "&limit=" + config.defaultListLimit
              );
@@ -221,8 +230,8 @@ var SearchableList = React.createClass({
   render: function() {
     return (
       <div>
-        <ListToolbar pagename={this.props.pagename} checked={this.state.checked} />
-        <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
+        <ListToolbar setting={this.props.setting} checked={this.state.checked} />
+        <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} setting={this.props.setting}/>
         <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
         <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
       </div>
@@ -234,7 +243,7 @@ var SearchableList = React.createClass({
 var CaseVerWrapper = React.createClass({
   render: function() {
     return (
-      <SearchableList pagename="caseversion" />
+      <SearchableList setting={caseverSetting}/>
     )
   }
 })
@@ -242,7 +251,7 @@ var CaseVerWrapper = React.createClass({
 var SuiteWrapper = React.createClass({
   render: function() {
     return (
-      <SearchableList pagename="suite"/>
+      <SearchableList setting={suiteSetting}/>
     )
   }
 })
@@ -257,8 +266,8 @@ var SearchForm = React.createClass({
     this.refs.searchbox.getDOMNode().firstElementChild.value= query;
   },
   render: function() {
-    if (typeof this.props.syntaxlink !== "undefined") {
-        var helplink = <small>(<a href={this.props.syntaxlink} target="_blank">help</a>)</small>;
+    if (typeof this.props.setting.syntaxlink !== "undefined") {
+        var helplink = <small>(<a href={this.props.setting.syntaxlink} target="_blank">help</a>)</small>;
     }
     return (
       <Row>
