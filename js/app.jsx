@@ -24,27 +24,27 @@ var caseverSetting = new Array();
 caseverSetting.pagename = "caseversion";
 caseverSetting.syntaxlink = "help/syntax_caseversion.html";
 caseverSetting.header = [
-{text: "", sortable: false},
-{text: "ID", sortable: false},
-{text: "name", sortable: true},
-{text: "priority", sortable: true},
-{text: "product", sortable: true},
-{text: "modified", sortable: true},
-{text: "", sortable: false},
-{text: "", sortable: false},
+{text: ""},
+{text: "ID"},
+{text: "name", sortable: true, filtername: "name"},
+{text: "priority", sortable: true, filtername: "case__priority"},
+{text: "product", sortable: true, filtername: "productversion"},
+{text: "modified", sortable: true, filtername: "modified_on"},
+{text: ""},
+{text: ""},
 ];
 
 var suiteSetting = new Array();
 suiteSetting.pagename = "suite";
 suiteSetting.syntaxlink = "help/syntax_suite.html";
 suiteSetting.header = [
-{text: "", sortable: false},
-{text: "ID", sortable: false},
-{text: "status", sortable: false},
-{text: "name", sortable: true},
-{text: "modified", sortable: true},
-{text: "", sortable: false},
-{text: "", sortable: false},
+{text: ""},
+{text: "ID"},
+{text: "status"},
+{text: "name", sortable: true, filtername: "name"},
+{text: "modified", sortable: true, filtername: "modified_on"},
+{text: ""},
+{text: ""},
 ]
 
 
@@ -420,6 +420,7 @@ var MTTableHeadTh = React.createClass({
       newOrder = "-";
     }
     this.setState({"order": newOrder})
+    this.props.handleAddFilter(' orderby:' + newOrder + this.props.filter, / orderby:[-\w]+/)
   },
   getInitialState: function(){
     return ({"order": null}) //+ and -
@@ -445,12 +446,14 @@ var MTTableHead = React.createClass({
     var tableheader = obj.map(
       function(setting){
         if (setting["sortable"]) {
-          return <MTTableHeadTh text={setting["text"]} />
+          return (
+            <MTTableHeadTh text={setting["text"]} filter={setting["filtername"]}
+            handleAddFilter={this.props.handleAddFilter} />
+          )
         } else {
           return <th>{setting["text"]}</th>
         }
-      }
-    );
+      }.bind(this))
 
     return (
       <tr>{tableheader}</tr>
@@ -462,9 +465,10 @@ var MTTable = React.createClass({
   render: function() {
     return (
       <Row>
-      <Table striped condensed hover className="caseverList">
+      <Table striped condensed hover className={this.props.setting.pagename}>
         <tbody>
-          <MTTableHead setting={this.props.setting}/>
+          <MTTableHead setting={this.props.setting}
+            handleAddFilter={this.props.handleAddFilter}/>
         </tbody>
       </Table>
       </Row>
