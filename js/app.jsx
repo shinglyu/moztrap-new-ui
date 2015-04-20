@@ -24,27 +24,27 @@ var caseverSetting = new Array();
 caseverSetting.pagename = "caseversion";
 caseverSetting.syntaxlink = "help/syntax_caseversion.html";
 caseverSetting.header = [
-{text: ""},
-{text: "ID"},
-{text: "name"},
-{text: "priority"},
-{text: "product"},
-{text: "modified"},
-{text: ""},
-{text: ""},
+{text: "", sortable: false},
+{text: "ID", sortable: false},
+{text: "name", sortable: true},
+{text: "priority", sortable: true},
+{text: "product", sortable: true},
+{text: "modified", sortable: true},
+{text: "", sortable: false},
+{text: "", sortable: false},
 ];
 
 var suiteSetting = new Array();
 suiteSetting.pagename = "suite";
 suiteSetting.syntaxlink = "help/syntax_suite.html";
 suiteSetting.header = [
-{text: ""},
-{text: "ID"},
-{text: "status"},
-{text: "name"},
-{text: "modified"},
-{text: ""},
-{text: ""},
+{text: "", sortable: false},
+{text: "ID", sortable: false},
+{text: "status", sortable: false},
+{text: "name", sortable: true},
+{text: "modified", sortable: true},
+{text: "", sortable: false},
+{text: "", sortable: false},
 ]
 
 
@@ -411,6 +411,7 @@ var CaseverListItem = React.createClass({
   }
 });
 
+
 //this.props.handleAddFilter(' orderby:' + newOrder + this.props.filter, / orderby:[-\w]+/)
 var MTTableHeadTh = React.createClass({
   handleSort: function(){
@@ -443,7 +444,11 @@ var MTTableHead = React.createClass({
     var obj = this.props.setting.header;
     var tableheader = obj.map(
       function(setting){
-        return <MTTableHeadTh text={setting["text"]} />
+        if (setting["sortable"]) {
+          return <MTTableHeadTh text={setting["text"]} />
+        } else {
+          return <th>{setting["text"]}</th>
+        }
       }
     );
 
