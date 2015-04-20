@@ -251,7 +251,7 @@ var SearchableList = React.createClass({
       <div>
         <ListToolbar setting={this.props.setting} checked={this.state.checked} />
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} setting={this.props.setting}/>
-        <MTTable setting={this.props.setting} casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
+        <MTTable setting={this.props.setting} data={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
         <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
       </div>
     )
@@ -463,12 +463,29 @@ var MTTableHead = React.createClass({
 
 var MTTable = React.createClass({
   render: function() {
+    var content
+    if (this.props.setting.pagename == "caseversion") {
+      content = this.props.data.objects.map(
+          function(casever) {
+            return (<CaseverListItem
+                casever={casever}
+                onChange={this.props.handleCheck}
+                handleAddFilter={this.props.handleAddFilter}/>)
+          }.bind(this))
+    } else if (this.props.setting.pagename == "suite") {
+      content = this.props.data.objects.map(
+          function(suite) {
+            return (<SuiteListItem suite={suite} />)
+          })
+    }
+
     return (
       <Row>
       <Table striped condensed hover className={this.props.setting.pagename}>
         <tbody>
           <MTTableHead setting={this.props.setting}
             handleAddFilter={this.props.handleAddFilter}/>
+          {content}
         </tbody>
       </Table>
       </Row>
