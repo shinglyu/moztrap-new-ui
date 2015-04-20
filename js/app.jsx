@@ -23,10 +23,29 @@ var Glyphicon= ReactBootstrap.Glyphicon
 var caseverSetting = new Array();
 caseverSetting.pagename = "caseversion";
 caseverSetting.syntaxlink = "help/syntax_caseversion.html";
+caseverSetting.header = [
+{text: ""},
+{text: "ID"},
+{text: "name"},
+{text: "priority"},
+{text: "product"},
+{text: "modified"},
+{text: ""},
+{text: ""},
+];
 
 var suiteSetting = new Array();
 suiteSetting.pagename = "suite";
 suiteSetting.syntaxlink = "help/syntax_suite.html";
+suiteSetting.header = [
+{text: ""},
+{text: "ID"},
+{text: "status"},
+{text: "name"},
+{text: "modified"},
+{text: ""},
+{text: ""},
+]
 
 
 var Header = React.createClass({
@@ -232,7 +251,7 @@ var SearchableList = React.createClass({
       <div>
         <ListToolbar setting={this.props.setting} checked={this.state.checked} />
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} setting={this.props.setting}/>
-        <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
+        <MTTable setting={this.props.setting} casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
         <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
       </div>
     )
@@ -391,6 +410,63 @@ var CaseverListItem = React.createClass({
     )
   }
 });
+
+//this.props.handleAddFilter(' orderby:' + newOrder + this.props.filter, / orderby:[-\w]+/)
+var MTTableHeadTh = React.createClass({
+  handleSort: function(){
+    var newOrder = "";
+    if (this.state.order == "") {
+      newOrder = "-";
+    }
+    this.setState({"order": newOrder})
+  },
+  getInitialState: function(){
+    return ({"order": null}) //+ and -
+  }, render: function(){
+    var marker=""
+    if (this.state.order == ""){
+      marker = "▼";
+    }
+    else if (this.state.order == "-"){
+      marker = "▲";
+    }
+
+    return(
+      <th onClick={this.handleSort}>{this.props.text}{marker}</th>
+    )
+  }
+})
+
+//return (<CaseverListItem casever={casever} onChange={this.props.handleCheck} handleAddFilter={this.props.handleAddFilter}/>)
+var MTTableHead = React.createClass({
+  render: function() {
+    var obj = this.props.setting.header;
+    var tableheader = obj.map(
+      function(setting){
+        return <MTTableHeadTh text={setting["text"]} />
+      }
+    );
+
+    return (
+      <tr>{tableheader}</tr>
+    )
+  }
+})
+
+var MTTable = React.createClass({
+  render: function() {
+    return (
+      <Row>
+      <Table striped condensed hover className="caseverList">
+        <tbody>
+          <MTTableHead setting={this.props.setting}/>
+        </tbody>
+      </Table>
+      </Row>
+    )
+  }
+});
+//{casevers}
 
 
 var CaseverList = React.createClass({
