@@ -3,9 +3,9 @@ moztrap-new-ui
 
 A new frontend UI for [MozTrap](https://moztrap.mozilla.org/) that levarages on its REST API
 
-# [Live Demo](https://shinglyu.github.io/moztrap-new-ui/#/)
+# [Production Site](https://shinglyu.github.io/moztrap-new-ui/#/)
 
-Check out the [Live Demo](https://shinglyu.github.io/moztrap-new-ui/#/)(only tested on [Firefox](https://www.mozilla.org/en-US/firefox/new/))
+Use this [production site](https://shinglyu.github.io/moztrap-new-ui/#/)(only tested on [Firefox](https://www.mozilla.org/en-US/firefox/new/)) directly, or host on your own.
 
 # Dependencies
 * bower (`npm install -g bower` if you have Node.js and npm)
