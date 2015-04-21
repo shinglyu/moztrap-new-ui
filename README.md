@@ -13,12 +13,14 @@ Check out the [Live Demo](https://shinglyu.github.io/moztrap-new-ui/#/)(only tes
 # Installation 
 * `git clone` this repo.
 * Run `bower install` to install 3rd party dependencies. ( A `bower_components` folder should be created.)
+* If you need the diff function, run `git submoudle init; git submoudle update;`.
 * Open the `index.html` in the browser.
-* e.g.<div>
+* Summary: <div>
 ```
 git clone https://github.com/shinglyu/moztrap-new-ui.git
 cd moztrap-new-ui/
 bower install
+git submoudle init; git submoudle update;
 firefox index.html &
 ```
 </div>
