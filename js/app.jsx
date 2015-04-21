@@ -688,7 +688,6 @@ var AddToSuite = React.createClass({
   },
 
   handleQueueUpdate: function(e, queueName) {
-alert("dddd");
     if (e.target.checked){
       var newState = {};
       newState[queueName] = this.state[queueName].concat(e.target.value);
