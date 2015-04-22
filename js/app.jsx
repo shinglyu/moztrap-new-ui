@@ -106,7 +106,7 @@ var SearchableRemoteListMixin = {
 
       success: function(data) {
         var availablePages = 0;
-        if (data.meta.next != null && typeof data.meta.next != 'undefined') {
+        if (typeof data.meta.next != 'undefined') {
           availablePages = parseInt(data.meta.total_count / data.meta.limit)
           if (data.meta.total_count % data.meta.limit != 0)
             availablePages += 1;
