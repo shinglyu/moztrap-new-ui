@@ -1,6 +1,18 @@
 var expect = chai.expect;
 
 describe('Parser', function(){
+  describe('parser', function(){
+    it('parse basic query into tokens', function(){
+      var query = "product:\"Firefox OS\" suite:Test hello";
+      var result = parser.parse(String(query));
+      var expected = [{key:"product", value:"Firefox OS"}, {key:"suite", value:"Test"}, {key:"", value:"hello"}];
+      //expect(result.length).to.be.equal(expected.length);
+
+      console.log(result, expected)
+      expect(result).to.be.eql(expected);
+    });
+  });
+
   describe('codegen', function(){
     it('build query url without explict orderby', function(){
       url="http://moztrap.com/api/v1/caseversion/";
@@ -18,21 +30,12 @@ describe('Parser', function(){
       expect(url).to.be.equal("http://moztrap.com/api/v1/caseversion/?&productversion__product__name__icontains=Firefox%20OS&order_by=name");
       //expect(url).to.be.equal("http://moztrap.com/api/v1/caseversion/?order_by=modified_on&product=\"Firefox OS\"");
     }); 
-    it('parse basic query into tokens', function(){
-      var query = "product:\"Firefox OS\" suite:Test hello";
-      var result = tokenize(String(query));
-      var expected = [{key:"product", value:"\"Firefox OS\""}, {key:"suite", value:"Test"}, {key:"", value:"hello"}];
-      //expect(result.length).to.be.equal(expected.length);
-
-      expect(result).to.be.eql(expected);
-    });
-
     it('Turn caseversion tokens into TastyPie search queries', function(){
       var testDatum = [
         {input: [{key:"name", value:"foobar"}], expected: ["name__icontains=foobar"]},
         //{input: [{key:"foo", value:"foofoo"}], expected: ["name__icontains=foofoo"]},
         {input: [{key:"foo", value:"foofoo"}], expected: [""]},
-        {input: [{key:"tag", value:"foofoo"}], expected: ["tags__name__icontains=foofoo"]},
+        {input: [{key:"tag", value:"foofoo"}], expected: ["tags__name__in=foofoo"]},
         {input: [{key:"suite", value:"foofoo"}], expected: ["case__suites__name__icontains=foofoo"]},
         {input: [{key:"product", value:"foofoo"}], expected: ["productversion__product__name__icontains=foofoo"]},
         {input: [{key:"ver", value:"2.4"}], expected: ["productversion__version__icontains=2.4"]},
@@ -82,11 +85,11 @@ describe('Parser', function(){
 
     it('Tokens to URI querystring', function(){
       var testDatum = [
-        {input: [{key:"orderby", value:"name"}], expected: ["orderby=name"]},
-        {input: [{key:"name", value:"MozTrap"}], expected: ["name=MozTrap"]},
+        {input: [{key:"orderby", value:"name"}], expected: ["order_by=name"]},
+        {input: [{key:"name", value:"MozTrap"}], expected: ["name__icontains=MozTrap"]},
       ];
       for (var testData of testDatum) {
-        var result = urlCodegen(testData.input);
+        var result = caseversionCodegen(testData.input);
         expect(result).to.be.eql(testData.expected);
       }
     });
