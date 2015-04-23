@@ -94,11 +94,14 @@ var SearchableRemoteListMixin = {
   }, 
 
   loadOnePage: function(url, clickedPageNum) {
+
     clickedPageNum = typeof clickedPageNum !== 'undefined' ? clickedPageNum : 1;
-    var selectedPageOffset = (clickedPageNum-1) * this.state.data.meta.limit;
+    var limit = typeof this.state.data.meta.limit !== 'undefined' ? 
+                this.state.data.meta.limit : 20;
+    var selectedPageOffset = (clickedPageNum-1) * limit;
     url = url.replace(/offset=[0-9]+/, "offset=" + selectedPageOffset);
 
-    console.log("===> loadOnePage URL = ", url)
+    console.log("===> loadOnePage (Page, URL) = (%d, %s)", clickedPageNum, url);
 
     $.ajax({
       url: url,
@@ -148,7 +151,12 @@ var SearchableRemoteListMixin = {
   },
 
   handlePageLoading: function(page) {
-    this.loadOnePage(config.baseUrl + this.state.data.meta.next, page);
+    if (this.state.data.meta.previous)
+      this.loadOnePage(config.baseUrl + this.state.data.meta.previous, page);
+    else if (this.state.data.meta.next)
+      this.loadOnePage(config.baseUrl + this.state.data.meta.next, page);
+    else
+      console.error(this.state.data, status, err.toString());
   },
 
   handleAddFilter: function(additionalQuery, removeRegex){
