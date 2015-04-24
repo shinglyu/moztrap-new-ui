@@ -94,11 +94,14 @@ var SearchableRemoteListMixin = {
   }, 
 
   loadOnePage: function(url, clickedPageNum) {
+
     clickedPageNum = typeof clickedPageNum !== 'undefined' ? clickedPageNum : 1;
-    var selectedPageOffset = (clickedPageNum-1) * this.state.data.meta.limit;
+    var limit = typeof this.state.data.meta.limit !== 'undefined' ? 
+                this.state.data.meta.limit : 20;
+    var selectedPageOffset = (clickedPageNum-1) * limit;
     url = url.replace(/offset=[0-9]+/, "offset=" + selectedPageOffset);
 
-    console.log("===> loadOnePage URL = ", url)
+    console.log("===> loadOnePage (Page, URL) = (%d, %s)", clickedPageNum, url);
 
     $.ajax({
       url: url,
@@ -106,7 +109,7 @@ var SearchableRemoteListMixin = {
 
       success: function(data) {
         var availablePages = 0;
-        if (data.meta.next != null && typeof data.meta.next != 'undefined') {
+        if (typeof data.meta.next != 'undefined') {
           availablePages = parseInt(data.meta.total_count / data.meta.limit)
           if (data.meta.total_count % data.meta.limit != 0)
             availablePages += 1;
@@ -148,7 +151,12 @@ var SearchableRemoteListMixin = {
   },
 
   handlePageLoading: function(page) {
-    this.loadOnePage(config.baseUrl + this.state.data.meta.next, page);
+    if (this.state.data.meta.previous)
+      this.loadOnePage(config.baseUrl + this.state.data.meta.previous, page);
+    else if (this.state.data.meta.next)
+      this.loadOnePage(config.baseUrl + this.state.data.meta.next, page);
+    else
+      console.error(this.state.data, status, err.toString());
   },
 
   handleAddFilter: function(additionalQuery, removeRegex){
@@ -688,7 +696,6 @@ var AddToSuite = React.createClass({
   },
 
   handleQueueUpdate: function(e, queueName) {
-alert("dddd");
     if (e.target.checked){
       var newState = {};
       newState[queueName] = this.state[queueName].concat(e.target.value);
