@@ -233,17 +233,9 @@ var SearchableList = React.createClass({
 
   buildURL: function(query) {
       var api_url =  config.baseUrl + "/api/v1/" + this.props.setting.pagename;
-      var codegen;
       var pagename = this.props.setting.pagename;
-      if (pagename == "caseversion") {
-        codegen = caseversionCodegen;
-      } else if (pagename == "suite") {
-        codegen = suiteCodegen;
-      } else if (pagename == "caseselection") {
-        codegen = caseSelectionCodegen;
-      } else {
-        codegen = null;
-      }
+      var codegen = window[pagename + "Codegen"];
+
       return (buildQueryUrl(api_url, query, codegen) +
               "&limit=" + config.defaultListLimit
              );
