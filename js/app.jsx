@@ -891,7 +891,16 @@ var routes = (
   <Route name="app" path="/" handler={App}>
     <DefaultRoute handler={CaseVerWrapper}/>
     <Route name="caseversion" path="/caseversion" handler={CaseVerWrapper}/>
-    <Route name="suite" path="/suite" handler={SuiteWrapper}/>
+    <Route name="caseversion_search" path="/caseversion/search/:query" handler={CaseVerWrapper}/>
+    <Redirect                        from="/search/:query"  to="/caseversion/search/:query" />
+
+    <Route name="suites_noid"        path="/suite/" handler={SuiteWrapper}/>
+    <Redirect                        from="/suite"  to="/suite/" />
+    <Route name="suite_search"       path="/suite/search/:query" handler={SuiteWrapper}/>
+
+    <Route name="suite"              path="/suite/:id" handler={AddToSuite} />
+
+    <Route name="settings"           path="/settings" handler={Settings} />
     <NotFoundRoute handler={CaseVerWrapper}/>
   </Route>
 );
