@@ -20,6 +20,34 @@ var Nav= ReactBootstrap.Nav
 var NavItem= ReactBootstrap.NavItem
 var Glyphicon= ReactBootstrap.Glyphicon
 
+var caseverSetting = new Array();
+caseverSetting.pagename = "caseversion";
+caseverSetting.syntaxlink = "help/syntax_caseversion.html";
+caseverSetting.header = [
+{text: ""},
+{text: "ID"},
+{text: "name", sortable: true, filtername: "name"},
+{text: "priority", sortable: true, filtername: "case__priority"},
+{text: "product", sortable: true, filtername: "productversion"},
+{text: "modified", sortable: true, filtername: "modified_on"},
+{text: ""},
+{text: ""},
+];
+
+var suiteSetting = new Array();
+suiteSetting.pagename = "suite";
+suiteSetting.syntaxlink = "help/syntax_suite.html";
+suiteSetting.header = [
+{text: ""},
+{text: "ID"},
+{text: "status"},
+{text: "name", sortable: true, filtername: "name"},
+{text: "modified", sortable: true, filtername: "modified_on"},
+{text: ""},
+{text: ""},
+]
+
+
 var Header = React.createClass({
   render: function() {
     return (
@@ -167,6 +195,103 @@ var SearchableRemoteListMixin = {
 
 }
 
+var CaseverToolbar = React.createClass({
+  render: function() {
+    console.log("render");
+    var newButton = <div></div>;
+    var diffButton = <div></div>;
+
+    var diffURL = "";
+    var diffDisabled = true;
+
+    if (typeof this.props.checked !== "undefined"){
+      diffURL = "diff.html?lhs=" + this.props.checked[0] + "&rhs=" + this.props.checked[1]
+      if (this.props.checked.length == 2){
+        var diffDisabled = false;
+      }
+    //create diff button
+    }
+
+    return (
+      <Row>
+        <Col md="12">
+          <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
+          <Button bsStyle="success" target="blank_" href={diffURL} disabled={diffDisabled}>diff</Button>
+        </Col>
+      </Row>
+    )
+  }
+})
+
+var SuiteToolbar = React.createClass({
+  render: function() {
+    return (
+      <Row>
+        <Col md="12">
+          <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/suite/add/' >+ New Suite</Button>
+        </Col>
+      </Row>
+    )
+  }
+})
+
+
+var SearchableList = React.createClass({
+  mixins: [SearchableRemoteListMixin],
+
+  buildURL: function(query) {
+      var api_url =  config.baseUrl + "/api/v1/" + this.props.setting.pagename;
+      var pagename = this.props.setting.pagename;
+      var codegen = window[pagename + "Codegen"];
+
+      return (buildQueryUrl(api_url, query, codegen) +
+              "&limit=" + config.defaultListLimit
+             );
+  },
+
+  handleQueueUpdate: function(e) {
+    var newState = {};
+    if (e.target.checked){
+      newState['checked'] = this.state['checked'].concat(e.target.value);
+    }
+    else {
+      this.state['checked'].splice(this.state['checked'].indexOf(e.target.value), 1);
+      newState['checked'] = this.state['checked'];
+    }
+    this.setState(newState);
+    console.log("===> handleQueueUpdate: ", newState);
+  },
+
+
+  render: function() {
+    return (
+      <div>
+        <this.props.toolbar setting={this.props.setting} checked={this.state.checked} />
+        <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} setting={this.props.setting}/>
+        <MTTable setting={this.props.setting} data={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
+        <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
+      </div>
+    )
+  }
+})
+
+// http://stackoverflow.com/questions/27864720/react-router-pass-props-to-handler-component
+var CaseVerWrapper = React.createClass({
+  render: function() {
+    return (
+      <SearchableList setting={caseverSetting} toolbar={CaseverToolbar}/>
+    )
+  }
+})
+
+var SuiteWrapper = React.createClass({
+  render: function() {
+    return (
+      <SearchableList setting={suiteSetting} toolbar={SuiteToolbar}/>
+    )
+  }
+})
+
 var SearchForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
@@ -177,8 +302,8 @@ var SearchForm = React.createClass({
     this.refs.searchbox.getDOMNode().firstElementChild.value= query;
   },
   render: function() {
-    if (typeof this.props.syntaxlink !== "undefined") {
-        var helplink = <small>(<a href={this.props.syntaxlink} target="_blank">help</a>)</small>;
+    if (typeof this.props.setting.syntaxlink !== "undefined") {
+        var helplink = <small>(<a href={this.props.setting.syntaxlink} target="_blank">help</a>)</small>;
     }
     return (
       <Row>
@@ -304,91 +429,85 @@ var CaseverListItem = React.createClass({
 });
 
 
-var CaseverList = React.createClass({
+var MTTableHeadTh = React.createClass({
+  handleSort: function(){
+    var newOrder = "";
+    if (this.state.order == "") {
+      newOrder = "-";
+    }
+    this.setState({"order": newOrder})
+    this.props.handleAddFilter(' orderby:' + newOrder + this.props.filter, / orderby:[-\w]+/)
+  },
+  getInitialState: function(){
+    return ({"order": null}) //+ and -
+  }, render: function(){
+    var marker=""
+    if (this.state.order == ""){
+      marker = "▼";
+    }
+    else if (this.state.order == "-"){
+      marker = "▲";
+    }
+
+    return(
+      <th onClick={this.handleSort}>{this.props.text}{marker}</th>
+    )
+  }
+})
+
+var MTTableHead = React.createClass({
   render: function() {
-    //can use the casevers.meta
-    var casevers = this.props.casevers.objects.map(function(casever){
-      return (<CaseverListItem casever={casever} onChange={this.props.handleCheck} handleAddFilter={this.props.handleAddFilter}/>)
-    }.bind(this))
+    var obj = this.props.setting.header;
+    var tableheader = obj.map(
+      function(setting){
+        if (setting["sortable"]) {
+          return (
+            <MTTableHeadTh text={setting["text"]} filter={setting["filtername"]}
+            handleAddFilter={this.props.handleAddFilter} />
+          )
+        } else {
+          return <th>{setting["text"]}</th>
+        }
+      }.bind(this))
+
+    return (
+      <tr>{tableheader}</tr>
+    )
+  }
+})
+
+var MTTable = React.createClass({
+  render: function() {
+    var content
+    if (this.props.setting.pagename == "caseversion") {
+      content = this.props.data.objects.map(
+          function(casever) {
+            return (<CaseverListItem
+                casever={casever}
+                onChange={this.props.handleCheck}
+                handleAddFilter={this.props.handleAddFilter}/>)
+          }.bind(this))
+    } else if (this.props.setting.pagename == "suite") {
+      content = this.props.data.objects.map(
+          function(suite) {
+            return (<SuiteListItem suite={suite} />)
+          })
+    }
 
     return (
       <Row>
-      <Table striped condensed hover className="caseverList">
+      <Table striped condensed hover className={this.props.setting.pagename}>
         <tbody>
-          <tr>
-            <th></th>
-            <th>ID</th>
-            <th>status</th>
-            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="priority" filter="case__priority" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="product" filter="productversion" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <th></th>
-            <th></th>
-          </tr>
-          {casevers}
+          <MTTableHead setting={this.props.setting}
+            handleAddFilter={this.props.handleAddFilter}/>
+          {content}
         </tbody>
       </Table>
       </Row>
     )
   }
 });
-
-var SearchableCaseverList = React.createClass({
-  mixins: [SearchableRemoteListMixin],
-  api_url: config.baseUrl + "/api/v1/caseversion/",
-  //TODO: migrate to api_url: "https://moztrap.mozilla.org/api/v1/caseversionsearch/",
-  buildURL: function(query) {
-      return (buildQueryUrl(this.api_url, query, caseversionCodegen) + 
-              "&limit=" + config.defaultListLimit
-             );
-  },
-
-  handleQueueUpdate: function(e) {
-    if (e.target.checked) {
-      var newState = {};
-      newState['checked'] = this.state['checked'].concat(e.target.value);
-      this.setState(newState);
-    }
-    else {
-      this.state['checked'].splice(this.state['checked'].indexOf(e.target.value), 1);
-      var newState = {};
-      newState['checked'] = this.state['checked'];
-      this.setState(newState);
-    }
-console.log("===> handleQueueUpdate: ", newState);
-  },
-
-  render: function() {
-    var diffURL = ""
-    var diffDisabled = true;
-    if (typeof this.state.checked !== "undefined"){
-      diffURL = "diff.html?lhs=" + this.state.checked[0] + "&rhs=" + this.state.checked[1]
-      if (this.state.checked.length == 2){
-        var diffDisabled = false;
-      }
-    }
-
-    return (
-      <Grid>
-        <Row>
-          <Col md="12">
-          <ButtonGroup id="toolbar"> 
-            <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
-            <Button bsStyle="success" id="diffBtn" target="blank_" href={diffURL}
-                    disabled={diffDisabled}>
-              diff
-            </Button>
-          </ButtonGroup>
-          </Col>
-        </Row>
-        <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
-        <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
-        <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
-      </Grid>
-    )
-  }
-})
+//{casevers}
 
 var SuiteListItem = React.createClass({
   render: function() {
@@ -427,32 +546,6 @@ var SuiteListItem = React.createClass({
   }
 });
 
-var SuiteList = React.createClass({
-  render: function() {
-
-    var suites = this.props.suites.objects.map(function(suite){
-      return (<SuiteListItem suite={suite} />)
-    })
-
-    return (
-      <Table striped condensed hover className="suiteList">
-        <tbody>
-          <tr>
-            <th></th>
-            <th>ID</th>
-            <th>status</th>
-            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <th></th>
-            <th></th>
-          </tr>
-          {suites}
-        </tbody>
-      </Table>
-    )
-  }
-});
-
 var SearchableSuiteList = React.createClass({
   mixins: [SearchableRemoteListMixin],
   api_url: config.baseUrl + "/api/v1/suite/",
@@ -464,18 +557,12 @@ var SearchableSuiteList = React.createClass({
 
   render: function() {
     return (
-      <Grid>
-        <Row>
-          <Col md="12">
-          <ButtonGroup id="toolbar"> 
-            <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/suite/add/' >+ New Suite</Button>
-          </ButtonGroup>
-          </Col>
-        </Row>
-        <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
-        <SuiteList suites={this.state.data} handleAddFilter={this.handleAddFilter}/>
+      <div>
+        <SearchForm query={this.state.query} onSubmit={this.handleSearch} />
+        <CaseverList casevers={this.state.data}/>
+        <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
-      </Grid>
+      </div>
     )
   }
 });
@@ -809,16 +896,19 @@ var Settings = React.createClass({
 
 var routes = (
   <Route name="app" path="/" handler={App}>
-    <DefaultRoute handler={SearchableCaseverList}/>
-    <Route name="caseversions"       path="/caseversion" handler={SearchableCaseverList}/>
-    <Route name="caseversion_search" path="/caseversion/search/:query" handler={SearchableCaseverList}/>
+    <DefaultRoute handler={CaseVerWrapper}/>
+    <Route name="caseversion" path="/caseversion" handler={CaseVerWrapper}/>
+    <Route name="caseversion_search" path="/caseversion/search/:query" handler={CaseVerWrapper}/>
     <Redirect                        from="/search/:query"  to="/caseversion/search/:query" />
-    <Route name="suites_noid"        path="/suite/" handler={SearchableSuiteList}/>
+
+    <Route name="suites_noid"        path="/suite/" handler={SuiteWrapper}/>
     <Redirect                        from="/suite"  to="/suite/" />
-    <Route name="suite_search"       path="/suite/search/:query" handler={SearchableSuiteList}/>
+    <Route name="suite_search"       path="/suite/search/:query" handler={SuiteWrapper}/>
+
     <Route name="suite"              path="/suite/:id" handler={AddToSuite} />
+
     <Route name="settings"           path="/settings" handler={Settings} />
-    <NotFoundRoute handler={SearchableCaseverList}/>
+    <NotFoundRoute handler={CaseVerWrapper}/>
   </Route>
 );
 
