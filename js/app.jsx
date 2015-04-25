@@ -187,36 +187,40 @@ var SearchableRemoteListMixin = {
 
 }
 
-var ListToolbar = React.createClass({
+var CaseverToolbar = React.createClass({
   render: function() {
+    console.log("render");
     var newButton = <div></div>;
     var diffButton = <div></div>;
 
     var diffURL = "";
     var diffDisabled = true;
 
-    //create diff button
-    if (this.props.setting.pagename =="caseversion") {
-      if (typeof this.props.checked !== "undefined"){
-        diffURL = "diff.html?lhs=" + this.props.checked[0] + "&rhs=" + this.props.checked[1]
-        if (this.props.checked.length == 2){
-          var diffDisabled = false;
-        }
+    if (typeof this.props.checked !== "undefined"){
+      diffURL = "diff.html?lhs=" + this.props.checked[0] + "&rhs=" + this.props.checked[1]
+      if (this.props.checked.length == 2){
+        var diffDisabled = false;
       }
-      diffButton = <Button bsStyle="success" target="blank_" href={diffURL} disabled={diffDisabled}>diff</Button>
+    //create diff button
     }
 
-    //create new button
-    if (this.props.setting.pagename == "caseversion") {
-      newButton = <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
-    } else if (this.props.setting.pagename == "suite") {
-      newButton = <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/suite/add/' >+ New Suite</Button>
-    }
     return (
       <Row>
         <Col md="12">
-          {newButton}
-          {diffButton}
+          <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
+          <Button bsStyle="success" target="blank_" href={diffURL} disabled={diffDisabled}>diff</Button>
+        </Col>
+      </Row>
+    )
+  }
+})
+
+var SuiteToolbar = React.createClass({
+  render: function() {
+    return (
+      <Row>
+        <Col md="12">
+          <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/suite/add/' >+ New Suite</Button>
         </Col>
       </Row>
     )
@@ -250,10 +254,11 @@ var SearchableList = React.createClass({
     console.log("===> handleQueueUpdate: ", newState);
   },
 
+
   render: function() {
     return (
       <div>
-        <ListToolbar setting={this.props.setting} checked={this.state.checked} />
+        <this.props.toolbar setting={this.props.setting} checked={this.state.checked} />
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} setting={this.props.setting}/>
         <MTTable setting={this.props.setting} data={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
@@ -266,7 +271,7 @@ var SearchableList = React.createClass({
 var CaseVerWrapper = React.createClass({
   render: function() {
     return (
-      <SearchableList setting={caseverSetting}/>
+      <SearchableList setting={caseverSetting} toolbar={CaseverToolbar}/>
     )
   }
 })
@@ -274,7 +279,7 @@ var CaseVerWrapper = React.createClass({
 var SuiteWrapper = React.createClass({
   render: function() {
     return (
-      <SearchableList setting={suiteSetting}/>
+      <SearchableList setting={suiteSetting} toolbar={SuiteToolbar}/>
     )
   }
 })
