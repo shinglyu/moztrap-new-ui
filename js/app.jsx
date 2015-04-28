@@ -819,21 +819,22 @@ var Settings = React.createClass({
     localforage.getItem('api_key').then(function(val){
       this.setState({'api_key':val})
     }.bind(this))
-    return ({'username': "Loading...", 'api_key':"Loading...",
-             //'buttonStyle': "primary"
-            });
+    return ({'username': "Loading...", 'api_key':"Loading...", 'bsStyle': "primary"});
 
   },
   handleUpdate: function() {
+    var promises = [ ];
     if (this.refs.username.getValue() !== ''){
-      localforage.setItem('username', this.refs.username.getValue()).then(refreshConfig)//TODO:trim?
+      promises.push(localforage.setItem('username', this.refs.username.getValue()));//TODO:trim?
     }
     if (this.refs.api_key.getValue() !== ''){
-      localforage.setItem('api_key', this.refs.api_key.getValue()).then(refreshConfig)
+      promises.push(localforage.setItem('api_key', this.refs.api_key.getValue()));
     }
-    //TODO: change button color when all saved
-    //this.setState({'buttonStyle': "success"})
-
+    Promise.all(promises).then(function(val) {
+      refreshConfig;
+      console.log("hi");
+      this.setState({'bsStyle': "success"});
+    }.bind(this));
   },
   render: function() {
     return (
@@ -841,7 +842,7 @@ var Settings = React.createClass({
       <Col md={12}>
         <Input type="text" label="MozTrap Username" id="usernameInput" ref='username' placeholder={this.state.username} />
         <Input type="text" label="API Key" id="apikeyInput" ref='api_key' placeholder={this.state.api_key}/>
-        <Button type="submit" id="saveBtn" bsStyle="primary" onClick={this.handleUpdate}>Save</Button>
+        <Button type="submit" id="saveBtn" bsStyle={this.state.bsStyle} onClick={this.handleUpdate}>Save</Button>
       </Col>
       </Row>
     )
