@@ -143,8 +143,10 @@ var SearchableRemoteListMixin = {
     this.setState({query: query, data: this.loading});
     //TODO: two way data binding?
     //console.log("handle search: " + query)
-    this.refs.searchform.forceUpdateInput(query);
-    window.history.pushState({}, "MozTrap", document.URL.split("search/")[0] + "search/" + encodeURI(query));
+    if(!this.state.disableQueryURL) {
+      this.refs.searchform.forceUpdateInput(query);
+      window.history.pushState({}, "MozTrap", document.URL.split("search/")[0] + "search/" + encodeURI(query));
+    }
   },
 
   handleLoadMore: function() {
@@ -585,10 +587,14 @@ SearchableCaseSelectionList = React.createClass({
     }
   },
 
+ getInitialState: function() {
+    return ({disableQueryURL: true});
+  },
+
   render: function() {
     return (
       <div id={this.props.id}>
-        <SearchForm query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
+        <SearchForm ref="searchform" disableQueryURL={this.state.disableQueryURL} query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
         <CaseList casevers={this.state.data} handleCheck={this.props.onCheck}/>
         <MoreLink onLoadMore={this.handleLoadMore} buttonDisabled={this.state.hasNoLinkToShow}/>
       </div>
