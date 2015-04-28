@@ -830,10 +830,12 @@ var Settings = React.createClass({
     if (this.refs.api_key.getValue() !== ''){
       promises.push(localforage.setItem('api_key', this.refs.api_key.getValue()));
     }
-    Promise.all(promises).then(function(val) {
-      refreshConfig;
-      this.setState({'bsStyle': "success"});
-    }.bind(this));
+    if (promises.length > 0) {
+      Promise.all(promises).then(function(val) {
+        refreshConfig;
+	this.setState({'bsStyle': "success"});
+      }.bind(this));
+    }
   },
   render: function() {
     return (
