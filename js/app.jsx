@@ -832,7 +832,6 @@ var Settings = React.createClass({
     }
     Promise.all(promises).then(function(val) {
       refreshConfig;
-      console.log("hi");
       this.setState({'bsStyle': "success"});
     }.bind(this));
   },
