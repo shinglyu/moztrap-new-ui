@@ -110,6 +110,11 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
         driver.find_element_by_id("apikeyInput").send_keys('c67c9af7-7e07-4820-b686-5f92ae94f6c9') #FIXME: how to setup this for easy test
         driver.find_element_by_id("saveBtn").click()
 
+        WebDriverWait(self.driver, 10, poll_frequency=0.5).until(
+            EC.alert_is_present()
+        )
+        driver.switch_to_alert().accept()
+
         driver.get(self.baseURL + "/#/suite/1")  # FIXME: test suite id?
         self.newui.waitForLoadComplete()
 
@@ -172,7 +177,7 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
         windows = self.driver.window_handles
         self.driver.switch_to_window(windows[1])
 
-        WebDriverWait(self.driver, 1000, poll_frequency=0.5).until(
+        WebDriverWait(self.driver, 10, poll_frequency=0.5).until(
             EC.text_to_be_present_in_element((By.ID, 'path-lhs'), "http")
         )
         #self.assertNotEqual(self.driver.find_element_by_id('path-lhs').text, "")
@@ -189,7 +194,7 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
         windows = self.driver.window_handles
         self.driver.switch_to_window(windows[1])
 
-        WebDriverWait(self.driver, 1000, poll_frequency=0.5).until(
+        WebDriverWait(self.driver, 10, poll_frequency=0.5).until(
             EC.text_to_be_present_in_element((By.ID, 'path-lhs'), "http")
         )
         #self.assertNotEqual(self.driver.find_element_by_id('path-lhs').text, "")
