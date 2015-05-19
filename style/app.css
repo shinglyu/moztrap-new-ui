@@ -26,3 +26,10 @@ div#react-paginator {
     text-align: center;
 }
 
+#searchInput {
+    display:block;
+    height:34px;
+    padding:6px 12px;
+    font-size:14px;
+    border-radius:4px;
+}

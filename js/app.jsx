@@ -236,10 +236,33 @@ var SearchableRemoteListMixin = {
 var SearchForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
-    this.props.onSubmit(this.refs.searchbox.getDOMNode().firstChild.value); //FIXME: firstChild is a hack!
+
+    /* queryString =
+     *   tagged strings under $(".text-tags .text-label")
+     *   + non tagged strings except space
+     */
+    var allNodes = $(this.refs.searchbox.getDOMNode()).find(".text-tags .text-label"),
+	length = allNodes.length,
+        queryString = "",
+	nonTagQueryString = $(this.refs.searchbox.getDOMNode()).find("#searchInput")[0].value   //FIXME: might have some issues
+        ;
+
+    for (var i=0; i< length; i++) {
+	queryString = queryString + " " + allNodes[i].innerHTML;
+    }
+
+    if(!nonTagQueryString.match(/\s+^[\S]/)) {
+	queryString = queryString + " " + nonTagQueryString;
+    }
+
+    console.log("query: " + queryString);
+    this.props.onSubmit(queryString);
+  },
+  componentDidMount: function() {
+    initAutocomplete(this.props.parentId);
   },
   forceUpdateInput: function(query){
-    console.log(this.refs.searchbox.getDOMNode())
+    //console.log(this.refs.searchbox.getDOMNode())
     this.refs.searchbox.getDOMNode().firstElementChild.value= query;
   },
   render: function() {
@@ -640,7 +663,7 @@ var SearchableCaseverList = React.createClass({
     this.state.type="case";
 
     return (
-      <Grid>
+      <Grid id="SearchableCaseverList">
         <Row>
           <Col md="12">
           <ButtonGroup id="toolbar"> 
@@ -811,7 +834,7 @@ var SearchableSuiteList = React.createClass({
   render: function() {
     this.state.type="suite";
     return (
-      <Grid>
+      <Grid id="SearchableSuiteList">
         <Row>
           <Col md="12">
           <ButtonGroup id="toolbar"> 
@@ -906,7 +929,7 @@ SearchableCaseSelectionList = React.createClass({
   render: function() {
     return (
       <div id={this.props.id}>
-        <SearchForm ref="searchform" disableQueryURL={this.state.disableQueryURL} query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
+        <SearchForm ref="searchform" parentId={this.props.id} disableQueryURL={this.state.disableQueryURL} query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
         <CaseList casevers={this.state.data} handleCheck={this.props.onCheck}/>
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
       </div>
