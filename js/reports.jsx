@@ -69,14 +69,31 @@ var App = React.createClass({
   }
 });
 
+var SearchForm = React.createClass({
+  handleSubmit: function(e) {
+    e.preventDefault();
+    var query = this.refs.searchbox.getDOMNode().value;
+    /* 1. Call the parent's search handler */
+    this.props.onSearch(query);
+  },
+  render: function() {
+    return (
+        <form onSubmit={this.handleSubmit}>
+          <input type="text" id="searchInput" ref="searchbox" />
+          <button type="submit" id="searchSubmit">Search</button>
+        </form>
+    )
+  }
+});
 
 var HistoryReport = React.createClass({
   getInitialState: function(){
-    return ({ data: null })
+    return ({ data: null
+    })
   },
 
-  componentDidMount: function(){
-    var url = "http://127.0.0.1:8000/api/v1/resultview/?format=json&limit=0&runcaseversion__run__series=2" //FIXME: hardcode
+  getData: function(id) {
+    var url = "http://127.0.0.1:8000/api/v1/resultview/?format=json&limit=0&runcaseversion__run__series=" + id
     $.ajax({
       url: url,
 
@@ -89,20 +106,26 @@ var HistoryReport = React.createClass({
         console.error(xhr, status, err.toString());
       }.bind(this)
     });
+
   },
-  
+
+  componentDidMount: function(){
+    this.setState({data: null});
+  },
+
   calcHistory: function(data) {
     //if (data == null) { return (<tr><tb>Loading...</tb></tr>) }
-    if (data == null) { return (
-      {
+    if (data == null) {
+      return (
+      [{
         "created_on": 0,
         "name": "Loading...", 
         "passed": 0, 
         "failed": 0,
         "skipped": 0,
         "blocked": 0,
-        "invalidated": 0,
-      }
+        "invalidated": 0
+      }]
 
     ) }
     var aggr= {}
@@ -129,6 +152,7 @@ var HistoryReport = React.createClass({
 
   render: function(){
     var history = this.calcHistory(this.state.data);
+
     var rows = []
     for (var key in history) {
       var run = history[key];
@@ -148,9 +172,15 @@ var HistoryReport = React.createClass({
 
     //TODO: sort by time, reversed
     return (
+
       <Col xs={12}>
         <Table striped condensed hover className="caseverList">
           <tbody>
+            <tr>
+
+              <th>Run series</th>
+              <th colSpan="7"><SearchForm onSearch={this.getData}/></th>
+            </tr>
             <tr>
               <th>Run</th>
               <th>Name</th>
