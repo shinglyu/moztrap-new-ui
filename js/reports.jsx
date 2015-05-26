@@ -20,7 +20,7 @@ var CollapsableNav= ReactBootstrap.CollapsableNav;
 var Nav= ReactBootstrap.Nav;
 var NavItem= ReactBootstrap.NavItem;
 var Glyphicon= ReactBootstrap.Glyphicon;
-
+var MozTrapUrl= "10.247.24.79:8000";
 
 var Header = React.createClass({
     render: function() {
@@ -155,9 +155,9 @@ var HistoryReport = React.createClass({
     getResultData: function(id) {
         var url ="";
         if (id == ""){
-            url = "http://127.0.0.1:8000/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion
+            url = "http://"+MozTrapUrl+"/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion
         }else{
-            url = "http://127.0.0.1:8000/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion + "&runcaseversion__run__series=" + id
+            url = "http://"+MozTrapUrl+"/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion + "&runcaseversion__run__series=" + id
         }
         $.ajax({
             url: url,
@@ -173,7 +173,7 @@ var HistoryReport = React.createClass({
     },
 
     getProductData: function(){
-        var url = "http://127.0.0.1:8000/api/v1/product/?format=json&limit=0";
+        var url = "http://"+MozTrapUrl+"/api/v1/product/?format=json&limit=0";
         $.ajax({
             url: url,
             success: function(data) {
@@ -188,7 +188,7 @@ var HistoryReport = React.createClass({
     },
 
     getProductVersionData: function(name){
-        var url = "http://127.0.0.1:8000/api/v1/productversion/?format=json&limit=0&product__name=" + name ;
+        var url = "http://"+MozTrapUrl+"/api/v1/productversion/?format=json&limit=0&product__name=" + name ;
         $.ajax({
             url: url,
             success: function(data) {
