@@ -76,8 +76,24 @@ var SearchForm = React.createClass({
     render: function() {
         return (
             <form onSubmit={this.handleSubmit}>
-                <input type="text" id="searchInput" ref="searchbox" />
-                <button type="submit" id="searchSubmit">Search</button>
+                <table>
+                <tr>
+                    <td>Product</td>
+                    <td><GetProductList productNameData={this.props.productNameData} productNameOnChange={this.props.productNameOnChange} updateCurrentProductName={this.updateCurrentProductName}/></td>
+                    <td>Product Version</td>
+                    <td><GetProductVersionList productVersionData={this.props.productVersionData} productVersionOnChange={this.props.productVersionOnChange} updateCurrentProductVersion={this.props.updateCurrentProductVersion}/></td>
+                    <td>Name</td>
+                    <td><input type="text" id="searchInput" ref="searchbox" /></td>
+                </tr>
+                <tr>
+                    <td>Begin Date</td>
+                    <td><UIDatePicker /></td>
+                    <td>End Date</td>
+                    <td><UIDatePicker /></td>
+                    <td></td>
+                    <td><button type="submit" id="searchSubmit">Search</button></td>
+                </tr>
+                </table>
             </form>
         )
     }
@@ -283,12 +299,7 @@ var HistoryReport = React.createClass({
         <Table striped condensed hover className="caseverList">
             <tbody>
             <tr>
-                <th>Product</th>
-                <th><GetProductList productNameData={this.state.productNameData} productNameOnChange={this.productNameOnChange} updateCurrentProductName={this.updateCurrentProductName}/></th>
-                <th>Product Version</th>
-                <th><GetProductVersionList productVersionData={this.state.productVersionData} productVersionOnChange={this.productVersionOnChange} updateCurrentProductVersion={this.updateCurrentProductVersion}/></th>
-                <th>Run series</th>
-                <th colSpan="3"><SearchForm getResultData={this.getResultData}/></th>
+                <th colSpan="8"><SearchForm productNameData={this.state.productNameData} productNameOnChange={this.productNameOnChange} updateCurrentProductName={this.updateCurrentProductName} productVersionData={this.state.productVersionData} productVersionOnChange={this.productVersionOnChange} updateCurrentProductVersion={this.updateCurrentProductVersion} getResultData={this.getResultData}/></th>
             </tr>
             <tr>
                 <th>Run</th>
@@ -312,6 +323,18 @@ var HistoryReport = React.createClass({
 
 }
 );
+
+var UIDatePicker = React.createClass({
+    render: function(){
+        return(
+            React.createElement(Datepicker, {
+                onSelect: function(date) {
+                    console.log(date);
+                }
+            })
+        )
+    }
+});
 
 var routes = (
   <Route name="app" path="/" handler={App}>
