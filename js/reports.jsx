@@ -20,7 +20,6 @@ var CollapsableNav= ReactBootstrap.CollapsableNav;
 var Nav= ReactBootstrap.Nav;
 var NavItem= ReactBootstrap.NavItem;
 var Glyphicon= ReactBootstrap.Glyphicon;
-var MozTrapUrl= "10.247.24.79:8000";
 
 var Header = React.createClass({
     render: function() {
@@ -93,10 +92,6 @@ var GetProductList = React.createClass({
         }
     },
 
-    componentDidUpdate: function(){
-        this.props.updateCurrentProductName(this.refs.productList.getDOMNode().value)
-    },
-
     render: function(){
         var options = this.printProducts();
         return(
@@ -137,7 +132,7 @@ var HistoryReport = React.createClass({
             currentProductVersion: null,
             productNameData: null,
             productVersionData: null,
-            initProductVersionFlag: null
+            isInitProductVersion: false
         })
     },
 
@@ -146,18 +141,18 @@ var HistoryReport = React.createClass({
     },
 
     componentDidUpdate: function(){
-        if (this.state.initProductVersionFlag == null) {
+        if (this.state.isInitProductVersion == false) {
             this.getProductVersionData(this.state.productNameData.objects[0].name);
-            this.setState({initProductVersionFlag:1});
+            this.setState({isInitProductVersion:true});
         }
     },
 
     getResultData: function(id) {
         var url ="";
         if (id == ""){
-            url = "http://"+MozTrapUrl+"/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion
+            url = config.baseUrl + "/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion
         }else{
-            url = "http://"+MozTrapUrl+"/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion + "&runcaseversion__run__series=" + id
+            url = config.baseUrl + "/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion + "&runcaseversion__run__series=" + id
         }
         $.ajax({
             url: url,
@@ -173,7 +168,7 @@ var HistoryReport = React.createClass({
     },
 
     getProductData: function(){
-        var url = "http://"+MozTrapUrl+"/api/v1/product/?format=json&limit=0";
+        var url = config.baseUrl + "/api/v1/product/?format=json&limit=0";
         $.ajax({
             url: url,
             success: function(data) {
@@ -188,7 +183,7 @@ var HistoryReport = React.createClass({
     },
 
     getProductVersionData: function(name){
-        var url = "http://"+MozTrapUrl+"/api/v1/productversion/?format=json&limit=0&product__name=" + name ;
+        var url = config.baseUrl + "/api/v1/productversion/?format=json&limit=0&product__name=" + name ;
         $.ajax({
             url: url,
             success: function(data) {
