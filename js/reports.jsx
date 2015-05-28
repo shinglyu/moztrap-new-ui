@@ -69,9 +69,9 @@ var App = React.createClass({
 var SearchForm = React.createClass({
     handleSubmit: function(e) {
         e.preventDefault();
-        var runSeriesID = this.refs.searchbox.getDOMNode().value;
+        var runSeriesName = this.refs.searchbox.getDOMNode().value;
         /* 1. Call the parent's search handler */
-        this.props.getResultData(runSeriesID);
+        this.props.getResultData(runSeriesName);
     },
     render: function() {
         return (
@@ -87,9 +87,9 @@ var SearchForm = React.createClass({
                 </tr>
                 <tr>
                     <td>Begin Date</td>
-                    <td><UIDatePicker /></td>
+                    <td><UIDatePicker onSelectDate={this.props.updateBeginDate}/></td>
                     <td>End Date</td>
-                    <td><UIDatePicker /></td>
+                    <td><UIDatePicker onSelectDate={this.props.updateEndDate}/></td>
                     <td></td>
                     <td><button type="submit" id="searchSubmit">Search</button></td>
                 </tr>
@@ -143,12 +143,15 @@ var GetProductVersionList = React.createClass({
 
 var HistoryReport = React.createClass({
     getInitialState: function(){
+        var currentDate = new Date();
         return ({ resultData: null,
             currentProductName: null,
             currentProductVersion: null,
             productNameData: null,
             productVersionData: null,
-            isInitProductVersion: false
+            isInitProductVersion: false,
+            beginDate:currentDate,
+            endDate:currentDate
         })
     },
 
@@ -163,12 +166,12 @@ var HistoryReport = React.createClass({
         }
     },
 
-    getResultData: function(id) {
+    getResultData: function(name) {
         var url ="";
-        if (id == ""){
-            url = config.baseUrl + "/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion
+        if (name == ""){
+            url = config.baseUrl + "/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion + "&created_on__gte=" + moment(this.state.beginDate).format('YYYY-MM-DD') + "&created_on__lte=" + moment(this.state.endDate).format('YYYY-MM-DD')
         }else{
-            url = config.baseUrl + "/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion + "&runcaseversion__run__series=" + id
+            url = config.baseUrl + "/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion + "&created_on__gte=" + moment(this.state.beginDate).format('YYYY-MM-DD') + "&created_on__lte=" + moment(this.state.endDate).format('YYYY-MM-DD') + "&runcaseversion__run__name__contains=" + name
         }
         $.ajax({
             url: url,
@@ -222,6 +225,18 @@ var HistoryReport = React.createClass({
     updateCurrentProductVersion: function(version){
         if (this.state.currentProductVersion == null || this.state.currentProductVersion != version){
             this.setState({currentProductVersion:version})
+        }
+    },
+
+    updateBeginDate: function(date){
+        if (this.state.beginDate == null || this.state.beginDate != date){
+            this.setState({beginDate:date})
+        }
+    },
+
+    updateEndDate: function(date){
+        if (this.state.endDate == null || this.state.endDate != date){
+            this.setState({endDate:date})
         }
     },
 
@@ -299,7 +314,16 @@ var HistoryReport = React.createClass({
         <Table striped condensed hover className="caseverList">
             <tbody>
             <tr>
-                <th colSpan="8"><SearchForm productNameData={this.state.productNameData} productNameOnChange={this.productNameOnChange} updateCurrentProductName={this.updateCurrentProductName} productVersionData={this.state.productVersionData} productVersionOnChange={this.productVersionOnChange} updateCurrentProductVersion={this.updateCurrentProductVersion} getResultData={this.getResultData}/></th>
+                <th colSpan="8"><SearchForm productNameData={this.state.productNameData}
+                                            productNameOnChange={this.productNameOnChange}
+                                            updateCurrentProductName={this.updateCurrentProductName}
+                                            productVersionData={this.state.productVersionData}
+                                            productVersionOnChange={this.productVersionOnChange}
+                                            updateCurrentProductVersion={this.updateCurrentProductVersion}
+                                            getResultData={this.getResultData}
+                                            updateBeginDate={this.updateBeginDate}
+                                            updateEndDate={this.updateEndDate}/></th>
+
             </tr>
             <tr>
                 <th>Run</th>
@@ -325,12 +349,16 @@ var HistoryReport = React.createClass({
 );
 
 var UIDatePicker = React.createClass({
+    getInitialState: function(){
+        return ({ myDatepicker: Datepicker.noConflict()
+        })
+    },
     render: function(){
         return(
-            React.createElement(Datepicker, {
+            React.createElement(this.state.myDatepicker, {
                 onSelect: function(date) {
-                    console.log(date);
-                }
+                    this.props.onSelectDate(date);
+                }.bind(this)
             })
         )
     }
