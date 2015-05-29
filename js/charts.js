@@ -30,6 +30,7 @@ function createCharts(input) {
       .orient("left")
       .tickFormat(d3.format(".2s"));
 
+  d3.select("#mbars").selectAll("*").remove();
   var svg = d3.select("#mbars").append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
