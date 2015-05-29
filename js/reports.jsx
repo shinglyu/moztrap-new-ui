@@ -167,8 +167,8 @@ var HistoryReport = React.createClass({
             this.getProductVersionData(this.state.productNameData.objects[0].name);
             this.setState({isInitProductVersion:true});
         }
-        if (this.state.data != null) {
-          var history = this.calcHistory(this.state.data);
+        if (this.state.resultData != null) {
+          var history = this.calcHistory(this.state.resultData);
           createCharts(history);
         }
     },
