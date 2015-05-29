@@ -21,6 +21,8 @@ var Nav= ReactBootstrap.Nav
 var NavItem= ReactBootstrap.NavItem
 var Glyphicon= ReactBootstrap.Glyphicon
 
+var Aggr
+
 
 var Header = React.createClass({
   render: function() {
@@ -62,6 +64,7 @@ var App = React.createClass({
       <Header/>
       <Grid>
       <RouteHandler {...this.props}/>
+      <div id="mbars"/>
       <Footer/>
       </Grid>
       </div>
@@ -93,7 +96,7 @@ var HistoryReport = React.createClass({
   },
 
   getData: function(id) {
-    var url = "http://127.0.0.1:8000/api/v1/resultview/?format=json&limit=0&runcaseversion__run__series=" + id
+    var url = "http://10.247.24.126:8181/api/v1/resultview/?format=json&limit=0&runcaseversion__run__series=" + id
     $.ajax({
       url: url,
 
@@ -111,6 +114,13 @@ var HistoryReport = React.createClass({
 
   componentDidMount: function(){
     this.setState({data: null});
+  },
+
+  componentDidUpdate: function(){
+    if (this.state.data != null) {
+      var history = this.calcHistory(this.state.data);
+      createCharts(history);
+    }
   },
 
   calcHistory: function(data) {
@@ -196,11 +206,8 @@ var HistoryReport = React.createClass({
         </Table>
       </Col>
     )
-
   }
-
-}
-)
+})
 
 var routes = (
   <Route name="app" path="/" handler={App}>
