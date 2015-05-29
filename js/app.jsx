@@ -309,6 +309,16 @@ var CaseverListItem = React.createClass({
 
 
 var CaseverList = React.createClass({
+  checkAll: function() {
+    var checkState = this.refs.checkAllBox.getDOMNode().checked;
+    [].forEach.call(document.querySelectorAll('input[type=checkbox]'), function(checkbox){
+      if (checkState == true)
+        checkbox.checked = true;
+      else
+        checkbox.checked = false;
+    }.bind(this));
+  },
+
   render: function() {
     //can use the casevers.meta
     var casevers = this.props.casevers.objects.map(function(casever){
@@ -320,7 +330,7 @@ var CaseverList = React.createClass({
       <Table striped condensed hover className="caseverList">
         <tbody>
           <tr>
-            <th></th>
+            <th><input type="checkbox" ref="checkAllBox" onChange={this.checkAll}/></th>
             <th>ID</th>
             <th>status</th>
             <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
@@ -432,6 +442,16 @@ var SuiteListItem = React.createClass({
 });
 
 var SuiteList = React.createClass({
+  checkAll: function() {
+    var checkState = this.refs.checkAllBox.getDOMNode().checked;
+    [].forEach.call(document.querySelectorAll('input[type=checkbox]'), function(checkbox){
+      if (checkState == true)
+        checkbox.checked = true;
+      else
+        checkbox.checked = false;
+    }.bind(this));
+  },
+
   render: function() {
 
     var suites = this.props.suites.objects.map(function(suite){
@@ -442,7 +462,7 @@ var SuiteList = React.createClass({
       <Table striped condensed hover className="suiteList">
         <tbody>
           <tr>
-            <th></th>
+            <th><input type="checkbox" ref="checkAllBox" onChange={this.checkAll}/></th>
             <th>ID</th>
             <th>status</th>
             <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
