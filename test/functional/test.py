@@ -4,9 +4,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from app import NewUI, NewUIAssertions
+import time
 
 
-localURL = "http://0.0.0.0:8888"
+localURL = "http://127.0.0.1:8888"
 prodURL  = "http://shinglyu.github.io/moztrap-new-ui"
 baseURL = localURL
 #baseURL = prodURL
@@ -110,12 +111,17 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
         driver.find_element_by_id("apikeyInput").send_keys('c67c9af7-7e07-4820-b686-5f92ae94f6c9') #FIXME: how to setup this for easy test
         driver.find_element_by_id("saveBtn").click()
 
-        WebDriverWait(self.driver, 10, poll_frequency=0.5).until(
-            EC.alert_is_present()
-        )
-        driver.switch_to_alert().accept()
+
+        #WebDriverWait(self.driver, 10, poll_frequency=0.5).until(
+        #    EC.presence_of_element_located((By.CSS_SELECTOR, "#saveBtn.btn-success"))
+            #"btn-success" in driver.find_element_by_id("saveBtn").get_attribute("class").split(' ')
+        #    EC.alert_is_present()
+        #)
+        #driver.switch_to_alert().accept()
+
 
         driver.get(self.baseURL + "/#/suite/1")  # FIXME: test suite id?
+        driver.refresh()
         self.newui.waitForLoadComplete()
 
         case = driver.find_element_by_id('ni_list').find_element_by_class_name('caseListItem')
@@ -210,7 +216,7 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
     def test_tag(self):
         self.driver.get(self.baseURL + "/#/")
         self.newui.waitForLoadComplete()
-        tag = self.driver.find_element_by_css_selector('span.tag')
+        tag = self.driver.find_element_by_css_selector('span.tag.badge')
         tag_name = tag.text
         tag.click()
         self.assertTermInSearchQuery(' tag:"' + tag_name+ '"')
