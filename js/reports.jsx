@@ -28,11 +28,12 @@ var Header = React.createClass({
     return (
       <Navbar brand="MozTrap+" inverse toggleNavKey={0}>
         <Nav navbar>
-          <NavItem eventKey={1} href="#">Case</NavItem>
-          <NavItem eventKey={2} href="#/suite">Suite</NavItem>
+          <NavItem eventKey={1} href="index.html">Case</NavItem>
+          <NavItem eventKey={2} href="index.html#/suite">Suite</NavItem>
+          <NavItem eventKey={3} href="reports.html">Results</NavItem>
         </Nav>
         <Nav navbar right>
-          <NavItem eventKey={3} href="#/settings"><Glyphicon glyph="cog"/></NavItem>
+          <NavItem eventKey={4} href="#/settings"><Glyphicon glyph="cog"/></NavItem>
         </Nav>
       </Navbar>
     )
