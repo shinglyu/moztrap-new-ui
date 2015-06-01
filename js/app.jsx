@@ -325,26 +325,34 @@ var CaseverList = React.createClass({
       return (<CaseverListItem casever={casever} onChange={this.props.handleCheck} handleAddFilter={this.props.handleAddFilter}/>)
     }.bind(this))
 
-    return (
-      <Row>
-      <Table striped condensed hover className="caseverList">
-        <tbody>
-          <tr>
-            <th><input type="checkbox" ref="checkAllBox" onChange={this.checkAll}/></th>
-            <th>ID</th>
-            <th>status</th>
-            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="priority" filter="case__priority" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="product" filter="productversion" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <th></th>
-            <th></th>
-          </tr>
-          {casevers}
-        </tbody>
-      </Table>
-      </Row>
-    )
+    if (this.props.casevers.meta.total_count>0) {
+      return (
+          <Row>
+            <Table striped condensed hover className="caseverList">
+              <tbody>
+              <tr>
+                <td colSpan="9">Total {this.props.casevers.meta.total_count} suites found</td>
+              </tr>
+              <tr>
+                <th><input type="checkbox" ref="checkAllBox" onChange={this.checkAll}/></th>
+                <th>ID</th>
+                <th>status</th>
+                <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+                <SortableTh name="priority" filter="case__priority"
+                            handleAddFilter={this.props.handleAddFilter}></SortableTh>
+                <SortableTh name="product" filter="productversion"
+                            handleAddFilter={this.props.handleAddFilter}></SortableTh>
+                <SortableTh name="modified" filter="modified_on"
+                            handleAddFilter={this.props.handleAddFilter}></SortableTh>
+                <th></th>
+                <th></th>
+              </tr>
+              {casevers}
+              </tbody>
+            </Table>
+          </Row>
+      )
+    }else{return <div className="emptySearchResults">No results found</div>}
   }
 });
 
@@ -458,22 +466,28 @@ var SuiteList = React.createClass({
       return (<SuiteListItem suite={suite} />)
     })
 
-    return (
-      <Table striped condensed hover className="suiteList">
-        <tbody>
-          <tr>
-            <th><input type="checkbox" ref="checkAllBox" onChange={this.checkAll}/></th>
-            <th>ID</th>
-            <th>status</th>
-            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <th></th>
-            <th></th>
-          </tr>
-          {suites}
-        </tbody>
-      </Table>
-    )
+    if (this.props.suites.meta.total_count>0) {
+      return (
+          <Table striped condensed hover className="suiteList">
+            <tbody>
+            <tr>
+              <td colSpan="7">Total {this.props.suites.meta.total_count} suites found</td>
+            </tr>
+            <tr>
+              <th><input type="checkbox" ref="checkAllBox" onChange={this.checkAll}/></th>
+              <th>ID</th>
+              <th>status</th>
+              <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+              <SortableTh name="modified" filter="modified_on"
+                          handleAddFilter={this.props.handleAddFilter}></SortableTh>
+              <th></th>
+              <th></th>
+            </tr>
+            {suites}
+            </tbody>
+          </Table>
+      )
+    }else{return <div className="emptySearchResults">No results found</div>}
   }
 });
 
