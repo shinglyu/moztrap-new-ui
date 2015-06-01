@@ -21,6 +21,8 @@ var Nav= ReactBootstrap.Nav;
 var NavItem= ReactBootstrap.NavItem;
 var Glyphicon= ReactBootstrap.Glyphicon;
 
+var Aggr;
+
 var Header = React.createClass({
     render: function() {
     return (
@@ -59,6 +61,7 @@ var App = React.createClass({
       <Header/>
       <Grid>
       <RouteHandler {...this.props}/>
+      <div id="mbars"/>
       <Footer/>
       </Grid>
       </div>
@@ -163,6 +166,10 @@ var HistoryReport = React.createClass({
         if (this.state.isInitProductVersion == false) {
             this.getProductVersionData(this.state.productNameData.objects[0].name);
             this.setState({isInitProductVersion:true});
+        }
+        if (this.state.resultData != null) {
+          var history = this.calcHistory(this.state.resultData);
+          createCharts(history);
         }
     },
 
