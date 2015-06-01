@@ -319,29 +319,19 @@ var CaseverList = React.createClass({
     }.bind(this));
   },
 
-  getInitialState: function() {
-    return ({totalCount: 0});
-  },
-
-  componentDidUpdate: function() {
-    if(this.state.totalCount!=this.props.casevers.meta.total_count) {
-      this.setState({totalCount: this.props.casevers.meta.total_count});
-    }
-  },
-
   render: function() {
     //can use the casevers.meta
     var casevers = this.props.casevers.objects.map(function(casever){
       return (<CaseverListItem casever={casever} onChange={this.props.handleCheck} handleAddFilter={this.props.handleAddFilter}/>)
     }.bind(this))
 
-    if (this.state.totalCount>0) {
+    if (this.props.casevers.meta.total_count>0) {
       return (
           <Row>
             <Table striped condensed hover className="caseverList">
               <tbody>
               <tr>
-                <td colSpan="9">Total {this.state.totalCount} suites found</td>
+                <td colSpan="9">Total {this.props.casevers.meta.total_count} suites found</td>
               </tr>
               <tr>
                 <th><input type="checkbox" ref="checkAllBox" onChange={this.checkAll}/></th>
@@ -470,28 +460,18 @@ var SuiteList = React.createClass({
     }.bind(this));
   },
 
-  getInitialState: function() {
-    return ({totalCount: 0});
-  },
-
-  componentDidUpdate: function() {
-    if(this.state.totalCount!=this.props.suites.meta.total_count) {
-      this.setState({totalCount: this.props.suites.meta.total_count});
-    }
-  },
-
   render: function() {
 
     var suites = this.props.suites.objects.map(function(suite){
       return (<SuiteListItem suite={suite} />)
     })
 
-    if (this.state.totalCount>0) {
+    if (this.props.suites.meta.total_count>0) {
       return (
           <Table striped condensed hover className="suiteList">
             <tbody>
             <tr>
-              <td colSpan="7">Total {this.state.totalCount} suites found</td>
+              <td colSpan="7">Total {this.props.suites.meta.total_count} suites found</td>
             </tr>
             <tr>
               <th><input type="checkbox" ref="checkAllBox" onChange={this.checkAll}/></th>
