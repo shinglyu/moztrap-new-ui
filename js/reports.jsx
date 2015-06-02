@@ -20,6 +20,8 @@ var CollapsableNav= ReactBootstrap.CollapsableNav;
 var Nav= ReactBootstrap.Nav;
 var NavItem= ReactBootstrap.NavItem;
 var Glyphicon= ReactBootstrap.Glyphicon;
+var ModalTrigger = ReactBootstrap.ModalTrigger;
+var Modal = ReactBootstrap.Modal;
 
 var Aggr;
 
@@ -70,32 +72,57 @@ var App = React.createClass({
 });
 
 var SearchForm = React.createClass({
+    getInitialState: function(){
+        return ({ enableProductFilter:true,
+            enableProductVerFilter:true,
+            enableDateFilter:false
+        })
+    },
+
     handleSubmit: function(e) {
         e.preventDefault();
         var runSeriesName = this.refs.searchbox.getDOMNode().value;
+        var runSeriesCase = this.refs.searchCasebox.getDOMNode().value;
+        var runSeriesSuite = this.refs.searchSuitebox.getDOMNode().value;
+        var enableProductFilter = this.refs.enableProductFilter.getDOMNode().checked;
+        var enableProductVerFilter = this.refs.enableProductVerFilter.getDOMNode().checked;
+        var enableDateFilter = this.refs.enableDateFilter.getDOMNode().checked;
         /* 1. Call the parent's search handler */
-        this.props.getResultData(runSeriesName);
+        this.props.getResultData(runSeriesName,runSeriesSuite,runSeriesCase,enableProductFilter, enableProductVerFilter,enableDateFilter );
     },
     render: function() {
         return (
             <form onSubmit={this.handleSubmit}>
                 <table>
                 <tr>
+                    <td><input type="checkbox" id="enableProductFilter" ref="enableProductFilter" defaultChecked={this.state.enableProductFilter}/></td>
                     <td>Product</td>
                     <td><GetProductList productNameData={this.props.productNameData} productNameOnChange={this.props.productNameOnChange} updateCurrentProductName={this.updateCurrentProductName}/></td>
+                    <td><input type="checkbox" id="enableProductVerFilter" ref="enableProductVerFilter" defaultChecked={this.state.enableProductVerFilter}/></td>
                     <td>Product Version</td>
                     <td><GetProductVersionList productVersionData={this.props.productVersionData} productVersionOnChange={this.props.productVersionOnChange} updateCurrentProductVersion={this.props.updateCurrentProductVersion}/></td>
                     <td>Name</td>
                     <td><input type="text" id="searchInput" ref="searchbox" /></td>
                 </tr>
                 <tr>
+                    <td><input type="checkbox" id="enableDateFilter" ref="enableDateFilter" defaultChecked={this.state.enableDateFilter}/></td>
                     <td>Begin Date</td>
                     <td><UIDatePicker onSelectDate={this.props.updateBeginDate}/></td>
+                    <td></td>
                     <td>End Date</td>
                     <td><UIDatePicker onSelectDate={this.props.updateEndDate}/></td>
-                    <td></td>
-                    <td><button type="submit" id="searchSubmit">Search</button></td>
                 </tr>
+                <tr>
+                    <td></td>
+                    <td>Suite Name</td>
+                    <td><input type="text" id="searchSuiteInput" ref="searchSuitebox" /></td>
+                    <td></td>
+                    <td>Case Name</td>
+                    <td><input type="text" id="searchCaseInput" ref="searchCasebox" /></td>
+                    <td></td>
+                    <td colSpan="2"><button type="submit" id="searchSubmit">Search</button></td>
+                </tr>
+
                 </table>
             </form>
         )
@@ -169,16 +196,30 @@ var HistoryReport = React.createClass({
         }
         if (this.state.resultData != null) {
           var history = this.calcHistory(this.state.resultData);
+            console.log(history);
           createCharts(history);
         }
     },
 
-    getResultData: function(name) {
-        var url ="";
-        if (name == ""){
-            url = config.baseUrl + "/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion + "&created_on__gte=" + moment(this.state.beginDate).format('YYYY-MM-DD') + "&created_on__lte=" + moment(this.state.endDate).format('YYYY-MM-DD')
-        }else{
-            url = config.baseUrl + "/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion + "&created_on__gte=" + moment(this.state.beginDate).format('YYYY-MM-DD') + "&created_on__lte=" + moment(this.state.endDate).format('YYYY-MM-DD') + "&runcaseversion__run__name__contains=" + name
+    getResultData: function(runSeriesName,runSeriesSuite,runSeriesCase,enableProductFilter, enableProductVerFilter,enableDateFilter ) {
+        var url =config.baseUrl + "/api/v1/resultview/?format=json&limit=0";
+        if (enableProductFilter == true){
+            url = url + "&runcaseversion__run__productversion__product__name=" + this.state.currentProductName;
+        }
+        if (enableProductVerFilter == true){
+            url = url + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion;
+        }
+        if (enableDateFilter == true){
+            url = url + "&created_on__gte=" + moment(this.state.beginDate).format('YYYY-MM-DD') + "&created_on__lte=" + moment(this.state.endDate).format('YYYY-MM-DD');
+        }
+        if (runSeriesName != ""){
+            url = url + "&runcaseversion__run__name__contains=" + runSeriesName;
+        }
+        if (runSeriesSuite != ""){
+            url = url + "&runcaseversion__caseversion__name=" + runSeriesSuite;
+        }
+        if (runSeriesCase != ""){
+            url = url + "&runcaseversion__caseversion__name__contains=" + runSeriesCase;
         }
         $.ajax({
             url: url,
@@ -285,9 +326,11 @@ var HistoryReport = React.createClass({
           "invalidated": 0
         };
         aggr[curr.run][curr.status] = 1;
+        aggr[curr.run]["runCaseVersionList"]=[curr.runcaseversion];
       }
       else{
         aggr[curr.run][curr.status] += 1 ;
+        aggr[curr.run]["runCaseVersionList"].push(curr.runcaseversion);
       }
     });
 
@@ -346,14 +389,36 @@ var HistoryReport = React.createClass({
           </tbody>
         </Table>
       </Col>
-
-
     )
 
     }
 
 }
 );
+
+var MyModal = React.createClass({
+    printCase: function(){
+        if (this.props.runCaseVersionList != null) {
+            return this.props.runCaseVersionList.map(function (runCaseVersion){
+                return <p>{runCaseVersion}</p>;
+            }, this);
+        }
+    },
+
+    render: function() {
+        var detail = this.printCase();
+        return (
+            <Modal {...this.props} title='Modal heading' animation={false}>
+                <div className='modal-body'>
+                    {detail}
+                </div>
+                <div className='modal-footer'>
+                    <Button onClick={this.props.onRequestHide}>Close</Button>
+                </div>
+            </Modal>
+        );
+    }
+});
 
 var UIDatePicker = React.createClass({
     getInitialState: function(){
@@ -377,6 +442,7 @@ var routes = (
     <NotFoundRoute handler={HistoryReport}/>
   </Route>
 );
+
 
 Router.run(routes, function(Handler, state) {
   var params = state.params;
