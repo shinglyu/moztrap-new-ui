@@ -20,6 +20,8 @@ var CollapsableNav= ReactBootstrap.CollapsableNav;
 var Nav= ReactBootstrap.Nav;
 var NavItem= ReactBootstrap.NavItem;
 var Glyphicon= ReactBootstrap.Glyphicon;
+var ModalTrigger = ReactBootstrap.ModalTrigger;
+var Modal = ReactBootstrap.Modal;
 
 var Aggr;
 
@@ -70,32 +72,57 @@ var App = React.createClass({
 });
 
 var SearchForm = React.createClass({
+    getInitialState: function(){
+        return ({ enableProductFilter:true,
+            enableProductVerFilter:true,
+            enableDateFilter:false
+        })
+    },
+
     handleSubmit: function(e) {
         e.preventDefault();
         var runSeriesName = this.refs.searchbox.getDOMNode().value;
+        var runSeriesCase = this.refs.searchCasebox.getDOMNode().value;
+        var runSeriesSuite = this.refs.searchSuitebox.getDOMNode().value;
+        var enableProductFilter = this.refs.enableProductFilter.getDOMNode().checked;
+        var enableProductVerFilter = this.refs.enableProductVerFilter.getDOMNode().checked;
+        var enableDateFilter = this.refs.enableDateFilter.getDOMNode().checked;
         /* 1. Call the parent's search handler */
-        this.props.getResultData(runSeriesName);
+        this.props.getResultData(runSeriesName,runSeriesSuite,runSeriesCase,enableProductFilter, enableProductVerFilter,enableDateFilter );
     },
     render: function() {
         return (
             <form onSubmit={this.handleSubmit}>
                 <table>
                 <tr>
+                    <td><input type="checkbox" id="enableProductFilter" ref="enableProductFilter" defaultChecked={this.state.enableProductFilter}/></td>
                     <td>Product</td>
                     <td><GetProductList productNameData={this.props.productNameData} productNameOnChange={this.props.productNameOnChange} updateCurrentProductName={this.updateCurrentProductName}/></td>
+                    <td><input type="checkbox" id="enableProductVerFilter" ref="enableProductVerFilter" defaultChecked={this.state.enableProductVerFilter}/></td>
                     <td>Product Version</td>
                     <td><GetProductVersionList productVersionData={this.props.productVersionData} productVersionOnChange={this.props.productVersionOnChange} updateCurrentProductVersion={this.props.updateCurrentProductVersion}/></td>
                     <td>Name</td>
                     <td><input type="text" id="searchInput" ref="searchbox" /></td>
                 </tr>
                 <tr>
+                    <td><input type="checkbox" id="enableDateFilter" ref="enableDateFilter" defaultChecked={this.state.enableDateFilter}/></td>
                     <td>Begin Date</td>
                     <td><UIDatePicker onSelectDate={this.props.updateBeginDate}/></td>
+                    <td></td>
                     <td>End Date</td>
                     <td><UIDatePicker onSelectDate={this.props.updateEndDate}/></td>
-                    <td></td>
-                    <td><button type="submit" id="searchSubmit">Search</button></td>
                 </tr>
+                <tr>
+                    <td></td>
+                    <td>Suite Name</td>
+                    <td><input type="text" id="searchSuiteInput" ref="searchSuitebox" /></td>
+                    <td></td>
+                    <td>Case Name</td>
+                    <td><input type="text" id="searchCaseInput" ref="searchCasebox" /></td>
+                    <td></td>
+                    <td colSpan="2"><button type="submit" id="searchSubmit">Search</button></td>
+                </tr>
+
                 </table>
             </form>
         )
@@ -154,7 +181,9 @@ var HistoryReport = React.createClass({
             productVersionData: null,
             isInitProductVersion: false,
             beginDate:currentDate,
-            endDate:currentDate
+            endDate:currentDate,
+            tCount:0
+
         })
     },
 
@@ -173,17 +202,32 @@ var HistoryReport = React.createClass({
         }
     },
 
-    getResultData: function(name) {
-        var url ="";
-        if (name == ""){
-            url = config.baseUrl + "/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion + "&created_on__gte=" + moment(this.state.beginDate).format('YYYY-MM-DD') + "&created_on__lte=" + moment(this.state.endDate).format('YYYY-MM-DD')
-        }else{
-            url = config.baseUrl + "/api/v1/resultview/?format=json&limit=0&runcaseversion__run__productversion__product__name=" + this.state.currentProductName + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion + "&created_on__gte=" + moment(this.state.beginDate).format('YYYY-MM-DD') + "&created_on__lte=" + moment(this.state.endDate).format('YYYY-MM-DD') + "&runcaseversion__run__name__contains=" + name
+    getResultData: function(runSeriesName,runSeriesSuite,runSeriesCase,enableProductFilter, enableProductVerFilter,enableDateFilter ) {
+        var url =config.baseUrl + "/api/v1/resultview/?format=json&limit=0";
+        if (enableProductFilter == true){
+            url = url + "&runcaseversion__run__productversion__product__name=" + this.state.currentProductName;
+        }
+        if (enableProductVerFilter == true){
+            url = url + "&runcaseversion__run__productversion__version=" + this.state.currentProductVersion;
+        }
+        if (enableDateFilter == true){
+            url = url + "&created_on__gte=" + moment(this.state.beginDate).format('YYYY-MM-DD') + "&created_on__lte=" + moment(this.state.endDate).format('YYYY-MM-DD');
+        }
+        if (runSeriesName != ""){
+            url = url + "&runcaseversion__run__name__contains=" + runSeriesName;
+        }
+        if (runSeriesSuite != ""){
+            url = url + "&runcaseversion__caseversion__name=" + runSeriesSuite;
+        }
+        if (runSeriesCase != ""){
+            url = url + "&runcaseversion__caseversion__name__contains=" + runSeriesCase;
         }
         $.ajax({
             url: url,
             success: function(data) {
-                this.setState({resultData: data});
+                this.setState({resultData: data,
+                tCount:this.state.tCount+1});
+
             }.bind(this),
 
             error: function(xhr, status, err) {
@@ -285,9 +329,15 @@ var HistoryReport = React.createClass({
           "invalidated": 0
         };
         aggr[curr.run][curr.status] = 1;
+        aggr[curr.run]["caseNameList"]={};
       }
       else{
         aggr[curr.run][curr.status] += 1 ;
+      }
+      if (!(curr.runcaseversion in aggr[curr.run]["caseNameList"])){
+          aggr[curr.run]["caseNameList"][curr.runcaseversion] = {"name":curr.case_name, "count": 1};
+      }else{
+          aggr[curr.run]["caseNameList"][curr.runcaseversion]["count"] += 1;
       }
     });
 
@@ -296,13 +346,14 @@ var HistoryReport = React.createClass({
 
     render: function(){
     var history = this.calcHistory(this.state.resultData);
-
     var rows = [];
     for (var key in history) {
       var run = history[key];
       rows.push(
         <tr>
-          <td>{run.created_on}</td>
+          <td><ModalTrigger modal={<MyModal caseNameList={run.caseNameList} calcHistory={this.calcHistory} runName={run.name}/>} >
+              <Button bsStyle='primary' bsSize="xsmall">{run.created_on}</Button>
+          </ModalTrigger></td>
           <td>{run.name}</td>
           <td>{run.failed}</td>
           <td>{run.passed}</td>
@@ -343,17 +394,158 @@ var HistoryReport = React.createClass({
                 <th>Total</th>
             </tr>
             {rows}
+
           </tbody>
+
+        </Table>
+        <Table>
+        <tr>
+            <Tetris tCount={this.state.tCount}/>
+        </tr>
         </Table>
       </Col>
-
-
     )
 
     }
 
 }
 );
+
+var MyModal = React.createClass({
+
+    getInitialState: function(){
+      return {isPrintDetail: false,
+      resultData:null,
+      currentCaseName:null}
+    },
+
+    getMoreDetail: function(event){
+
+        var url =config.baseUrl + "/api/v1/resultview/?format=json&limit=0&runcaseversion__caseversion__name__contains=" + event.data.text;
+        $.ajax({
+            url: url,
+            success: function(data) {
+                this.setState({resultData: data,
+                    isPrintDetail:true,
+                    currentCaseName:event.data.text});
+            }.bind(this),
+
+            error: function(xhr, status, err) {
+                //this.setState(this.notFound)
+                console.error(xhr, status, err.toString());
+            }.bind(this)
+        });
+
+    },
+    printCaseDetail: function(){
+        if (this.state.isPrintDetail == true) {
+            var tmpData = this.props.calcHistory(this.state.resultData);
+            var allRunData = {"passed":0,
+                             "failed":0,
+                             "skipped":0,
+                             "invalidated":0,
+                             "blocked":0
+            };
+            var currentRunData = {};
+            for (var key in tmpData){
+                var detailData = tmpData[key];
+                if (detailData["name"] == this.props.runName){
+                    currentRunData["passed"] = detailData["passed"]
+                    currentRunData["failed"] = detailData["failed"]
+                    currentRunData["skipped"] = detailData["skipped"]
+                    currentRunData["invalidated"] = detailData["invalidated"]
+                    currentRunData["blocked"] = detailData["blocked"]
+                }
+                allRunData["passed"] += detailData["passed"]
+                allRunData["failed"] += detailData["failed"]
+                allRunData["skipped"] += detailData["skipped"]
+                allRunData["invalidated"] += detailData["invalidated"]
+                allRunData["blocked"] += detailData["blocked"]
+            }
+            return <Table>
+                <tr>
+                    <th>Name</th>
+                    <th>Total</th>
+                    <th>Failed</th>
+                    <th>Passed</th>
+                    <th>Skipped</th>
+                    <th>Blocked</th>
+                    <th>Invalidated</th>
+                </tr>
+                <tr><th colSpan="7">Current Run</th></tr>
+                <tr>
+                    <td>{this.state.currentCaseName}</td>
+                    <td>{currentRunData.blocked+currentRunData.failed+currentRunData.passed+currentRunData.skipped+currentRunData.invalidated}</td>
+                    <td>{currentRunData.failed}</td>
+                    <td>{currentRunData.passed}</td>
+                    <td>{currentRunData.skipped}</td>
+                    <td>{currentRunData.blocked}</td>
+                    <td>{currentRunData.invalidated}</td>
+                </tr>
+                <tr><th colSpan="7">All Runs</th></tr>
+                <tr>
+                    <td>{this.state.currentCaseName}</td>
+                    <td>{allRunData.blocked+allRunData.failed+allRunData.passed+allRunData.skipped+allRunData.invalidated}</td>
+                    <td>{allRunData.failed}</td>
+                    <td>{allRunData.passed}</td>
+                    <td>{allRunData.skipped}</td>
+                    <td>{allRunData.blocked}</td>
+                    <td>{allRunData.invalidated}</td>
+                </tr>
+            </Table>;
+        }
+    },
+
+    printCase: function(){
+        var colorRange = ["#0b64a0", "#5098d8", "#80b2e0", "#afcfef",
+            "#d4e6f9",  "#fcedd6", "#f7e3bf", "#fcce65", "#fec92d", "#f4b425"];
+        if (this.props.caseNameList != null) {
+            var data = [];
+            var caseNameList = this.props.caseNameList;
+            for (var caseVersionId in caseNameList) {
+                data.push({text:caseNameList[caseVersionId]["name"], quantity: caseNameList[caseVersionId]["count"]});
+            }
+            return <Pie onClick={this.getMoreDetail} colorRange={colorRange} data={data} width={500} height={500}/>
+        }
+    },
+
+    render: function() {
+        var detail = this.printCase();
+        var caseDeatil = this.printCaseDetail();
+        return (
+            <Modal {...this.props} title='Cases for this run' animation={false}>
+                <div className='modal-body'>
+                    {detail}
+                    {caseDeatil}
+                </div>
+                <div className='modal-footer'>
+                    <Button onClick={this.props.onRequestHide}>Close</Button>
+                </div>
+            </Modal>
+        );
+    }
+
+});
+
+var Tetris = React.createClass({
+    render: function() {
+        if (this.props.tCount >= 15 && this.props.tCount <= 30){
+        return (
+            <div>
+                <iframe style={{overflow:'hidden', height:'800',width:'100%'}}
+                        width="100%"
+                        height="100%"
+                        src="http://d3tetris.herokuapp.com/"
+                        frameborder="0"
+                        allowfullscreen>
+                </iframe>
+            </div>
+        );}else{
+            return (<div></div>)
+        }
+
+    }
+});
 
 var UIDatePicker = React.createClass({
     getInitialState: function(){
@@ -377,6 +569,7 @@ var routes = (
     <NotFoundRoute handler={HistoryReport}/>
   </Route>
 );
+
 
 Router.run(routes, function(Handler, state) {
   var params = state.params;
