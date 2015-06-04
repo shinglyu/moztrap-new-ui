@@ -21,3 +21,8 @@
 td.priority, td.productversion, td.modified_on, td.status, td.id{
   font-size: 12px
 }
+
+div#react-paginator {
+    text-align: center;
+}
+
