@@ -666,7 +666,7 @@ var SearchableCaseverList = React.createClass({
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
         <CaseverList casevers={this.state.data} handleCheckAll={this.checkAll} handleCheck={this.handleQueueUpdate} handleAddFilter={this.handleAddFilter} caseVerQueue={this.state.caseVerChecked} caseQueue={this.state.caseChecked}/>
-        <PaginationContainer type={this.state.type} onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount}/>
+        <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount}/>
       </Grid>
     )
   }
@@ -830,7 +830,7 @@ var SearchableSuiteList = React.createClass({
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
         <SuiteList suites={this.state.data} handleCheck={this.handleQueueUpdate} handleAddFilter={this.handleAddFilter} onUpdate={this.props.onUpdate} queue={this.state.suiteChecked}/>
-        <PaginationContainer type={this.state.type} onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
+        <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
       </Grid>
     )
   }
