@@ -82,19 +82,13 @@ var SearchableRemoteListMixin = {
 
     // 2. Unchecked all boxes.
     if(this.state.type == "case") {
-      $.each($('tr td input[type=checkbox]:checked.caseCheckBox'), function () {
-        $(this).prop('checked', false);
-      });
-      $.each($('tr th input[type=checkbox]:checked.caseCheckBox'), function () {
+      $.each($('tr th input[type=checkbox]:checked.caseCheckBox, tr td input[type=checkbox]:checked.caseCheckBox'), function () {
         $(this).prop('checked', false);
       });
     }
 
     if(this.state.type == "suite") {
-      $.each($('tr td input[type=checkbox]:checked.suiteCheckBox'), function () {
-        $(this).prop('checked', false);
-      });
-      $.each($('tr th input[type=checkbox]:checked.suiteCheckBox'), function () {
+      $.each($('tr th input[type=checkbox]:checked.suiteCheckBox, tr td input[type=checkbox]:checked.suiteCheckBox'), function () {
         $(this).prop('checked', false);
       });
     }
