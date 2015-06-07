@@ -290,7 +290,6 @@ var PopWindow = React.createClass({
 
   getInitialState: function(){
     return ({
-      addDisabled: false,
       suiteQueue: []
     })
   },
@@ -366,6 +365,13 @@ var PopWindow = React.createClass({
       }.bind(this),this)
     }
 
+    var addDisabled = true;
+    if (typeof this.state.suiteQueue != "undefined") {
+      if (this.state.suiteQueue.length > 0) {
+        var addDisabled = false;
+      }
+    }
+
     return(
         <Modal bsSize='large'>
           <div className='modal-body'>
@@ -377,7 +383,7 @@ var PopWindow = React.createClass({
             </tr>
             {tags}
             <tr>
-              <td><Button bsStyle='primary' disabled={this.state.addDisabled} onClick={this.addToSuite}>Submit</Button></td>
+              <td><Button bsStyle='primary' disabled={addDisabled} onClick={this.addToSuite}>Submit</Button></td>
               <td><Button bsStyle='warning' onClick={this.props.onRequestHide}>Close</Button></td>
             </tr>
             </tbody>
