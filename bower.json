@@ -25,7 +25,8 @@
     "react-bootstrap": "~0.18.0",
     "localforage": "~1.2.2",
     "react-ui-datepicker": "*",
-    "moment": "~2.10.3"
+    "moment": "~2.10.3",
+    "react-loader": "~1.2.0"
   },
   "resolutions": {
     "react": ">= 0.13.0"

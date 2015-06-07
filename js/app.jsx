@@ -54,8 +54,6 @@ var Footer = React.createClass({
   }
 })
 
-
-
 var App = React.createClass({
   render: function() {
     return (
@@ -69,6 +67,23 @@ var App = React.createClass({
     )
   }
 });
+
+var LoaderOptions = {
+    lines: 13,
+    length: 20,
+    width: 10,
+    radius: 30,
+    corners: 1,
+    rotate: 0,
+    direction: 1,
+    color: '#000',
+    speed: 1,
+    trail: 20,
+    shadow: false,
+    hwaccel: false,
+    zIndex: 2e9,
+    scale: 1.00
+};
 
 
 var SearchableRemoteListMixin = {
@@ -135,7 +150,8 @@ var SearchableRemoteListMixin = {
           if (data.meta.total_count % data.meta.limit != 0)
             availablePages += 1;
         }
-        this.setState({data: data, queriedPageCount: availablePages});
+        this.setState({data: data, queriedPageCount: availablePages, 
+                       pageLoaded: true});
         
         this.updateListUIState(data);
       }.bind(this),
@@ -158,7 +174,8 @@ var SearchableRemoteListMixin = {
 
     var type = "";
   
-    return {query: defaultQuery, data: this.loading, caseVerChecked: [], caseChecked: [], suiteChecked: [], queriedPageCount: 0, type:type};
+    return {query: defaultQuery, data: this.loading, caseVerChecked: [], caseChecked: [], 
+            suiteChecked: [], queriedPageCount: 0, type:type, pageLoaded: false};
   },
 
   componentDidMount: function() {
@@ -217,6 +234,8 @@ var SearchableRemoteListMixin = {
   },
 
   handlePageLoading: function(page) {
+    this.setState({pageLoaded: false});
+
     if (this.state.data.meta.previous)
       this.loadOnePage(config.baseUrl + this.state.data.meta.previous, page);
     else if (this.state.data.meta.next)
@@ -657,6 +676,7 @@ var SearchableCaseverList = React.createClass({
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
         <CaseverList casevers={this.state.data} handleCheckAll={this.checkAll} handleCheck={this.handleQueueUpdate} handleAddFilter={this.handleAddFilter} caseVerQueue={this.state.caseVerChecked} caseQueue={this.state.caseChecked}/>
+        <Loader loaded={this.state.pageLoaded} options={LoaderOptions} className="spinner" position="relative" />
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount}/>
       </Grid>
     )
@@ -821,6 +841,7 @@ var SearchableSuiteList = React.createClass({
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
         <SuiteList suites={this.state.data} handleCheck={this.handleQueueUpdate} handleAddFilter={this.handleAddFilter} onUpdate={this.props.onUpdate} queue={this.state.suiteChecked}/>
+        <Loader loaded={this.state.pageLoaded} options={LoaderOptions} className="spinner" position="relative" />
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
       </Grid>
     )
@@ -900,7 +921,7 @@ SearchableCaseSelectionList = React.createClass({
   },
 
  getInitialState: function() {
-    return ({disableQueryURL: true});
+    return ({disableQueryURL: true, loaded: false});
   },
 
   render: function() {
@@ -908,6 +929,7 @@ SearchableCaseSelectionList = React.createClass({
       <div id={this.props.id}>
         <SearchForm ref="searchform" disableQueryURL={this.state.disableQueryURL} query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
         <CaseList casevers={this.state.data} handleCheck={this.props.onCheck}/>
+        <Loader loaded={this.state.pageLoaded} options={LoaderOptions} className="spinner" position="relative" />
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
       </div>
     )
