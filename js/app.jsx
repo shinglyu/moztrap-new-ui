@@ -204,30 +204,21 @@ var SearchableRemoteListMixin = {
       var nonExisted = true;
       for(var index in this.state.caseVerChecked){
         nonExisted = true;
-        var toBeAddCase = this.state.caseVerChecked[index];
         var caseVerKey    = Object.keys(this.state.caseVerChecked[index]);
         var caseVerSecKey = Object.keys(this.state.caseVerChecked[index][caseVerKey]);
-        //console.log("caseVerChecked key:"+caseVerKey);
-        //console.log("caseVerChecked sec key:"+caseVerSecKey);
-        //console.log("caseVerChecked name:"+this.state.caseVerChecked[index][caseVerKey][caseVerSecKey]);
-        //if(caseChecked.length >0) {
         for (var caseItem in caseChecked) {
           var caseKey = Object.keys(this.state.caseChecked[caseItem]);
           if (caseVerSecKey.toString() == caseKey.toString()){
             nonExisted = false;
           }
-          //console.log("===>caseChecked key:"+caseKey+" "+nonExisted);
         }
         if(nonExisted){
           var obj = {};
           obj[caseVerSecKey] = this.state.caseVerChecked[index][caseVerKey][caseVerSecKey];
           caseChecked.push(obj);
-          console.log("added in caseChecked queue.");
         }
-        console.log("==================================")
       }
       this.setState({ caseChecked: caseChecked });
-      //console.log("caseChecked Queue:" + this.state.caseChecked);
     }
   },
 
