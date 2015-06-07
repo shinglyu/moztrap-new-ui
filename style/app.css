@@ -47,3 +47,14 @@ div#react-paginator {
     font-size:14px;
     border-radius:4px;
 }
+
+.loader {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgb(38, 102, 170); /* Fall-back for browsers that don't support rgba */
+  background: rgba(38, 102, 170, .15);
+  z-index: 9999;
+}
