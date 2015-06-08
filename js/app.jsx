@@ -346,7 +346,9 @@ var PopWindow = React.createClass({
           }))
         }, this)
 
-    addSuiteCase(this)
+    addSuiteCase(this);
+    this.props.checkAll("false");
+    this.props.onRequestHide();
   },
 
   render: function(){
@@ -550,8 +552,18 @@ var SearchableCaseverList = React.createClass({
              );
   },
 
-  checkAll: function() {
-    var checkState = $('tr th input[type=checkbox].caseCheckBox').prop('checked');
+  checkAll: function(flag) {
+    var checkState;
+    if(typeof(flag) == 'object'){
+      checkState = $('tr th input[type=checkbox].caseCheckBox').prop('checked');
+    }
+    else{
+      if(flag == "true")
+        checkState = true;
+      else
+        checkState = false;
+    }
+
     [].forEach.call(document.querySelectorAll('input[type=checkbox].caseCheckBox'), function(checkbox){
       if (checkState == true) {
         checkbox.checked = true;
@@ -645,7 +657,7 @@ var SearchableCaseverList = React.createClass({
           <Col md="12">
           <ButtonGroup id="toolbar"> 
             <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
-            <ModalTrigger modal={<PopWindow queue={this.state.caseChecked} />}>
+            <ModalTrigger modal={<PopWindow queue={this.state.caseChecked} checkAll={this.checkAll}/>}>
               <Button bsStyle='primary' disabled={addDisabled} onClick={this.handleAddCases}>Add to Suite</Button>
             </ModalTrigger>
             <Button bsStyle="success" id="diffBtn" target="blank_" href={diffURL}
