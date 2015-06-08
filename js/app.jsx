@@ -19,6 +19,8 @@ var CollapsableNav= ReactBootstrap.CollapsableNav
 var Nav= ReactBootstrap.Nav
 var NavItem= ReactBootstrap.NavItem
 var Glyphicon= ReactBootstrap.Glyphicon
+var Modal= ReactBootstrap.Modal
+var ModalTrigger= ReactBootstrap.ModalTrigger
 
 var Header = React.createClass({
   render: function() {
@@ -73,25 +75,43 @@ var SearchableRemoteListMixin = {
   //need to implement `function buildURL(query) {...}`
   loading: {meta:{}, objects: [{name:"Loading..."}]},
   notFound: {data:{objects:[{name:"Can't find anything. Try loosen the search criteria."}]}},
-  
+
   updateListUIState: function(data) {
     // 1. Hightlight the loaded page.
     $('li.pre-active').attr('class', 'active'); 
 
     // 2. Unchecked all boxes.
-    $.each($('tr td input[type=checkbox]:checked'), function() {
-      $(this).prop('checked', false);
-    });
+    if(this.state.type == "case") {
+      $.each($('tr th input[type=checkbox]:checked.caseCheckBox, tr td input[type=checkbox]:checked.caseCheckBox'), function () {
+        $(this).prop('checked', false);
+      });
+    }
+
+    if(this.state.type == "suite") {
+      $.each($('tr th input[type=checkbox]:checked.suiteCheckBox, tr td input[type=checkbox]:checked.suiteCheckBox'), function () {
+        $(this).prop('checked', false);
+      });
+    }
 
     // 3. Check boxes whose ID matches checkedIDs.
-    var checkedIDs = this.state['checked'];
-    $.each($('tr td input[type=checkbox]'), 
-      function() { 
-        for (i = 0; i < checkedIDs.length; i++) { 
-          if ($(this).val() == checkedIDs[i])
+    var checkedIDs = this.state.caseVerChecked;
+    $.each($('tr td input[type=checkbox].caseCheckBox'),
+      function() {
+        for (var item in checkedIDs) {
+          var key = Object.keys(checkedIDs[item]);
+          if ($(this).val() == key)
             $(this).prop('checked', true);
         }
     });
+
+    var checkedIDs = this.state['suiteChecked'];
+    $.each($('tr td input[type=checkbox].suiteCheckBox'),
+        function() {
+          for (i = 0; i < checkedIDs.length; i++) {
+            if ($(this).val() == checkedIDs[i])
+              $(this).prop('checked', true);
+          }
+        });
   }, 
 
   loadOnePage: function(url, clickedPageNum) {
@@ -135,8 +155,10 @@ var SearchableRemoteListMixin = {
     } else {
       defaultQuery = "product:\"" + config.defaultProduct + "\"";
     }
+
+    var type = "";
   
-    return {query: defaultQuery, data: this.loading, checked: [], queriedPageCount: 0};
+    return {query: defaultQuery, data: this.loading, caseVerChecked: [], caseChecked: [], suiteChecked: [], queriedPageCount: 0, type:type};
   },
 
   componentDidMount: function() {
@@ -151,6 +173,46 @@ var SearchableRemoteListMixin = {
     if(!this.state.disableQueryURL) {
       this.refs.searchform.forceUpdateInput(query);
       window.history.pushState({}, "MozTrap", document.URL.split("search/")[0] + "search/" + encodeURI(query));
+    }
+  },
+
+  handleAddCases: function(){
+    /***  the data structure of caseVerChecked & caseChecked queues
+    caseVerChecked queue = [{"172000":{"/api/v1/case/15973/":"Test case name."}},
+                            {"172001":{"/api/v1/case/15974/":"Test case name 2"}}
+                           ]
+    caseChecked queue = [{"/api/v1/case/15973/":"Test case name."},
+                         {"/api/v1/case/15974/":"Test case name 2"}
+                        ]
+    ***/
+    //remove all items
+    var caseChecked = this.state.caseChecked;
+    if(caseChecked.length>0) {
+      //var caseChecked = this.state.caseChecked;
+      for (var index in caseChecked) {
+        caseChecked.splice(0, caseChecked.length);
+      }
+      console.log("-----clean caseChecked queue");
+    }
+    if(this.state.type=='case') {
+      var nonExisted = true;
+      for(var index in this.state.caseVerChecked){
+        nonExisted = true;
+        var caseVerKey    = Object.keys(this.state.caseVerChecked[index]);
+        var caseVerSecKey = Object.keys(this.state.caseVerChecked[index][caseVerKey]);
+        for (var caseItem in caseChecked) {
+          var caseKey = Object.keys(this.state.caseChecked[caseItem]);
+          if (caseVerSecKey.toString() == caseKey.toString()){
+            nonExisted = false;
+          }
+        }
+        if(nonExisted){
+          var obj = {};
+          obj[caseVerSecKey] = this.state.caseVerChecked[index][caseVerKey][caseVerSecKey];
+          caseChecked.push(obj);
+        }
+      }
+      this.setState({ caseChecked: caseChecked });
     }
   },
 
@@ -211,11 +273,120 @@ var PaginationContainer = React.createClass({
    render: function() {
    return  (
      <div id="react-paginator">
-       <Pagination numPages={this.props.totalPageCount} maxDisplayPages={this.props.maxDisplayPages} onClick={this.props.onPageSelected} />
+       <Pagination numPages={this.props.totalPageCount} maxDisplayPages={this.props.maxDisplayPages} onClick={this.props.onPageSelected}/>
      </div>
      );
    }
 
+});
+
+var PopWindow = React.createClass({
+
+  getInitialState: function(){
+    return ({
+      suiteQueue: []
+    })
+  },
+
+  updateSuiteNumber: function(checked,id) {
+
+    if (checked == "true") {
+      if (this.state.suiteQueue.indexOf(id) == -1) {
+        var tmp = this.state.suiteQueue;
+        tmp.push(id);
+        this.setState({suiteQueue:tmp});
+      }
+    }
+    else {
+      var tmp = this.state.suiteQueue;
+      tmp.splice(this.state.suiteQueue.indexOf(id), 1);
+      this.setState({suiteQueue:tmp});
+    }
+
+    if(this.state.suiteQueue.length>0)
+      this.setState({addDisabled:false});
+  },
+
+  addToSuite: function(){
+    function addSuiteCase(that) {
+      //console.log(addDatum)
+      if (addDatum.length == 0) { //update state to trigger refresh
+        that.setState({addQueue:[]}); //Cleanup the add queue
+        return;
+      }
+      size = addDatum.length;
+      for (i = 0; i < size; i++) {
+        var data = addDatum.pop()
+        for(j=0; j< data.length;j++){
+          console.log(JSON.stringify(data[j]));
+         $.ajax({
+            type: "POST",
+            url: config.baseUrl + "/api/v1/suitecase/?username=" + config.username + "&api_key=" + config.api_key,
+            contentType:"application/json",
+            data: JSON.stringify(data[j]),
+            success: function(data){
+              console.log(data)
+              addSuiteCase(that)
+            }.bind(this),
+
+            error: function(xhr, status, err) {
+               console.error(xhr, status, err.toString());
+            }.bind(this)
+         });
+        }
+      }
+    }
+
+    var addDatum = this.state.suiteQueue.map(function(resource_uri){
+      return(
+      this.props.queue.map(
+          function(caseuri){
+            return ({case: Object.keys(caseuri)[0],
+                     suite:resource_uri})
+          }))
+        }, this)
+
+    addSuiteCase(this)
+  },
+
+  render: function(){
+    if (typeof this.props.queue !== "undefined"){
+      var tags = this.props.queue.map(function(caseitem){
+        console.log(caseitem);
+        var caseURI = Object.keys(caseitem);
+        var caseDescription = caseitem[caseURI];
+        return (<tr><td>{caseURI}</td><td>{caseDescription}</td> </tr>)
+      }.bind(this),this)
+    }
+
+    var addDisabled = true;
+    if (typeof this.state.suiteQueue != "undefined") {
+      if (this.state.suiteQueue.length > 0) {
+        var addDisabled = false;
+      }
+    }
+
+    return(
+        <Modal bsSize='large'>
+          <div className='modal-body'>
+          <table>
+            <tbody>
+            <tr>
+              <th>ID</th>
+              <th>name</th>
+            </tr>
+            {tags}
+            <tr>
+              <td><Button bsStyle='primary' disabled={addDisabled} onClick={this.addToSuite}>Submit</Button></td>
+              <td><Button bsStyle='warning' onClick={this.props.onRequestHide}>Close</Button></td>
+            </tr>
+            </tbody>
+          </table>
+          </div>
+          <SearchableSuiteList onUpdate={this.updateSuiteNumber}/>
+        </Modal>
+    )
+  }
 });
 
 //TODO: using client side sort for now, use this when two way data binding is OK
@@ -257,6 +428,27 @@ var CaseverListItem = React.createClass({
     tagname = e.target.innerHTML;
     this.props.handleAddFilter(" tag:\"" + tagname + "\"");
   },
+
+  printCheckboxes: function(){
+    if ( this.props.caseVerQueue.length != 0){
+      var Existed=false;
+      for(var index in this.props.caseVerQueue) {
+
+      var key = Object.keys(this.props.caseVerQueue[index]);
+        if (key == this.props.casever.id.toString()) {
+          Existed=true;
+        }
+      }
+      if(Existed)
+        return <input type="checkbox" className="caseCheckBox" data-casename={this.props.casever.name} data-caseid={this.props.casever.case} value={this.props.casever.id} checked onChange={this.props.onChange}/>
+      else
+        return <input type="checkbox" className="caseCheckBox" data-casename={this.props.casever.name} data-caseid={this.props.casever.case} value={this.props.casever.id} onChange={this.props.onChange}/>
+    }
+    else{
+        return <input type="checkbox" className="caseCheckBox" data-casename={this.props.casever.name} data-caseid={this.props.casever.case} value={this.props.casever.id} onChange={this.props.onChange}/>
+    }
+  },
+
   render: function() {
     var detailUrl = config.baseUrl + "/manage/cases/_detail/" + this.props.casever.id;
     // Formatting tags
@@ -272,7 +464,7 @@ var CaseverListItem = React.createClass({
     return (
       <tr className="caseverListItem">
         <td>
-          <input type="checkbox" value={this.props.casever.id} onChange={this.props.onChange}/>
+          {this.printCheckboxes()}
         </td>
         <td className="id">
           {this.props.casever.id}
@@ -309,20 +501,12 @@ var CaseverListItem = React.createClass({
 
 
 var CaseverList = React.createClass({
-  checkAll: function() {
-    var checkState = this.refs.checkAllBox.getDOMNode().checked;
-    [].forEach.call(document.querySelectorAll('input[type=checkbox]'), function(checkbox){
-      if (checkState == true)
-        checkbox.checked = true;
-      else
-        checkbox.checked = false;
-    }.bind(this));
-  },
+
 
   render: function() {
     //can use the casevers.meta
     var casevers = this.props.casevers.objects.map(function(casever){
-      return (<CaseverListItem casever={casever} onChange={this.props.handleCheck} handleAddFilter={this.props.handleAddFilter}/>)
+      return (<CaseverListItem casever={casever} onChange={this.props.handleCheck} handleAddFilter={this.props.handleAddFilter} caseVerQueue={this.props.caseVerQueue}/>)
     }.bind(this))
 
     if (this.props.casevers.meta.total_count>0) {
@@ -331,10 +515,10 @@ var CaseverList = React.createClass({
             <Table striped condensed hover className="caseverList">
               <tbody>
               <tr>
-                <td colSpan="9">Total {this.props.casevers.meta.total_count} suites found</td>
+                <td colSpan="9">Total {this.props.casevers.meta.total_count} cases found</td>
               </tr>
               <tr>
-                <th><input type="checkbox" ref="checkAllBox" onChange={this.checkAll}/></th>
+                <th><input type="checkbox" className="caseCheckBox" ref="checkAllBox" onChange={this.props.handleCheckAll}/></th>
                 <th>ID</th>
                 <th>status</th>
                 <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
@@ -366,30 +550,94 @@ var SearchableCaseverList = React.createClass({
              );
   },
 
+  checkAll: function() {
+    var checkState = $('tr th input[type=checkbox].caseCheckBox').prop('checked');
+    [].forEach.call(document.querySelectorAll('input[type=checkbox].caseCheckBox'), function(checkbox){
+      if (checkState == true) {
+        checkbox.checked = true;
+      }
+      else
+        checkbox.checked = false;
+    }.bind(this));
+
+    var nonExisted = true;
+    var caseVerChecked = this.state.caseVerChecked;
+    if (checkState == true){
+      this.state.data.objects.map(function(casever){
+        nonExisted = true;
+        for(var index in caseVerChecked) {
+          if( Object.keys(caseVerChecked[index])== casever.id.toString()){
+            nonExisted = false;
+          }
+        }
+        if(nonExisted){
+          var obj = {};
+          var valueObj = {};
+          valueObj[casever.case.toString()] = casever.name;
+          obj[casever.id.toString()] = valueObj;
+          caseVerChecked.push(obj);
+        }
+      }.bind(this))
+    }
+    else
+    {
+      var casevers = this.state.data.objects.map(function(casever){
+        for(var index in caseVerChecked) {
+          if( Object.keys(caseVerChecked[index])== casever.id.toString()){
+            //console.log("yes");
+            //console.log("remove key: "+casever.id.toString());
+            //console.log("item = "+ caseVerChecked[index][casever.id.toString()]);
+            caseVerChecked.splice(index, 1);
+          }
+        }
+      }.bind(this))
+    }
+
+    this.setState({ caseVerChecked: caseVerChecked });
+    console.log("caseVerChecked:"+this.state.caseVerChecked);
+    console.log("Casever Queue Length:"+this.state.caseVerChecked.length);
+
+  },
+
   handleQueueUpdate: function(e) {
+    var caseVerChecked = this.state.caseVerChecked;
     if (e.target.checked) {
-      var newState = {};
-      newState['checked'] = this.state['checked'].concat(e.target.value);
-      this.setState(newState);
+      if(caseVerChecked[e.target.value] == null){
+        var obj = {};
+        var valueObj = {};
+        valueObj[e.target.getAttribute('data-caseid')] = e.target.getAttribute('data-casename');
+        obj[e.target.value.toString()] = valueObj;
+        caseVerChecked.push(obj);
+      }
     }
     else {
-      this.state['checked'].splice(this.state['checked'].indexOf(e.target.value), 1);
-      var newState = {};
-      newState['checked'] = this.state['checked'];
-      this.setState(newState);
+      for(var index in caseVerChecked) {
+        if( Object.keys(caseVerChecked[index])== e.target.value){
+          caseVerChecked.splice(index, 1);
+        }
+      }
     }
-console.log("===> handleQueueUpdate: ", newState);
+    this.setState({ caseVerChecked: caseVerChecked });
+    //console.log("===> handleQueueUpdate - CaseVersion: ", this.state.caseVerChecked);
+    console.log("Casever Queue Length:"+this.state.caseVerChecked.length);
   },
 
   render: function() {
     var diffURL = ""
-    var diffDisabled = true;
-    if (typeof this.state.checked !== "undefined"){
-      diffURL = "diff.html?lhs=" + this.state.checked[0] + "&rhs=" + this.state.checked[1]
-      if (this.state.checked.length == 2){
+    var diffDisabled = true, addDisabled = true;
+    if (typeof this.state.caseVerChecked != "undefined"){
+      console.log(diffURL);
+      if (this.state.caseVerChecked.length == 2){
         var diffDisabled = false;
+        diffURL = "diff.html?lhs=" + Object.keys(this.state.caseVerChecked[0]) + "&rhs=" + Object.keys(this.state.caseVerChecked[1]);
+        console.log("diffURL: "+diffURL);
+      }
+      if (this.state.caseVerChecked.length > 0){
+        var addDisabled = false;
       }
     }
+
+    this.state.type="case";
 
     return (
       <Grid>
@@ -397,6 +645,9 @@ console.log("===> handleQueueUpdate: ", newState);
           <Col md="12">
           <ButtonGroup id="toolbar"> 
             <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
+            <ModalTrigger modal={<PopWindow queue={this.state.caseChecked} />}>
+              <Button bsStyle='primary' disabled={addDisabled} onClick={this.handleAddCases}>Add to Suite</Button>
+            </ModalTrigger>
             <Button bsStyle="success" id="diffBtn" target="blank_" href={diffURL}
                     disabled={diffDisabled}>
               diff
@@ -405,20 +656,31 @@ console.log("===> handleQueueUpdate: ", newState);
           </Col>
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
-        <CaseverList casevers={this.state.data} handleAddFilter={this.handleAddFilter} handleCheck={this.handleQueueUpdate}/>
-        <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
+        <CaseverList casevers={this.state.data} handleCheckAll={this.checkAll} handleCheck={this.handleQueueUpdate} handleAddFilter={this.handleAddFilter} caseVerQueue={this.state.caseVerChecked} caseQueue={this.state.caseChecked}/>
+        <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount}/>
       </Grid>
     )
   }
 })
 
 var SuiteListItem = React.createClass({
+  printCheckboxes: function(){
+    if ( this.props.queue.length != 0){
+      if(this.props.queue.indexOf(this.props.suite.id)!= -1)
+        return <input type="checkbox" className="suiteCheckBox" data-suite-uri={this.props.suite.resource_uri} value={this.props.suite.id} checked onChange={this.props.onChange}/>
+      else
+        return <input type="checkbox" className="suiteCheckBox" data-suite-uri={this.props.suite.resource_uri} value={this.props.suite.id} onChange={this.props.onChange}/>
+    }
+    else{
+      return <input type="checkbox" className="suiteCheckBox" data-suite-uri={this.props.suite.resource_uri} value={this.props.suite.id} onChange={this.props.onChange}/>
+    }
+  },
+
   render: function() {
-    // TODO: handleQueueUpdate should also be called by SuiteListItem.
     return (
       <tr className="suiteListItem">
         <td>
-          <input type="checkbox"/>
+          {this.printCheckboxes()}
         </td>
         <td className="id">
           {this.props.suite.id}
@@ -427,7 +689,7 @@ var SuiteListItem = React.createClass({
           {this.props.suite.status}
         </td>
         <td className="name">
-          <a href={"./index.html#/caseversion/search/suite:\"" + this.props.suite.name + "\""}> 
+          <a href={"./index.html#/caseversion/search/suite:\"" + this.props.suite.name + "\""}>
             {this.props.suite.name}
           </a>
         </td>
@@ -435,12 +697,12 @@ var SuiteListItem = React.createClass({
           {this.props.suite.modified_on}
         </td>
         <td className="edit">
-          <a title="edit" href={"./index.html#/suite/" + this.props.suite.id}> 
+          <a title="edit" href={"./index.html#/suite/" + this.props.suite.id}>
             <Glyphicon glyph="pencil"/>
           </a>
         </td>
         <td className="sharelink">
-          <a title="share link" href={config.baseUrl + "/manage/cases/?filter-suite=" + this.props.suite.id}> 
+          <a title="share link" href={config.baseUrl + "/manage/cases/?filter-suite=" + this.props.suite.id}>
             <Glyphicon glyph="share"/>
           </a>
         </td>
@@ -452,19 +714,41 @@ var SuiteListItem = React.createClass({
 var SuiteList = React.createClass({
   checkAll: function() {
     var checkState = this.refs.checkAllBox.getDOMNode().checked;
-    [].forEach.call(document.querySelectorAll('input[type=checkbox]'), function(checkbox){
+    [].forEach.call(document.querySelectorAll('input[type=checkbox].suiteCheckBox'), function(checkbox){
       if (checkState == true)
         checkbox.checked = true;
       else
         checkbox.checked = false;
     }.bind(this));
+
+    if (checkState == true){
+      var suites = this.props.suites.objects.map(function(suite){
+        if(this.props.queue.indexOf(suite.id.toString())== -1) {
+          this.props.queue.push(suite.id.toString());
+          if(this.props.onUpdate!=null){
+            this.props.onUpdate("true",suite.resource_uri);
+          }
+        }
+      }.bind(this))
+    }
+    else
+    {
+      this.props.suites.objects.map(function(suite){
+        this.props.queue.splice(this.props.queue.indexOf(suite.id.toString()), 1);
+        if(this.props.onUpdate!=null){
+          this.props.onUpdate("false",suite.resource_uri);
+        }
+      }.bind(this))
+    }
+
+    console.log("Suite queue content:" + this.props.queue);
   },
 
   render: function() {
 
     var suites = this.props.suites.objects.map(function(suite){
-      return (<SuiteListItem suite={suite} />)
-    })
+      return (<SuiteListItem suite={suite} onChange={this.props.handleCheck} queue={this.props.queue}/>)
+    }.bind(this))
 
     if (this.props.suites.meta.total_count>0) {
       return (
@@ -474,7 +758,7 @@ var SuiteList = React.createClass({
               <td colSpan="7">Total {this.props.suites.meta.total_count} suites found</td>
             </tr>
             <tr>
-              <th><input type="checkbox" ref="checkAllBox" onChange={this.checkAll}/></th>
+              <th><input type="checkbox" className="suiteCheckBox" ref="checkAllBox" onChange={this.checkAll}/></th>
               <th>ID</th>
               <th>status</th>
               <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
@@ -500,7 +784,32 @@ var SearchableSuiteList = React.createClass({
              );
   },
 
+  handleQueueUpdate: function(e) {
+    //***
+    console.log("suite handle queue:" + e.target.checked);
+    if (e.target.checked) {
+      if (this.state.suiteChecked.indexOf(e.target.value) == -1) {
+        var suiteChecked = this.state.suiteChecked;
+        suiteChecked.push(e.target.value);
+        this.setState({ suiteChecked: suiteChecked });
+        if(this.props.onUpdate!=null){
+          this.props.onUpdate("true",e.target.getAttribute('data-suite-uri'));
+        }
+      }
+    }
+    else {
+      var suiteChecked = this.state.suiteChecked;
+      suiteChecked.splice(suiteChecked.indexOf(e.target.value), 1);
+      this.setState({ suiteChecked: suiteChecked });
+      if(this.props.onUpdate!=null){
+        this.props.onUpdate("false",e.target.getAttribute('data-suite-uri'));
+      }
+    }
+    console.log("selected suite: "+this.state.suiteChecked);
+  },
+
   render: function() {
+    this.state.type="suite";
     return (
       <Grid>
         <Row>
@@ -511,7 +820,7 @@ var SearchableSuiteList = React.createClass({
           </Col>
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
-        <SuiteList suites={this.state.data} handleAddFilter={this.handleAddFilter}/>
+        <SuiteList suites={this.state.data} handleCheck={this.handleQueueUpdate} handleAddFilter={this.handleAddFilter} onUpdate={this.props.onUpdate} queue={this.state.suiteChecked}/>
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
       </Grid>
     )
