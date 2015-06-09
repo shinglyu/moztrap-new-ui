@@ -371,7 +371,7 @@ var PopWindow = React.createClass({
     return(
         <Modal bsSize='large'>
           <div className='modal-body'>
-          <table>
+          <Table striped condensed hover>
             <tbody>
             <tr>
               <th>ID</th>
@@ -383,7 +383,7 @@ var PopWindow = React.createClass({
               <td><Button bsStyle='warning' onClick={this.props.onRequestHide}>Close</Button></td>
             </tr>
             </tbody>
-          </table>
+          </Table>
           </div>
           <SearchableSuiteList onUpdate={this.updateSuiteNumber}/>
         </Modal>
