@@ -554,14 +554,14 @@ var SearchableCaseverList = React.createClass({
 
   checkAll: function(flag) {
     var checkState;
-    if(typeof(flag) == 'object'){
-      checkState = $('tr th input[type=checkbox].caseCheckBox').prop('checked');
-    }
-    else{
+    if(typeof(flag) == 'string'){
       if(flag == "true")
         checkState = true;
       else
         checkState = false;
+    }
+    else{
+      checkState = $('tr th input[type=checkbox].caseCheckBox').prop('checked');
     }
 
     [].forEach.call(document.querySelectorAll('input[type=checkbox].caseCheckBox'), function(checkbox){
