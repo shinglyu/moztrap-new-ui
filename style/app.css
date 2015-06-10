@@ -32,6 +32,10 @@ td.status{
   text-align: center
 }
 
+th.thSortable:hover{
+    cursor: pointer;
+}
+
 div#react-paginator {
     text-align: center;
 }
