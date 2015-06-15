@@ -354,7 +354,9 @@ var PopWindow = React.createClass({
           }))
         }, this)
 
-    addSuiteCase(this)
+    addSuiteCase(this);
+    this.props.checkAll("false");
+    this.props.onRequestHide();
   },
 
   render: function(){
@@ -377,7 +379,7 @@ var PopWindow = React.createClass({
     return(
         <Modal bsSize='large'>
           <div className='modal-body'>
-          <table>
+          <Table striped condensed hover>
             <tbody>
             <tr>
               <th>ID</th>
@@ -389,7 +391,7 @@ var PopWindow = React.createClass({
               <td><Button bsStyle='warning' onClick={this.props.onRequestHide}>Close</Button></td>
             </tr>
             </tbody>
-          </table>
+          </Table>
           </div>
           <SearchableSuiteList onUpdate={this.updateSuiteNumber}/>
         </Modal>
@@ -558,8 +560,18 @@ var SearchableCaseverList = React.createClass({
              );
   },
 
-  checkAll: function() {
-    var checkState = $('tr th input[type=checkbox].caseCheckBox').prop('checked');
+  checkAll: function(flag) {
+    var checkState;
+    if(typeof(flag) == 'string'){
+      if(flag == "true")
+        checkState = true;
+      else
+        checkState = false;
+    }
+    else{
+      checkState = $('tr th input[type=checkbox].caseCheckBox').prop('checked');
+    }
+
     [].forEach.call(document.querySelectorAll('input[type=checkbox].caseCheckBox'), function(checkbox){
       if (checkState == true) {
         checkbox.checked = true;
@@ -653,7 +665,7 @@ var SearchableCaseverList = React.createClass({
           <Col md="12">
           <ButtonGroup id="toolbar"> 
             <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
-            <ModalTrigger modal={<PopWindow queue={this.state.caseChecked} />}>
+            <ModalTrigger modal={<PopWindow queue={this.state.caseChecked} checkAll={this.checkAll}/>}>
               <Button bsStyle='primary' disabled={addDisabled} onClick={this.handleAddCases}>Add to Suite</Button>
             </ModalTrigger>
             <Button bsStyle="success" id="diffBtn" target="blank_" href={diffURL}
