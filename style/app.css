@@ -18,8 +18,22 @@
 }
 */
 
-td.priority, td.productversion, td.modified_on, td.status, td.id{
+td.priority, td.productversion, td.modified_on, td.id{
   font-size: 12px
+}
+
+th.thStatus{
+  text-align: center
+}
+
+
+td.status{
+  font-size: 17px;
+  text-align: center
+}
+
+th.thSortable:hover{
+    cursor: pointer;
 }
 
 div#react-paginator {

@@ -231,6 +231,14 @@ var SearchableRemoteListMixin = {
     this.handleSearch(newQuery + additionalQuery);
   },
 
+  getStatusIcon: function(status){
+    if(status=="active")
+      return <Glyphicon glyph="ok-sign"/>
+    else if (status == "draft")
+      return <Glyphicon glyph="minus-sign"/>
+    else (status == "disabled")
+    return <Glyphicon glyph="remove-sign"/>
+  },
 }
 
 var SearchForm = React.createClass({
@@ -418,7 +426,7 @@ var SortableTh = React.createClass({
       marker = "▲";
     }
     return(
-      <th id={"orderby_"+ this.props.filter} onClick={this.handleSort}>{this.props.name}{marker}</th>
+      <th className="thSortable" id={"orderby_"+ this.props.filter} onClick={this.handleSort}>{this.props.name}{marker}</th>
     )
   }
 })
@@ -470,7 +478,7 @@ var CaseverListItem = React.createClass({
           {this.props.casever.id}
         </td>
         <td className="status">
-          {this.props.casever.status}
+          {this.props.getStatusIcon(this.props.casever.status)}
         </td>
         <td className="name">
           <a href={detailUrl} target="_blank">{this.props.casever.name}</a> <small>{tags}</small>
@@ -506,7 +514,7 @@ var CaseverList = React.createClass({
   render: function() {
     //can use the casevers.meta
     var casevers = this.props.casevers.objects.map(function(casever){
-      return (<CaseverListItem casever={casever} onChange={this.props.handleCheck} handleAddFilter={this.props.handleAddFilter} caseVerQueue={this.props.caseVerQueue}/>)
+      return (<CaseverListItem casever={casever} onChange={this.props.handleCheck} handleAddFilter={this.props.handleAddFilter} getStatusIcon={this.props.getStatusIcon} caseVerQueue={this.props.caseVerQueue}/>)
     }.bind(this))
 
     if (this.props.casevers.meta.total_count>0) {
@@ -520,7 +528,7 @@ var CaseverList = React.createClass({
               <tr>
                 <th><input type="checkbox" className="caseCheckBox" ref="checkAllBox" onChange={this.props.handleCheckAll}/></th>
                 <th>ID</th>
-                <th>status</th>
+                <th className="thStatus">status</th>
                 <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
                 <SortableTh name="priority" filter="case__priority"
                             handleAddFilter={this.props.handleAddFilter}></SortableTh>
@@ -656,7 +664,7 @@ var SearchableCaseverList = React.createClass({
           </Col>
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseversion.html"}/>
-        <CaseverList casevers={this.state.data} handleCheckAll={this.checkAll} handleCheck={this.handleQueueUpdate} handleAddFilter={this.handleAddFilter} caseVerQueue={this.state.caseVerChecked} caseQueue={this.state.caseChecked}/>
+        <CaseverList casevers={this.state.data} handleCheckAll={this.checkAll} handleCheck={this.handleQueueUpdate} handleAddFilter={this.handleAddFilter} getStatusIcon={this.getStatusIcon} caseVerQueue={this.state.caseVerChecked} caseQueue={this.state.caseChecked}/>
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount}/>
       </Grid>
     )
@@ -686,7 +694,7 @@ var SuiteListItem = React.createClass({
           {this.props.suite.id}
         </td>
         <td className="status">
-          {this.props.suite.status}
+          {this.props.getStatusIcon(this.props.suite.status)}
         </td>
         <td className="name">
           <a href={"./index.html#/caseversion/search/suite:\"" + this.props.suite.name + "\""}>
@@ -747,7 +755,7 @@ var SuiteList = React.createClass({
   render: function() {
 
     var suites = this.props.suites.objects.map(function(suite){
-      return (<SuiteListItem suite={suite} onChange={this.props.handleCheck} queue={this.props.queue}/>)
+      return (<SuiteListItem suite={suite} onChange={this.props.handleCheck} getStatusIcon={this.props.getStatusIcon} queue={this.props.queue}/>)
     }.bind(this))
 
     if (this.props.suites.meta.total_count>0) {
@@ -760,7 +768,7 @@ var SuiteList = React.createClass({
             <tr>
               <th><input type="checkbox" className="suiteCheckBox" ref="checkAllBox" onChange={this.checkAll}/></th>
               <th>ID</th>
-              <th>status</th>
+              <th className="thStatus">status</th>
               <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
               <SortableTh name="modified" filter="modified_on"
                           handleAddFilter={this.props.handleAddFilter}></SortableTh>
@@ -820,7 +828,7 @@ var SearchableSuiteList = React.createClass({
           </Col>
         </Row>
         <SearchForm ref="searchform" query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_suite.html"}/>
-        <SuiteList suites={this.state.data} handleCheck={this.handleQueueUpdate} handleAddFilter={this.handleAddFilter} onUpdate={this.props.onUpdate} queue={this.state.suiteChecked}/>
+        <SuiteList suites={this.state.data} handleCheck={this.handleQueueUpdate} handleAddFilter={this.handleAddFilter} onUpdate={this.props.onUpdate} getStatusIcon={this.getStatusIcon} queue={this.state.suiteChecked}/>
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
       </Grid>
     )
