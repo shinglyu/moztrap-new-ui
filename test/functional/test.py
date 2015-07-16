@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import Select
 from app import NewUI, NewUIAssertions
 import time
 
@@ -220,6 +221,39 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
         tag_name = tag.text
         tag.click()
         self.assertTermInSearchQuery(' tag:"' + tag_name+ '"')
+
+    def test_change_multiple_priority(self):
+        baseCSSSelector = '#SearchableCaseverList > div:nth-child(3) > table > tbody > '
+        driver = self.driver
+        driver.get(self.baseURL + '/#/settings')
+        driver.find_element_by_id('usernameInput').send_keys('admin-django')
+        driver.find_element_by_id('apikeyInput').send_keys('c67c9af7-7e07-4820-b686-5f92ae94f6c9')
+        driver.find_element_by_id('saveBtn').click()
+
+        driver.get(self.baseURL)
+        driver.refresh()
+        self.newui.waitForLoadComplete()
+
+        case_1 = driver.find_element_by_css_selector(baseCSSSelector + 'tr:nth-child(3)')
+        case_1.find_element_by_tag_name('input').click()
+
+        case_2 = driver.find_element_by_css_selector(baseCSSSelector + 'tr:nth-child(4)')
+        case_2.find_element_by_tag_name('input').click()
+
+        driver.find_element_by_id('modifyPriorityBtn').click()
+        select = Select(driver.find_element_by_name('priorityList'))
+        select.select_by_value('3')
+
+        driver.find_element_by_id('modifySubmit').click()
+
+        wait = WebDriverWait(driver, 5)
+        wait.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, baseCSSSelector + 'tr:nth-child(4) > .priority'), '3'))
+
+        case_1_updated = driver.find_element_by_css_selector(baseCSSSelector + 'tr:nth-child(3)')
+        case_2_updated = driver.find_element_by_css_selector(baseCSSSelector + 'tr:nth-child(4)')
+
+        self.assertEqual(case_1_updated.find_element_by_class_name('priority').text, '3')
+        self.assertEqual(case_2_updated.find_element_by_class_name('priority').text, '3')
 
     def tearDown(self):
         for window in self.driver.window_handles:

@@ -330,7 +330,7 @@ var PaginationContainer = React.createClass({
 
 });
 
-var PopWindow = React.createClass({
+var AddToSuitePopWindow = React.createClass({
 
   getInitialState: function(){
     return ({
@@ -436,6 +436,99 @@ var PopWindow = React.createClass({
           </Table>
           </div>
           <SearchableSuiteList onUpdate={this.updateSuiteNumber}/>
+        </Modal>
+    )
+  }
+});
+
+var ModifyPriorityPopWindow = React.createClass({
+
+  getInitialState: function(){
+    return ({
+      priority: ''
+    })
+  },
+
+  updatePriority: function(updatedPriority) {
+    if (updatedPriority == '0') {
+      updatedPriority = null;
+    }
+    this.setState({priority:updatedPriority});
+  },
+
+  modifyPriority: function(){
+    function modifyPriorityCase(that) {
+      if (modifyDatum.length == 0) {
+        Router.run(routes, function(Handler, state) {
+          var params = state.params;
+          React.render(<Handler params={params}/>, document.body);
+        })
+        return;
+      }
+      size = modifyDatum.length;
+      for (i = 0; i < size; i++) {
+        var data = modifyDatum.pop();
+        $.ajax({
+          type: "PUT",
+          url: config.baseUrl + data["case"] + "?username=" + config.username + "&api_key=" + config.api_key,
+          contentType:"application/json",
+          data: "{\"priority\": " + that.state.priority + "}",
+          success: function(data){
+            console.log(data)
+            modifyPriorityCase(that)
+          }.bind(this),
+
+          error: function(xhr, status, err) {
+            console.error(xhr, status, err.toString());
+          }.bind(this)
+        });
+      }
+    }
+
+    var modifyDatum = this.props.queue.map(
+      function(caseuri){
+        return ({case: Object.keys(caseuri)[0]
+          })
+      })
+
+    modifyPriorityCase(this);
+    this.props.checkAll("false");
+    this.props.onRequestHide();
+  },
+
+  render: function(){
+    if (typeof this.props.queue !== "undefined"){
+      var tags = this.props.queue.map(function(caseitem){
+        console.log(caseitem);
+        var caseURI = Object.keys(caseitem);
+        var caseDescription = caseitem[caseURI];
+        return (<tr><td>{caseURI}</td><td>{caseDescription}</td> </tr>)
+      }.bind(this),this)
+    }
+
+    var modifyDisabled = true;
+    if (this.state.priority != '') {
+      modifyDisabled = false;
+    }
+
+    return(
+        <Modal bsSize='large'>
+          <div className='modal-body'>
+          <Table striped condensed hover>
+            <tbody>
+            <tr>
+              <th>ID</th>
+              <th>name</th>
+            </tr>
+            {tags}
+            <tr>
+              <td><Button id='modifySubmit' bsStyle='primary' disabled={modifyDisabled} onClick={this.modifyPriority}>Submit</Button></td>
+              <td><Button bsStyle='warning' onClick={this.props.onRequestHide}>Close</Button></td>
+            </tr>
+            </tbody>
+          </Table>
+          </div>
+          <PriorityList onUpdate={this.updatePriority}/>
         </Modal>
     )
   }
@@ -707,8 +800,11 @@ var SearchableCaseverList = React.createClass({
           <Col md="12">
           <ButtonGroup id="toolbar"> 
             <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
-            <ModalTrigger modal={<PopWindow queue={this.state.caseChecked} checkAll={this.checkAll}/>}>
+            <ModalTrigger modal={<AddToSuitePopWindow queue={this.state.caseChecked} checkAll={this.checkAll}/>}>
               <Button bsStyle='primary' disabled={addDisabled} onClick={this.handleAddCases}>Add to Suite</Button>
+            </ModalTrigger>
+            <ModalTrigger modal={<ModifyPriorityPopWindow queue={this.state.caseChecked} checkAll={this.checkAll}/>}>
+              <Button id="modifyPriorityBtn" bsStyle='info' disabled={addDisabled} onClick={this.handleAddCases}>Modify Priority</Button>
             </ModalTrigger>
             <Button bsStyle="success" id="diffBtn" target="blank_" href={diffURL}
                     disabled={diffDisabled}>
@@ -886,6 +982,31 @@ var SearchableSuiteList = React.createClass({
         <SuiteList suites={this.state.data} handleCheck={this.handleQueueUpdate} handleAddFilter={this.handleAddFilter} onUpdate={this.props.onUpdate} getStatusIcon={this.getStatusIcon} queue={this.state.suiteChecked}/>
         <Loader loaded={this.state.pageLoaded} options={LoaderOptions} className="spinner" position="relative" />
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
+      </Grid>
+    )
+  }
+});
+
+var PriorityList = React.createClass({
+  handlePriorityUpdate: function(e) {
+    if (e.target.value >= 0) {
+        this.props.onUpdate(e.target.value);
+    }
+  },
+
+  render: function() {
+    return (
+      <Grid>
+        <Row>
+          <Input type='select' name='priorityList' label='Priority' onChange={this.handlePriorityUpdate}>
+            <option value=''>-----</option>
+            <option value='0'>None</option>
+            <option value='1'>1</option>
+            <option value='2'>2</option>
+            <option value='3'>3</option>
+            <option value='4'>4</option>
+          </Input>
+        </Row>
       </Grid>
     )
   }
