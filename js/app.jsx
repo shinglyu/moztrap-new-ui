@@ -286,7 +286,7 @@ var SearchForm = React.createClass({
     this.props.onSubmit(queryString);
   },
   componentDidMount: function() {
-    initAutocomplete(this.props.parentId);
+    //initAutocomplete(this.props.parentId); //disabling autocomplele before it's stable
   },
   forceUpdateInput: function(query){
     //console.log(this.refs.searchbox.getDOMNode())
