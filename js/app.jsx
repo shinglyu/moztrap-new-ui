@@ -1329,8 +1329,8 @@ var Settings = React.createClass({
     }
     if (promises.length > 0) {
       Promise.all(promises).then(function(val) {
-        refreshConfig;
-	this.setState({'bsStyle': "success"});
+        refreshConfig();
+        this.setState({'bsStyle': "success"});
       }.bind(this));
     }
     this.setState({'buttonStyle': "success"})
