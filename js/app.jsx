@@ -130,6 +130,7 @@ var SearchableRemoteListMixin = {
   }, 
 
   loadOnePage: function(url, clickedPageNum) {
+    this.setState({ pageLoaded: false });
 
     clickedPageNum = typeof clickedPageNum !== 'undefined' ? clickedPageNum : 1;
     var limit = typeof this.state.data.meta.limit !== 'undefined' ? 
