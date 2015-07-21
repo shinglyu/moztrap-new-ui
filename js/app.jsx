@@ -799,7 +799,7 @@ var SearchableCaseverList = React.createClass({
         <Row>
           <Col md="12">
           <ButtonGroup id="toolbar"> 
-            <Button href='https://moztrap.mozilla.org/manage/case/add/' >+ New Case</Button>
+            <Button href={config.baseUrl + '/manage/case/add/'} >+ New Case</Button>
             <ModalTrigger modal={<AddToSuitePopWindow queue={this.state.caseChecked} checkAll={this.checkAll}/>}>
               <Button bsStyle='primary' disabled={addDisabled} onClick={this.handleAddCases}>Add to Suite</Button>
             </ModalTrigger>
@@ -974,7 +974,7 @@ var SearchableSuiteList = React.createClass({
         <Row>
           <Col md="12">
           <ButtonGroup id="toolbar"> 
-            <Button bsStyle="success" href='https://moztrap.mozilla.org/manage/suite/add/' >+ New Suite</Button>
+            <Button bsStyle="success" href={config.baseUrl + '/manage/suite/add/'} >+ New Suite</Button>
           </ButtonGroup>
           </Col>
         </Row>
