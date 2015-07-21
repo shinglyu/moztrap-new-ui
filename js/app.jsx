@@ -513,24 +513,33 @@ var ModifyPriorityPopWindow = React.createClass({
     }
 
     return(
-        <Modal bsSize='large'>
-          <div className='modal-body'>
-          <Table striped condensed hover>
-            <tbody>
-            <tr>
-              <th>ID</th>
-              <th>name</th>
-            </tr>
-            {tags}
-            <tr>
-              <td><Button id='modifySubmit' bsStyle='primary' disabled={modifyDisabled} onClick={this.modifyPriority}>Submit</Button></td>
-              <td><Button bsStyle='warning' onClick={this.props.onRequestHide}>Close</Button></td>
-            </tr>
-            </tbody>
-          </Table>
-          </div>
-          <PriorityList onUpdate={this.updatePriority}/>
-        </Modal>
+      <Modal bsSize='large'>
+        <div className='modal-body'>
+          <Col sm="12">
+            <Row>
+              <Col sm="12">
+                <Table striped condensed hover>
+                  <tbody>
+                    <tr>
+                      <th>ID</th>
+                      <th>name</th>
+                    </tr>
+                      {tags}
+                    <tr>
+                      <td><Button id='modifySubmit' bsStyle='primary' disabled={modifyDisabled} onClick={this.modifyPriority}>Submit</Button></td>
+                      <td><Button bsStyle='warning' onClick={this.props.onRequestHide}>Close</Button></td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+
+            <Row>
+            <PriorityList onUpdate={this.updatePriority}/>
+            </Row>
+          </Col>
+        </div>
+      </Modal>
     )
   }
 });
@@ -796,7 +805,7 @@ var SearchableCaseverList = React.createClass({
     this.state.type="case";
 
     return (
-      <Grid id="SearchableCaseverList">
+      <Col md="12" id="SearchableCaseverList">
         <Row>
           <Col md="12">
           <ButtonGroup id="toolbar"> 
@@ -818,7 +827,7 @@ var SearchableCaseverList = React.createClass({
         <CaseverList casevers={this.state.data} handleCheckAll={this.checkAll} handleCheck={this.handleQueueUpdate} handleAddFilter={this.handleAddFilter} getStatusIcon={this.getStatusIcon} caseVerQueue={this.state.caseVerChecked} caseQueue={this.state.caseChecked}/>
         <Loader loaded={this.state.pageLoaded} options={LoaderOptions} className="spinner" position="relative" />
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount}/>
-      </Grid>
+      </Col>
     )
   }
 })
@@ -971,7 +980,7 @@ var SearchableSuiteList = React.createClass({
   render: function() {
     this.state.type="suite";
     return (
-      <Grid id="SearchableSuiteList">
+      <Col md="12" id="SearchableSuiteList">
         <Row>
           <Col md="12">
           <ButtonGroup id="toolbar"> 
@@ -983,7 +992,7 @@ var SearchableSuiteList = React.createClass({
         <SuiteList suites={this.state.data} handleCheck={this.handleQueueUpdate} handleAddFilter={this.handleAddFilter} onUpdate={this.props.onUpdate} getStatusIcon={this.getStatusIcon} queue={this.state.suiteChecked}/>
         <Loader loaded={this.state.pageLoaded} options={LoaderOptions} className="spinner" position="relative" />
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
-      </Grid>
+      </Col>
     )
   }
 });
@@ -997,8 +1006,7 @@ var PriorityList = React.createClass({
 
   render: function() {
     return (
-      <Grid>
-        <Row>
+      <Col sm="12">
           <Input type='select' name='priorityList' label='Priority' onChange={this.handlePriorityUpdate}>
             <option value=''>-----</option>
             <option value='0'>None</option>
@@ -1007,8 +1015,7 @@ var PriorityList = React.createClass({
             <option value='3'>3</option>
             <option value='4'>4</option>
           </Input>
-        </Row>
-      </Grid>
+      </Col>
     )
   }
 });
