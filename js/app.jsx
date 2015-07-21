@@ -184,6 +184,7 @@ var SearchableRemoteListMixin = {
   }, 
   
   handleSearch: function(query) { 
+    console.log(query)
     this.loadOnePage(this.buildURL(query));
     this.setState({query: query, data: this.loading});
     //TODO: two way data binding?
@@ -264,11 +265,13 @@ var SearchableRemoteListMixin = {
 var SearchForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
+    this.props.onSubmit(this.refs.searchbox.getDOMNode().firstChild.value);
 
     /* queryString =
      *   tagged strings under $(".text-tags .text-label")
      *   + non tagged strings except space
      */
+  /* backed out due to imcomplete autocomplete feature
     var allNodes = $(this.refs.searchbox.getDOMNode()).find(".text-tags .text-label"),
 	length = allNodes.length,
         queryString = "",
@@ -285,13 +288,14 @@ var SearchForm = React.createClass({
 
     console.log("query: " + queryString);
     this.props.onSubmit(queryString);
+  */
   },
   componentDidMount: function() {
     //initAutocomplete(this.props.parentId); //disabling autocomplele before it's stable
   },
   forceUpdateInput: function(query){
     //console.log(this.refs.searchbox.getDOMNode())
-    this.refs.searchbox.getDOMNode().firstElementChild.value= query;
+    this.refs.searchbox.getDOMNode().firstElementChild.value = query;
   },
   render: function() {
     if (typeof this.props.syntaxlink !== "undefined") {
