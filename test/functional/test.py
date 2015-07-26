@@ -1,6 +1,7 @@
 import unittest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
@@ -254,6 +255,43 @@ class MozTrapNewUISmokeTest(unittest.TestCase, NewUIAssertions): # Use mixin
 
         self.assertEqual(case_1_updated.find_element_by_class_name('priority').text, '3')
         self.assertEqual(case_2_updated.find_element_by_class_name('priority').text, '3')
+
+    def test_add_tag(self):
+        baseCSSSelector = '#SearchableCaseverList > div:nth-child(3) > table > tbody > tr:nth-child(3)'
+        driver = self.driver
+        driver.get(self.baseURL + '/#/settings')
+        driver.find_element_by_id('usernameInput').send_keys('admin-django')
+        driver.find_element_by_id('apikeyInput').send_keys('c67c9af7-7e07-4820-b686-5f92ae94f6c9')
+        driver.find_element_by_id('saveBtn').click()
+
+        driver.get(self.baseURL)
+        driver.refresh()
+        self.newui.waitForLoadComplete()
+
+        case = driver.find_element_by_css_selector(baseCSSSelector)
+        case.find_element_by_tag_name('input').click()
+
+        tagList = []
+        for tag in case.find_elements_by_css_selector(baseCSSSelector + '> td.name > small > span'):
+            tagList.append(tag.text)
+
+        driver.find_element_by_id('modifyTagBtn').click()
+
+        driver.find_element_by_id('addTagNameList').send_keys('addTag' + Keys.ENTER)
+        if tagList.count('addTag') == 0:
+            tagList.append('addTag')
+
+        driver.find_element_by_id('modifySubmit').click()
+
+        wait = WebDriverWait(driver, 5)
+        wait.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, baseCSSSelector + '> td.name > small > span:nth-child(1)'), 'addTag'))
+
+        case = driver.find_element_by_css_selector(baseCSSSelector)
+        modifiedTagList = []
+        for tag in case.find_elements_by_css_selector(baseCSSSelector + '> td.name > small > span'):
+            modifiedTagList.append(tag.text)
+
+        self.assertEqual(tagList, modifiedTagList)
 
     def tearDown(self):
         for window in self.driver.window_handles:
