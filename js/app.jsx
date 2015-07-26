@@ -548,6 +548,480 @@ var ModifyPriorityPopWindow = React.createClass({
   }
 });
 
+var ModifyTagPopWindow = React.createClass({
+
+  getInitialState: function(){
+    return ({
+      addTagNameList: [],
+      removeTagNameList: []
+    })
+  },
+
+  updateAddTagNameList: function(updatedAddTagNameList){
+    this.setState({addTagNameList:updatedAddTagNameList});
+  },
+
+  updateRemoveTagNameList: function(updatedRemoveTagNameList){
+    this.setState({removeTagNameList:updatedRemoveTagNameList});
+  },
+
+  modifyTags: function(){
+    function diffTagName(subTagNameList, tagNameList) {
+      subTagNameList = subTagNameList.filter(function(element) {
+        return tagNameList.indexOf(element) < 0;
+      });
+
+      return subTagNameList;
+    }
+
+    function getCurrentTag() {
+      var deferred = $.Deferred();
+
+      $.ajax({
+        type: "GET",
+        url: config.baseUrl + "/api/v1/tag?format=json",
+        success: function(data){
+          console.log(data)
+          deferred.resolve(data);
+        }.bind(this),
+
+        error: function(xhr, status, err) {
+          console.error(xhr, status, err.toString());
+          deferred.reject();
+        }.bind(this)
+      });
+
+      return deferred.promise();
+    }
+
+    function createTag(nonexistTagNameList) {
+      var deferred = $.Deferred();
+
+      if (nonexistTagNameList.length == 0) {
+        deferred.resolve();
+        return deferred.promise();
+      }
+
+      var tag = {};
+      tag['name'] = nonexistTagNameList.pop();
+
+      $.ajax({
+        type: "POST",
+        url: config.baseUrl + "/api/v1/tag/?username=" + config.username + "&api_key=" + config.api_key,
+        contentType:"application/json",
+        data: JSON.stringify(tag),
+        success: function(data){
+          console.log(data);
+          $.when(createTag(nonexistTagNameList)).then(function () {
+            deferred.resolve();
+          });
+        }.bind(this),
+
+        error: function(xhr, status, err) {
+          console.error(xhr, status, err.toString());
+          deferred.reject();
+        }.bind(this)
+      });
+
+      return deferred.promise();
+    }
+
+    function updateCaseTag(addTagNameList, removeTagNameList, currentTag) {
+      var deferred = $.Deferred();
+
+      if (modifyDatum.length == 0) {
+        deferred.resolve();
+        return deferred.promise();
+      }
+
+      var datum = modifyDatum.pop();
+      $.ajax({
+        type: "GET",
+        url: config.baseUrl + "/api/v1/caseversion/" + datum["caseverid"] + "?format=json",
+        success: function(data){
+          console.log(data);
+
+          var caseTag = [];
+          for (var i = 0; i < data['tags'].length; i++) {
+            caseTag.push(data['tags'][i]['name']);
+          }
+          $.when(addAndRemoveTags(caseTag, addTagNameList, removeTagNameList,
+            currentTag, datum["caseverid"])).then(function () {
+            return updateCaseTag(addTagNameList, removeTagNameList, currentTag)
+          }).then(function () {
+            deferred.resolve();
+          });
+        }.bind(this),
+
+        error: function(xhr, status, err) {
+          console.error(xhr, status, err.toString());
+          deferred.reject();
+        }.bind(this)
+      });
+
+      return deferred.promise();
+    }
+
+    function addAndRemoveTags(caseTag, addTagNameList, removeTagNameList, currentTag, caseverid) {
+      var updateTagNameList = caseTag;
+      var deferred = $.Deferred();
+
+      if (updateTagNameList.length == 0) {
+        updateTagNameList = addTagNameList;
+      } else {
+        for (var i = 0; i < addTagNameList.length; i++) {
+          for (var j = 0; j < updateTagNameList.length; j++) {
+            if (updateTagNameList[j] == addTagNameList[i]) {
+              break;
+            } else if (j == updateTagNameList.length - 1) {
+              updateTagNameList.push(addTagNameList[i]);
+            }
+          }
+        }
+      }
+
+      updateTagNameList = updateTagNameList.filter(function(element) {
+        return removeTagNameList.indexOf(element) < 0;
+      });
+
+      var updateTagUriList = {};
+
+      updateTagUriList['tags'] = [];
+      for (var i = 0; i < currentTag['objects'].length; i++) {
+        for (var j = 0; j < updateTagNameList.length; j++) {
+          if (currentTag['objects'][i]['name'] == updateTagNameList[j]) {
+            updateTagUriList['tags'].push(currentTag['objects'][i]['resource_uri']);
+          }
+        }
+      }
+
+      $.ajax({
+        type: "PUT",
+        url: config.baseUrl + "/api/v1/caseversion/" + caseverid + "/?username=" + config.username + "&api_key=" + config.api_key,
+        contentType:"application/json",
+        data: JSON.stringify(updateTagUriList),
+        success: function(data){
+          console.log(data);
+          deferred.resolve();
+        }.bind(this),
+
+        error: function(xhr, status, err) {
+          console.error(xhr, status, err.toString());
+          deferred.reject();
+        }.bind(this)
+      });
+
+      return deferred.promise();
+    }
+
+    var modifyDatum = this.props.queue.map(
+      function(caseuri){
+        var key = Object.keys(caseuri)[0];
+        return ({caseverid: caseuri[key]})
+      })
+
+    var diffedAddTagNameList = diffTagName(this.state.addTagNameList, this.state.removeTagNameList);
+    var diffedRemoveTagNameList = diffTagName(this.state.removeTagNameList, this.state.addTagNameList);
+
+    $.when(getCurrentTag()).then(function (currentTag) {
+      var currentTagNameList = [];
+      for (var i = 0; i < currentTag['objects'].length; i++) {
+        currentTagNameList.push(currentTag['objects'][i]['name']);
+      }
+
+      var nonexistTagNameList = diffTagName(diffedAddTagNameList, currentTagNameList);
+      return createTag(nonexistTagNameList);
+    }).then(function () {
+      return getCurrentTag();
+    }).then(function (currentTag) {
+      return updateCaseTag(diffedAddTagNameList, diffedRemoveTagNameList, currentTag);
+    }).then(function () {
+      Router.run(routes, function(Handler, state) {
+        var params = state.params;
+        React.render(<Handler params={params}/>, document.body);
+      })
+
+      this.props.checkAll("false");
+      this.props.onRequestHide();
+    });
+  },
+
+  render: function(){
+    if (typeof this.props.queue !== "undefined"){
+      var tags = this.props.queue.map(function(caseitem){
+        console.log(caseitem);
+        var caseURI = Object.keys(caseitem);
+        var caseDescription = caseitem[caseURI];
+        return (<tr><td>{caseURI}</td><td>{caseDescription}</td> </tr>)
+      }.bind(this),this)
+    }
+
+    var modifyDisabled = true;
+    if (this.state.addTagNameList.length != 0 || this.state.removeTagNameList.length != 0) {
+      modifyDisabled = false;
+    }
+
+    return(
+        <Modal bsSize='large'>
+          <div className='modal-body'>
+          <Table striped condensed hover>
+            <tbody>
+            <tr>
+              <th>ID</th>
+              <th>name</th>
+            </tr>
+            {tags}
+            <tr>
+              <td><Button id='modifySubmit' bsStyle='primary' disabled={modifyDisabled} onClick={this.modifyTags}>Submit</Button></td>
+              <td><Button bsStyle='warning' onClick={this.props.onRequestHide}>Close</Button></td>
+            </tr>
+            </tbody>
+          </Table>
+          </div>
+          <TagList id="addTagNameList" onUpdate={this.updateAddTagNameList}/>
+          <TagList id="removeTagNameList" onUpdate={this.updateRemoveTagNameList}/>
+        </Modal>
+    )
+  }
+});
+
+var ModifyTagPopWindow = React.createClass({
+
+  getInitialState: function(){
+    return ({
+      addTagNameList: [],
+      removeTagNameList: []
+    })
+  },
+
+  updateAddTagNameList: function(updatedAddTagNameList){
+    this.setState({addTagNameList:updatedAddTagNameList});
+  },
+
+  updateRemoveTagNameList: function(updatedRemoveTagNameList){
+    this.setState({removeTagNameList:updatedRemoveTagNameList});
+  },
+
+  modifyTags: function(){
+    function diffTagName(subTagNameList, tagNameList) {
+      subTagNameList = subTagNameList.filter(function(element) {
+        return tagNameList.indexOf(element) < 0;
+      });
+
+      return subTagNameList;
+    }
+
+    function getCurrentTag() {
+      var deferred = $.Deferred();
+
+      $.ajax({
+        type: "GET",
+        url: config.baseUrl + "/api/v1/tag?format=json",
+        success: function(data){
+          console.log(data)
+          deferred.resolve(data);
+        }.bind(this),
+
+        error: function(xhr, status, err) {
+          console.error(xhr, status, err.toString());
+          deferred.reject();
+        }.bind(this)
+      });
+
+      return deferred.promise();
+    }
+
+    function createTag(nonexistTagNameList) {
+      var deferred = $.Deferred();
+
+      if (nonexistTagNameList.length == 0) {
+        deferred.resolve();
+        return deferred.promise();
+      }
+
+      var tag = {};
+      tag['name'] = nonexistTagNameList.pop();
+
+      $.ajax({
+        type: "POST",
+        url: config.baseUrl + "/api/v1/tag/?username=" + config.username + "&api_key=" + config.api_key,
+        contentType:"application/json",
+        data: JSON.stringify(tag),
+        success: function(data){
+          console.log(data);
+          $.when(createTag(nonexistTagNameList)).then(function () {
+            deferred.resolve();
+          });
+        }.bind(this),
+
+        error: function(xhr, status, err) {
+          console.error(xhr, status, err.toString());
+          deferred.reject();
+        }.bind(this)
+      });
+
+      return deferred.promise();
+    }
+
+    function updateCaseTag(addTagNameList, removeTagNameList, currentTag) {
+      var deferred = $.Deferred();
+
+      if (modifyDatum.length == 0) {
+        deferred.resolve();
+        return deferred.promise();
+      }
+
+      var datum = modifyDatum.pop();
+      $.ajax({
+        type: "GET",
+        url: config.baseUrl + "/api/v1/caseversion/" + datum["caseverid"] + "?format=json",
+        success: function(data){
+          console.log(data);
+
+          var caseTag = [];
+          for (var i = 0; i < data['tags'].length; i++) {
+            caseTag.push(data['tags'][i]['name']);
+          }
+          $.when(addAndRemoveTags(caseTag, addTagNameList, removeTagNameList,
+            currentTag, datum["caseverid"])).then(function () {
+            return updateCaseTag(addTagNameList, removeTagNameList, currentTag)
+          }).then(function () {
+            deferred.resolve();
+          });
+        }.bind(this),
+
+        error: function(xhr, status, err) {
+          console.error(xhr, status, err.toString());
+          deferred.reject();
+        }.bind(this)
+      });
+
+      return deferred.promise();
+    }
+
+    function addAndRemoveTags(caseTag, addTagNameList, removeTagNameList, currentTag, caseverid) {
+      var updateTagNameList = caseTag;
+      var deferred = $.Deferred();
+
+      if (updateTagNameList.length == 0) {
+        updateTagNameList = addTagNameList;
+      } else {
+        for (var i = 0; i < addTagNameList.length; i++) {
+          for (var j = 0; j < updateTagNameList.length; j++) {
+            if (updateTagNameList[j] == addTagNameList[i]) {
+              break;
+            } else if (j == updateTagNameList.length - 1) {
+              updateTagNameList.push(addTagNameList[i]);
+            }
+          }
+        }
+      }
+
+      updateTagNameList = updateTagNameList.filter(function(element) {
+        return removeTagNameList.indexOf(element) < 0;
+      });
+
+      var updateTagUriList = {};
+
+      updateTagUriList['tags'] = [];
+      for (var i = 0; i < currentTag['objects'].length; i++) {
+        for (var j = 0; j < updateTagNameList.length; j++) {
+          if (currentTag['objects'][i]['name'] == updateTagNameList[j]) {
+            updateTagUriList['tags'].push(currentTag['objects'][i]['resource_uri']);
+          }
+        }
+      }
+
+      $.ajax({
+        type: "PUT",
+        url: config.baseUrl + "/api/v1/caseversion/" + caseverid + "/?username=" + config.username + "&api_key=" + config.api_key,
+        contentType:"application/json",
+        data: JSON.stringify(updateTagUriList),
+        success: function(data){
+          console.log(data);
+          deferred.resolve();
+        }.bind(this),
+
+        error: function(xhr, status, err) {
+          console.error(xhr, status, err.toString());
+          deferred.reject();
+        }.bind(this)
+      });
+
+      return deferred.promise();
+    }
+
+    var modifyDatum = this.props.queue.map(
+      function(caseuri){
+        var key = Object.keys(caseuri)[0];
+        return ({caseverid: caseuri[key]})
+      })
+
+    var diffedAddTagNameList = diffTagName(this.state.addTagNameList, this.state.removeTagNameList);
+    var diffedRemoveTagNameList = diffTagName(this.state.removeTagNameList, this.state.addTagNameList);
+
+    $.when(getCurrentTag()).then(function (currentTag) {
+      var currentTagNameList = [];
+      for (var i = 0; i < currentTag['objects'].length; i++) {
+        currentTagNameList.push(currentTag['objects'][i]['name']);
+      }
+
+      var nonexistTagNameList = diffTagName(diffedAddTagNameList, currentTagNameList);
+      return createTag(nonexistTagNameList);
+    }).then(function () {
+      return getCurrentTag();
+    }).then(function (currentTag) {
+      return updateCaseTag(diffedAddTagNameList, diffedRemoveTagNameList, currentTag);
+    }).then(function () {
+      Router.run(routes, function(Handler, state) {
+        var params = state.params;
+        React.render(<Handler params={params}/>, document.body);
+      })
+
+      this.props.checkAll("false");
+      this.props.onRequestHide();
+    });
+  },
+
+  render: function(){
+    if (typeof this.props.queue !== "undefined"){
+      var tags = this.props.queue.map(function(caseitem){
+        console.log(caseitem);
+        var caseURI = Object.keys(caseitem);
+        var caseDescription = caseitem[caseURI];
+        return (<tr><td>{caseURI}</td><td>{caseDescription}</td> </tr>)
+      }.bind(this),this)
+    }
+
+    var modifyDisabled = true;
+    if (this.state.addTagNameList.length != 0 || this.state.removeTagNameList.length != 0) {
+      modifyDisabled = false;
+    }
+
+    return(
+        <Modal bsSize='large'>
+          <div className='modal-body'>
+          <Table striped condensed hover>
+            <tbody>
+            <tr>
+              <th>ID</th>
+              <th>name</th>
+            </tr>
+            {tags}
+            <tr>
+              <td><Button id='modifySubmit' bsStyle='primary' disabled={modifyDisabled} onClick={this.modifyTags}>Submit</Button></td>
+              <td><Button bsStyle='warning' onClick={this.props.onRequestHide}>Close</Button></td>
+            </tr>
+            </tbody>
+          </Table>
+          </div>
+          <TagList id="addTagNameList" onUpdate={this.updateAddTagNameList}/>
+          <TagList id="removeTagNameList" onUpdate={this.updateRemoveTagNameList}/>
+        </Modal>
+    )
+  }
+});
+
 //TODO: using client side sort for now, use this when two way data binding is OK
 var SortableTh = React.createClass({
   handleSort: function(){
@@ -774,7 +1248,8 @@ var SearchableCaseverList = React.createClass({
       if(caseVerChecked[e.target.value] == null){
         var obj = {};
         var valueObj = {};
-        valueObj[e.target.getAttribute('data-caseid')] = e.target.getAttribute('data-casename');
+        //valueObj[e.target.getAttribute('data-caseid')] = e.target.getAttribute('data-casename');
+        valueObj[e.target.getAttribute('data-caseid')] = e.target.value;
         obj[e.target.value.toString()] = valueObj;
         caseVerChecked.push(obj);
       }
@@ -819,6 +1294,9 @@ var SearchableCaseverList = React.createClass({
             </ModalTrigger>
             <ModalTrigger modal={<ModifyPriorityPopWindow queue={this.state.caseChecked} checkAll={this.checkAll}/>}>
               <Button id="modifyPriorityBtn" bsStyle='info' disabled={addDisabled} onClick={this.handleAddCases}>Modify Priority</Button>
+            </ModalTrigger>
+            <ModalTrigger modal={<ModifyTagPopWindow queue={this.state.caseChecked} checkAll={this.checkAll}/>}>
+              <Button id="modifyTagBtn" bsStyle='primary' disabled={addDisabled} onClick={this.handleAddCases}>Modify Tags</Button>
             </ModalTrigger>
             <Button bsStyle="success" id="diffBtn" target="blank_" href={diffURL}
                     disabled={diffDisabled}>
@@ -1020,6 +1498,48 @@ var PriorityList = React.createClass({
             <option value='4'>4</option>
           </Input>
       </Col>
+    )
+  }
+});
+
+var TagList = React.createClass({
+  componentDidMount: function() {
+    var id = this.props.id;
+    var update = this.props.onUpdate;
+
+    $('#' + id).textext({ plugins : 'tags' }).on('enterKeyPress backspaceKeyPress', function () {
+      update($('#' + id).textext()[0].tags()._formData);
+    });
+  },
+
+  render: function() {
+    return (
+      <Grid>
+        <Row>
+          <Input id={this.props.id} type="text"/>
+        </Row>
+      </Grid>
+    )
+  }
+});
+
+var TagList = React.createClass({
+  componentDidMount: function() {
+    var id = this.props.id;
+    var update = this.props.onUpdate;
+
+    $('#' + id).textext({ plugins : 'tags' }).on('enterKeyPress backspaceKeyPress', function () {
+      update($('#' + id).textext()[0].tags()._formData);
+    });
+  },
+
+  render: function() {
+    return (
+      <Grid>
+        <Row>
+          <Input id={this.props.id} type="text"/>
+        </Row>
+      </Grid>
     )
   }
 });
