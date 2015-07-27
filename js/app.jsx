@@ -426,21 +426,29 @@ var AddToSuitePopWindow = React.createClass({
     return(
         <Modal bsSize='large'>
           <div className='modal-body'>
-          <Table striped condensed hover>
-            <tbody>
-            <tr>
-              <th>ID</th>
-              <th>name</th>
-            </tr>
-            {tags}
-            <tr>
-              <td><Button bsStyle='primary' disabled={addDisabled} onClick={this.addToSuite}>Submit</Button></td>
-              <td><Button bsStyle='warning' onClick={this.props.onRequestHide}>Close</Button></td>
-            </tr>
-            </tbody>
-          </Table>
+            <Col sm='12'>
+              <Row>
+                <Col sm='12'>
+                  <Table striped condensed hover>
+                    <tbody>
+                      <tr>
+                        <th>ID</th>
+                        <th>name</th>
+                      </tr>
+                      {tags}
+                      <tr>
+                        <td><Button bsStyle='primary' disabled={addDisabled} onClick={this.addToSuite}>Submit</Button></td>
+                        <td><Button bsStyle='warning' onClick={this.props.onRequestHide}>Close</Button></td>
+                      </tr>
+                    </tbody>
+                  </Table>
+                </Col>
+              </Row>
+              <Row>
+                <SearchableSuiteList onUpdate={this.updateSuiteNumber}/>
+              </Row>
+            </Col>
           </div>
-          <SearchableSuiteList onUpdate={this.updateSuiteNumber}/>
         </Modal>
     )
   }
@@ -764,22 +772,30 @@ var ModifyTagPopWindow = React.createClass({
     return(
         <Modal bsSize='large'>
           <div className='modal-body'>
-          <Table striped condensed hover>
-            <tbody>
-            <tr>
-              <th>ID</th>
-              <th>name</th>
-            </tr>
-            {tags}
-            <tr>
-              <td><Button id='modifySubmit' bsStyle='primary' disabled={modifyDisabled} onClick={this.modifyTags}>Submit</Button></td>
-              <td><Button bsStyle='warning' onClick={this.props.onRequestHide}>Close</Button></td>
-            </tr>
-            </tbody>
-          </Table>
+            <Col sm='12'>
+              <Row>
+                <Col sm='12'>
+                  <Table striped condensed hover>
+                    <tbody>
+                      <tr>
+                        <th>ID</th>
+                        <th>name</th>
+                      </tr>
+                      {tags}
+                      <tr>
+                        <td><Button id='modifySubmit' bsStyle='primary' disabled={modifyDisabled} onClick={this.modifyTags}>Submit</Button></td>
+                        <td><Button bsStyle='warning' onClick={this.props.onRequestHide}>Close</Button></td>
+                      </tr>
+                    </tbody>
+                  </Table>
+                </Col>
+              </Row>
+              <Row>
+                <TagList id="addTagNameList" onUpdate={this.updateAddTagNameList}/>
+                <TagList id="removeTagNameList" onUpdate={this.updateRemoveTagNameList}/>
+              </Row>
+            </Col>
           </div>
-          <TagList id="addTagNameList" onUpdate={this.updateAddTagNameList}/>
-          <TagList id="removeTagNameList" onUpdate={this.updateRemoveTagNameList}/>
         </Modal>
     )
   }
@@ -1277,11 +1293,9 @@ var TagList = React.createClass({
 
   render: function() {
     return (
-      <Grid>
-        <Row>
-          <Input id={this.props.id} type="text"/>
-        </Row>
-      </Grid>
+      <Col sm='12'>
+        <Input id={this.props.id} type="text"/>
+      </Col>
     )
   }
 });
