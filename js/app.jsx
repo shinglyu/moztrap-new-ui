@@ -693,14 +693,15 @@ var ModifyTagPopWindow = React.createClass({
       });
 
       var updateTagUriList = {};
+      var updateTagName, updateTag;
 
       updateTagUriList['tags'] = [];
-      for (var i = 0; i < currentTag['objects'].length; i++) {
-        for (var j = 0; j < updateTagNameList.length; j++) {
-          if (currentTag['objects'][i]['name'] == updateTagNameList[j]) {
-            updateTagUriList['tags'].push(currentTag['objects'][i]['resource_uri']);
-          }
-        }
+      while (updateTagNameList.length != 0) {
+        updateTagName = updateTagNameList.pop();
+        updateTag = currentTag['objects'].filter(function(tag) {
+          return tag['name'] == updateTagName;
+        });
+        updateTagUriList['tags'].push(updateTag[0]['resource_uri']);
       }
 
       $.ajax({
