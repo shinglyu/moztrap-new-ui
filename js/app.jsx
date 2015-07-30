@@ -411,7 +411,7 @@ var AddToSuitePopWindow = React.createClass({
       var tags = this.props.queue.map(function(caseitem){
         console.log(caseitem);
         var caseURI = Object.keys(caseitem);
-        var caseDescription = caseitem[caseURI];
+        var caseDescription = caseitem[caseURI][1];
         return (<tr><td>{caseURI}</td><td>{caseDescription}</td> </tr>)
       }.bind(this),this)
     }
@@ -514,7 +514,7 @@ var ModifyPriorityPopWindow = React.createClass({
       var tags = this.props.queue.map(function(caseitem){
         console.log(caseitem);
         var caseURI = Object.keys(caseitem);
-        var caseDescription = caseitem[caseURI];
+        var caseDescription = caseitem[caseURI][1];
         return (<tr><td>{caseURI}</td><td>{caseDescription}</td> </tr>)
       }.bind(this),this)
     }
@@ -725,7 +725,7 @@ var ModifyTagPopWindow = React.createClass({
     var modifyDatum = this.props.queue.map(
       function(caseuri){
         var key = Object.keys(caseuri)[0];
-        return ({caseverid: caseuri[key]})
+        return ({caseverid: caseuri[key][0]})
       })
 
     var diffedAddTagNameList = diffTagName(this.state.addTagNameList, this.state.removeTagNameList);
@@ -759,7 +759,7 @@ var ModifyTagPopWindow = React.createClass({
       var tags = this.props.queue.map(function(caseitem){
         console.log(caseitem);
         var caseURI = Object.keys(caseitem);
-        var caseDescription = caseitem[caseURI];
+        var caseDescription = caseitem[caseURI][1];
         return (<tr><td>{caseURI}</td><td>{caseDescription}</td> </tr>)
       }.bind(this),this)
     }
@@ -995,7 +995,7 @@ var SearchableCaseverList = React.createClass({
         if(nonExisted){
           var obj = {};
           var valueObj = {};
-          valueObj[casever.case.toString()] = casever.name;
+          valueObj[casever.case.toString()] = [casever.id, casever.name];
           obj[casever.id.toString()] = valueObj;
           caseVerChecked.push(obj);
         }
@@ -1027,8 +1027,7 @@ var SearchableCaseverList = React.createClass({
       if(caseVerChecked[e.target.value] == null){
         var obj = {};
         var valueObj = {};
-        //valueObj[e.target.getAttribute('data-caseid')] = e.target.getAttribute('data-casename');
-        valueObj[e.target.getAttribute('data-caseid')] = e.target.value;
+        valueObj[e.target.getAttribute('data-caseid')] = [e.target.value, e.target.getAttribute('data-casename')];
         obj[e.target.value.toString()] = valueObj;
         caseVerChecked.push(obj);
       }
