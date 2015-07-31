@@ -582,15 +582,22 @@ var ModifyTagPopWindow = React.createClass({
       return subTagNameList;
     }
 
-    function getCurrentTag() {
+    function verifyTag(tagList) {
       var deferred = $.Deferred();
+      var query = tagList.join('&name__in=');
 
       $.ajax({
         type: "GET",
-        url: config.baseUrl + "/api/v1/tag?format=json",
+        url: config.baseUrl + "/api/v1/tag?format=json&name__in=" + query,
         success: function(data){
-          console.log(data)
-          deferred.resolve(data);
+          console.log(data);
+
+          var verifiedTagList = [];
+          for (var i = 0; i < data['objects'].length; i++) {
+            verifiedTagList.push([data['objects'][i]['name'], data['objects'][i]['resource_uri']]);
+          }
+
+          deferred.resolve(verifiedTagList);
         }.bind(this),
 
         error: function(xhr, status, err) {
@@ -634,7 +641,7 @@ var ModifyTagPopWindow = React.createClass({
       return deferred.promise();
     }
 
-    function updateCaseTag(addTagNameList, removeTagNameList, currentTag) {
+    function updateCaseTag(addTagNameList, removeTagNameList) {
       var deferred = $.Deferred();
 
       if (modifyDatum.length == 0) {
@@ -654,8 +661,8 @@ var ModifyTagPopWindow = React.createClass({
             caseTag.push(data['tags'][i]['name']);
           }
           $.when(addAndRemoveTags(caseTag, addTagNameList, removeTagNameList,
-            currentTag, datum["caseverid"])).then(function () {
-            return updateCaseTag(addTagNameList, removeTagNameList, currentTag)
+            datum["caseverid"])).then(function () {
+            return updateCaseTag(addTagNameList, removeTagNameList)
           }).then(function () {
             deferred.resolve();
           });
@@ -670,7 +677,7 @@ var ModifyTagPopWindow = React.createClass({
       return deferred.promise();
     }
 
-    function addAndRemoveTags(caseTag, addTagNameList, removeTagNameList, currentTag, caseverid) {
+    function addAndRemoveTags(caseTag, addTagNameList, removeTagNameList, caseverid) {
       var updateTagNameList = caseTag;
       var deferred = $.Deferred();
 
@@ -692,31 +699,28 @@ var ModifyTagPopWindow = React.createClass({
         return removeTagNameList.indexOf(element) < 0;
       });
 
-      var updateTagUriList = {};
-
-      updateTagUriList['tags'] = [];
-      for (var i = 0; i < currentTag['objects'].length; i++) {
-        for (var j = 0; j < updateTagNameList.length; j++) {
-          if (currentTag['objects'][i]['name'] == updateTagNameList[j]) {
-            updateTagUriList['tags'].push(currentTag['objects'][i]['resource_uri']);
-          }
+      $.when(verifyTag(updateTagNameList)).then(function (verifiedTagList) {
+        var updateTagUriList = {};
+        updateTagUriList['tags'] = [];
+        for (var i = 0; i < verifiedTagList.length; i++) {
+          updateTagUriList['tags'].push(verifiedTagList[i][1]);
         }
-      }
 
-      $.ajax({
-        type: "PUT",
-        url: config.baseUrl + "/api/v1/caseversion/" + caseverid + "/?username=" + config.username + "&api_key=" + config.api_key,
-        contentType:"application/json",
-        data: JSON.stringify(updateTagUriList),
-        success: function(data){
-          console.log(data);
-          deferred.resolve();
-        }.bind(this),
+        $.ajax({
+          type: "PUT",
+          url: config.baseUrl + "/api/v1/caseversion/" + caseverid + "/?username=" + config.username + "&api_key=" + config.api_key,
+          contentType:"application/json",
+          data: JSON.stringify(updateTagUriList),
+          success: function(data){
+            console.log(data);
+            deferred.resolve();
+          }.bind(this),
 
-        error: function(xhr, status, err) {
-          console.error(xhr, status, err.toString());
-          deferred.reject();
-        }.bind(this)
+          error: function(xhr, status, err) {
+            console.error(xhr, status, err.toString());
+            deferred.reject();
+          }.bind(this)
+        });
       });
 
       return deferred.promise();
@@ -731,18 +735,16 @@ var ModifyTagPopWindow = React.createClass({
     var diffedAddTagNameList = diffTagName(this.state.addTagNameList, this.state.removeTagNameList);
     var diffedRemoveTagNameList = diffTagName(this.state.removeTagNameList, this.state.addTagNameList);
 
-    $.when(getCurrentTag()).then(function (currentTag) {
-      var currentTagNameList = [];
-      for (var i = 0; i < currentTag['objects'].length; i++) {
-        currentTagNameList.push(currentTag['objects'][i]['name']);
+    $.when(verifyTag(diffedAddTagNameList)).then(function (verifiedTagList) {
+      var existTagNameList = [];
+      for (var i = 0; i < verifiedTagList.length; i++) {
+        existTagNameList.push(verifiedTagList[i][0]);
       }
 
-      var nonexistTagNameList = diffTagName(diffedAddTagNameList, currentTagNameList);
+      var nonexistTagNameList = diffTagName(diffedAddTagNameList, existTagNameList);
       return createTag(nonexistTagNameList);
     }).then(function () {
-      return getCurrentTag();
-    }).then(function (currentTag) {
-      return updateCaseTag(diffedAddTagNameList, diffedRemoveTagNameList, currentTag);
+      return updateCaseTag(diffedAddTagNameList, diffedRemoveTagNameList);
     }).then(function () {
       Router.run(routes, function(Handler, state) {
         var params = state.params;
