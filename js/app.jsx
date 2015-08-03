@@ -455,7 +455,6 @@ var AddToSuitePopWindow = React.createClass({
 });
 
 var ModifyPriorityPopWindow = React.createClass({
-
   getInitialState: function(){
     return ({
       priority: ''
@@ -472,10 +471,7 @@ var ModifyPriorityPopWindow = React.createClass({
   modifyPriority: function(){
     function modifyPriorityCase(that) {
       if (modifyDatum.length == 0) {
-        Router.run(routes, function(Handler, state) {
-          var params = state.params;
-          React.render(<Handler params={params}/>, document.body);
-        })
+        that.props.onUnmount(that.props.query);
         return;
       }
       size = modifyDatum.length;
@@ -735,6 +731,11 @@ var ModifyTagPopWindow = React.createClass({
     var diffedAddTagNameList = diffTagName(this.state.addTagNameList, this.state.removeTagNameList);
     var diffedRemoveTagNameList = diffTagName(this.state.removeTagNameList, this.state.addTagNameList);
 
+    var checkAll = this.props.checkAll;
+    var onRequestHide = this.props.onRequestHide;
+    var onUnmount = this.props.onUnmount;
+    var query = this.props.query;
+
     $.when(verifyTag(diffedAddTagNameList)).then(function (verifiedTagList) {
       var existTagNameList = [];
       for (var i = 0; i < verifiedTagList.length; i++) {
@@ -746,13 +747,9 @@ var ModifyTagPopWindow = React.createClass({
     }).then(function () {
       return updateCaseTag(diffedAddTagNameList, diffedRemoveTagNameList);
     }).then(function () {
-      Router.run(routes, function(Handler, state) {
-        var params = state.params;
-        React.render(<Handler params={params}/>, document.body);
-      })
-
-      this.props.checkAll("false");
-      this.props.onRequestHide();
+      checkAll("false");
+      onRequestHide();
+      onUnmount(query);
     });
   },
 
@@ -1072,10 +1069,10 @@ var SearchableCaseverList = React.createClass({
             <ModalTrigger modal={<AddToSuitePopWindow queue={this.state.caseChecked} checkAll={this.checkAll}/>}>
               <Button bsStyle='primary' disabled={addDisabled} onClick={this.handleAddCases}>Add to Suite</Button>
             </ModalTrigger>
-            <ModalTrigger modal={<ModifyPriorityPopWindow queue={this.state.caseChecked} checkAll={this.checkAll}/>}>
+            <ModalTrigger modal={<ModifyPriorityPopWindow queue={this.state.caseChecked} checkAll={this.checkAll} onUnmount={this.handleSearch} query={this.state.query}/>}>
               <Button id="modifyPriorityBtn" bsStyle='info' disabled={addDisabled} onClick={this.handleAddCases}>Modify Priority</Button>
             </ModalTrigger>
-            <ModalTrigger modal={<ModifyTagPopWindow queue={this.state.caseChecked} checkAll={this.checkAll}/>}>
+            <ModalTrigger modal={<ModifyTagPopWindow queue={this.state.caseChecked} checkAll={this.checkAll} onUnmount={this.handleSearch} query={this.state.query}/>}>
               <Button id="modifyTagBtn" bsStyle='primary' disabled={addDisabled} onClick={this.handleAddCases}>Modify Tags</Button>
             </ModalTrigger>
             <Button bsStyle="success" id="diffBtn" target="blank_" href={diffURL}
