@@ -923,34 +923,32 @@ var CaseverList = React.createClass({
       return (<CaseverListItem casever={casever} onChange={this.props.handleCheck} handleAddFilter={this.props.handleAddFilter} getStatusIcon={this.props.getStatusIcon} caseVerQueue={this.props.caseVerQueue}/>)
     }.bind(this))
 
-    if (this.props.casevers.meta.total_count>0) {
-      return (
-          <Row>
-            <Table striped condensed hover className="caseverList">
-              <tbody>
-              <tr>
-                <td colSpan="9">Total {this.props.casevers.meta.total_count} cases found</td>
-              </tr>
-              <tr>
-                <th><input type="checkbox" className="caseCheckBox" ref="checkAllBox" onChange={this.props.handleCheckAll}/></th>
-                <th>ID</th>
-                <th className="thStatus">status</th>
-                <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-                <SortableTh name="priority" filter="case__priority"
-                            handleAddFilter={this.props.handleAddFilter}></SortableTh>
-                <SortableTh name="product" filter="productversion"
-                            handleAddFilter={this.props.handleAddFilter}></SortableTh>
-                <SortableTh name="modified" filter="modified_on"
-                            handleAddFilter={this.props.handleAddFilter}></SortableTh>
-                <th></th>
-                <th></th>
-              </tr>
-              {casevers}
-              </tbody>
-            </Table>
-          </Row>
-      )
-    }else{return <div className="emptySearchResults">No results found</div>}
+    return (
+      <Row>
+        <Table striped condensed hover className="caseverList">
+          <tbody>
+            <tr>
+              <td colSpan="9">Total {this.props.casevers.meta.total_count} cases found</td>
+            </tr>
+            <tr>
+              <th><input type="checkbox" className="caseCheckBox" ref="checkAllBox" onChange={this.props.handleCheckAll}/></th>
+              <th>ID</th>
+              <th className="thStatus">status</th>
+              <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+              <SortableTh name="priority" filter="case__priority"
+                          handleAddFilter={this.props.handleAddFilter}></SortableTh>
+              <SortableTh name="product" filter="productversion"
+                          handleAddFilter={this.props.handleAddFilter}></SortableTh>
+              <SortableTh name="modified" filter="modified_on"
+                          handleAddFilter={this.props.handleAddFilter}></SortableTh>
+              <th></th>
+              <th></th>
+            </tr>
+            {casevers}
+          </tbody>
+        </Table>
+      </Row>
+    )
   }
 });
 
@@ -1181,28 +1179,26 @@ var SuiteList = React.createClass({
       return (<SuiteListItem suite={suite} onChange={this.props.handleCheck} getStatusIcon={this.props.getStatusIcon} queue={this.props.queue}/>)
     }.bind(this))
 
-    if (this.props.suites.meta.total_count>0) {
-      return (
-          <Table striped condensed hover className="suiteList">
-            <tbody>
-            <tr>
-              <td colSpan="7">Total {this.props.suites.meta.total_count} suites found</td>
-            </tr>
-            <tr>
-              <th><input type="checkbox" className="suiteCheckBox" ref="checkAllBox" onChange={this.checkAll}/></th>
-              <th>ID</th>
-              <th className="thStatus">status</th>
-              <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-              <SortableTh name="modified" filter="modified_on"
-                          handleAddFilter={this.props.handleAddFilter}></SortableTh>
-              <th></th>
-              <th></th>
-            </tr>
-            {suites}
-            </tbody>
-          </Table>
-      )
-    }else{return <div className="emptySearchResults">No results found</div>}
+    return (
+      <Table striped condensed hover className="suiteList">
+        <tbody>
+          <tr>
+            <td colSpan="7">Total {this.props.suites.meta.total_count} suites found</td>
+          </tr>
+          <tr>
+            <th><input type="checkbox" className="suiteCheckBox" ref="checkAllBox" onChange={this.checkAll}/></th>
+            <th>ID</th>
+            <th className="thStatus">status</th>
+            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <SortableTh name="modified" filter="modified_on"
+                        handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <th></th>
+            <th></th>
+          </tr>
+          {suites}
+        </tbody>
+      </Table>
+    )
   }
 });
 
