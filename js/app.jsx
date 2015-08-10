@@ -1366,14 +1366,18 @@ SearchableCaseSelectionList = React.createClass({
     }
   },
 
- getInitialState: function() {
+  componentDidMount: function() {
+    this.loadOnePage(this.buildURL(this.props.query));
+  },
+
+  getInitialState: function() {
     return ({disableQueryURL: true, loaded: false});
   },
 
   render: function() {
     return (
       <div id={this.props.id}>
-        <SearchForm ref="searchform" parentId={this.props.id} disableQueryURL={this.state.disableQueryURL} query={this.state.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
+        <SearchForm ref="searchform" parentId={this.props.id} disableQueryURL={this.state.disableQueryURL} query={this.props.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
         <CaseList casevers={this.state.data} handleCheck={this.props.onCheck}/>
         <Loader loaded={this.state.pageLoaded} options={LoaderOptions} className="spinner" position="relative" />
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
@@ -1391,6 +1395,7 @@ var AddToSuite = React.createClass({
 
       success: function(data) {
         this.setState({suite: data}); 
+        this.refreshQuery(this);
         //FIXME: the sub lists will load itself in the first time, and will reload by this trigger, remove this by adding a refrsh flag in the state
       }.bind(this),
 
@@ -1406,6 +1411,19 @@ var AddToSuite = React.createClass({
             addQueue:[], 
             removeQueue:[]
             })
+  },
+
+  refreshQuery: function (that) {
+    $.ajax({
+      url: config.baseUrl + that.state.suite.product + "?format=json",
+      success: function(data) {
+        this.setState({query: "product:\"" + data.name + "\""});
+      }.bind(this),
+
+      error: function(xhr, status, err) {
+        console.error(xhr, status, err.toString());
+      }.bind(this)
+    });
   },
 
   componentDidMount: function() {
@@ -1544,49 +1562,55 @@ var AddToSuite = React.createClass({
       var credental_not_set_msg = <a href="#/settings">Click to set your username and api key before use</a>
       var credental_not_set = true
     }
-    
-    return (
-      <Grid>
-        <Row>
-          <h1>{this.state.suite.name}</h1>
-        </Row>
-        <Row>
-          <Col mdOffset={8}>
-            {credental_not_set_msg}
-            <Button bsStyle="success" block disabled={credental_not_set} id="modifySuiteTop" onClick={this.handleModifySuite}>Submit</Button>
-          </Col>
-        </Row>
-        <Row>
-          <Col xs={12} md={6}>
-            <h2>Add to suite </h2>
-            <SearchableCaseSelectionList isNotIn={true} 
-                                         suiteId={this.state.suite.id}
-                                         onCheck={this.handleAdd}
-                                         refresh={this.state.addQueue.length == 0 && 
-                                                  this.state.removeQueue.length == 0}
-                                         id="ni_list"
+
+    if (typeof(this.state.query) != "undefined") {
+      return (
+        <Grid>
+          <Row>
+            <h1>{this.state.suite.name}</h1>
+          </Row>
+          <Row>
+            <Col mdOffset={8}>
+              {credental_not_set_msg}
+              <Button bsStyle="success" block disabled={credental_not_set} id="modifySuiteTop" onClick={this.handleModifySuite}>Submit</Button>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={12} md={6}>
+              <h2>Add to suite </h2>
+              <SearchableCaseSelectionList isNotIn={true}
+                                           suiteId={this.state.suite.id}
+                                           onCheck={this.handleAdd}
+                                           refresh={this.state.addQueue.length == 0 &&
+                                                    this.state.removeQueue.length == 0}
+                                           query={this.state.query}
+                                           id="ni_list"
                                                   
-            />
-          </Col>
-          <Col xs={12} md={6}>
-          <h2>Remove from suite </h2>
-          <SearchableCaseSelectionList isNotIn={false} 
-                                       suiteId={this.props.params.id}
-                                       onCheck={this.handleRemove}
-                                       refresh={this.state.addQueue.length == 0 && this.state.removeQueue.length == 0}
-                                       id="in_list"
-          />
-          </Col>
-        </Row>
+              />
+            </Col>
+            <Col xs={12} md={6}>
+              <h2>Remove from suite </h2>
+              <SearchableCaseSelectionList isNotIn={false}
+                                           suiteId={this.props.params.id}
+                                           onCheck={this.handleRemove}
+                                           refresh={this.state.addQueue.length == 0 && this.state.removeQueue.length == 0}
+                                           query={this.state.query}
+                                           id="in_list"
+              />
+            </Col>
+          </Row>
         
-        <Row>
-          <Col mdOffset={8}>
-            {credental_not_set_msg}
-            <Button bsStyle="success" block disabled={credental_not_set} id="modifySuite" onClick={this.handleModifySuite}>Submit</Button>
-          </Col>
-        </Row>
-      </Grid>
-    )
+          <Row>
+            <Col mdOffset={8}>
+              {credental_not_set_msg}
+              <Button bsStyle="success" block disabled={credental_not_set} id="modifySuite" onClick={this.handleModifySuite}>Submit</Button>
+            </Col>
+          </Row>
+        </Grid>
+      )
+    } else {
+        return <div className="emptySearchResults">No results found</div>
+    }
   }
 })
 
