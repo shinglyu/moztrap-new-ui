@@ -815,6 +815,7 @@ var SortableTh = React.createClass({
         newOrder = ""
     }
     this.setState({"order": newOrder})
+    this.props.onSort(this.props.filter);
     this.props.handleAddFilter(' orderby:' + newOrder + this.props.filter, / orderby:[-\w]+/)
   },
   getInitialState: function(){
@@ -822,11 +823,13 @@ var SortableTh = React.createClass({
   },
   render: function(){
     var marker=""
-    if (this.state.order == ""){
-      marker = "▼";
-    }
-    else if (this.state.order == "-"){
-      marker = "▲";
+    if (this.props.isSorting) {
+      if (this.state.order == ""){
+        marker = "▼";
+      }
+      else if (this.state.order == "-"){
+        marker = "▲";
+      }
     }
     return(
       <th className="thSortable" id={"orderby_"+ this.props.filter} onClick={this.handleSort}>{this.props.name}{marker}</th>
@@ -912,7 +915,33 @@ var CaseverListItem = React.createClass({
 
 
 var CaseverList = React.createClass({
+  getInitialState: function() {
+    return {
+      isSort: {
+        name: false,
+        case__priority: false,
+        productversion: false,
+        modified_on: false
+      }
+    };
+  },
 
+  handleSort: function(sortColumn) {
+    var columns = ["name", "case__priority", "productversion", "modified_on"];
+    var index = columns.indexOf(sortColumn);
+
+    if (index > -1) {
+      columns.splice(index, 1);
+    }
+
+    var updateSort = {};
+    for (var i = 0; i < columns.length; i++) {
+      updateSort[columns[i]] = false;
+    }
+
+    updateSort[sortColumn] = true;
+    this.setState({isSort: updateSort});
+  },
 
   render: function() {
     //can use the casevers.meta
@@ -931,13 +960,22 @@ var CaseverList = React.createClass({
               <th><input type="checkbox" className="caseCheckBox" ref="checkAllBox" onChange={this.props.handleCheckAll}/></th>
               <th>ID</th>
               <th className="thStatus">status</th>
-              <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-              <SortableTh name="priority" filter="case__priority"
-                          handleAddFilter={this.props.handleAddFilter}></SortableTh>
-              <SortableTh name="product" filter="productversion"
-                          handleAddFilter={this.props.handleAddFilter}></SortableTh>
-              <SortableTh name="modified" filter="modified_on"
-                          handleAddFilter={this.props.handleAddFilter}></SortableTh>
+              <SortableTh name="name" filter="name" onSort={this.handleSort}
+                          isSorting={this.state.isSort.name}
+                          handleAddFilter={this.props.handleAddFilter}>
+              </SortableTh>
+              <SortableTh name="priority" filter="case__priority" onSort={this.handleSort}
+                          isSorting={this.state.isSort.case__priority}
+                          handleAddFilter={this.props.handleAddFilter}>
+              </SortableTh>
+              <SortableTh name="product" filter="productversion" onSort={this.handleSort}
+                          isSorting={this.state.isSort.productversion}
+                          handleAddFilter={this.props.handleAddFilter}>
+              </SortableTh>
+              <SortableTh name="modified" filter="modified_on" onSort={this.handleSort}
+                          isSorting={this.state.isSort.modified_on}
+                          handleAddFilter={this.props.handleAddFilter}>
+              </SortableTh>
               <th></th>
               <th></th>
             </tr>
@@ -1138,6 +1176,32 @@ var SuiteListItem = React.createClass({
 });
 
 var SuiteList = React.createClass({
+  getInitialState: function() {
+    return {
+      isSort: {
+        name: false,
+        modified_on: false
+      }
+    };
+  },
+
+  handleSort: function(sortColumn) {
+    var columns = ["name", "modified_on"];
+    var index = columns.indexOf(sortColumn);
+
+    if (index > -1) {
+      columns.splice(index, 1);
+    }
+
+    var updateSort = {};
+    for (var i = 0; i < columns.length; i++) {
+      updateSort[columns[i]] = false;
+    }
+
+    updateSort[sortColumn] = true;
+    this.setState({isSort: updateSort});
+  },
+
   checkAll: function() {
     var checkState = this.refs.checkAllBox.getDOMNode().checked;
     [].forEach.call(document.querySelectorAll('input[type=checkbox].suiteCheckBox'), function(checkbox){
@@ -1186,9 +1250,14 @@ var SuiteList = React.createClass({
             <th><input type="checkbox" className="suiteCheckBox" ref="checkAllBox" onChange={this.checkAll}/></th>
             <th>ID</th>
             <th className="thStatus">status</th>
-            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="modified" filter="modified_on"
-                        handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <SortableTh name="name" filter="name" onSort={this.handleSort}
+                        isSorting={this.state.isSort.name}
+                        handleAddFilter={this.props.handleAddFilter}>
+            </SortableTh>
+            <SortableTh name="modified" filter="modified_on" onSort={this.handleSort}
+                        isSorting={this.state.isSort.modified_on}
+                        handleAddFilter={this.props.handleAddFilter}>
+            </SortableTh>
             <th></th>
             <th></th>
           </tr>
@@ -1326,6 +1395,33 @@ var CaseListItem = React.createClass({
 
 
 var CaseList = React.createClass({
+  getInitialState: function() {
+    return {
+      isSort: {
+        name: false,
+        case__priority: false,
+        modified_on: false
+      }
+    };
+  },
+
+  handleSort: function(sortColumn) {
+    var columns = ["name", "case__priority", "modified_on"];
+    var index = columns.indexOf(sortColumn);
+
+    if (index > -1) {
+      columns.splice(index, 1);
+    }
+
+    var updateSort = {};
+    for (var i = 0; i < columns.length; i++) {
+      updateSort[columns[i]] = false;
+    }
+
+    updateSort[sortColumn] = true;
+    this.setState({isSort: updateSort});
+  },
+
   render: function() {
     //can use the casevers.meta
     var casevers = this.props.casevers.objects.map(function(casever){
@@ -1338,9 +1434,18 @@ var CaseList = React.createClass({
         <tbody>
           <tr>
             <th></th>
-            <SortableTh name="name" filter="name" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="priority" filter="case__priority" handleAddFilter={this.props.handleAddFilter}></SortableTh>
-            <SortableTh name="modified" filter="modified_on" handleAddFilter={this.props.handleAddFilter}></SortableTh>
+            <SortableTh name="name" filter="name" onSort={this.handleSort}
+                        isSorting={this.state.isSort.name}
+                        handleAddFilter={this.props.handleAddFilter}>
+            </SortableTh>
+            <SortableTh name="priority" filter="case__priority" onSort={this.handleSort}
+                        isSorting={this.state.isSort.case__priority}
+                        handleAddFilter={this.props.handleAddFilter}>
+            </SortableTh>
+            <SortableTh name="modified" filter="modified_on" onSort={this.handleSort}
+                        isSorting={this.state.isSort.modified_on}
+                        handleAddFilter={this.props.handleAddFilter}>
+            </SortableTh>
           </tr>
           {casevers}
         </tbody>
