@@ -1483,7 +1483,7 @@ SearchableCaseSelectionList = React.createClass({
     return (
       <div id={this.props.id}>
         <SearchForm ref="searchform" parentId={this.props.id} disableQueryURL={this.state.disableQueryURL} query={this.props.query} onSubmit={this.handleSearch} syntaxlink={"help/syntax_caseselection.html"}/>
-        <CaseList casevers={this.state.data} handleCheck={this.props.onCheck}/>
+        <CaseList casevers={this.state.data} handleCheck={this.props.onCheck} handleAddFilter={this.handleAddFilter}/>
         <Loader loaded={this.state.pageLoaded} options={LoaderOptions} className="spinner" position="relative" />
         <PaginationContainer onPageSelected={this.handlePageLoading} totalPageCount={this.state.queriedPageCount} />
       </div>
