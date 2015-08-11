@@ -89,7 +89,7 @@ var LoaderOptions = {
 var SearchableRemoteListMixin = {
   //need to implement `function buildURL(query) {...}`
   loading: {meta:{}, objects: [{name:"Loading..."}]},
-  notFound: {data:{objects:[{name:"Can't find anything. Try loosen the search criteria."}]}},
+  failed: {meta:{total_count: 0}, objects:[{name:"Oooops! **Request Timeout** Please try to reload me."}]},
 
   updateListUIState: function(data) {
     // 1. Hightlight the loaded page.
@@ -142,7 +142,7 @@ var SearchableRemoteListMixin = {
 
     $.ajax({
       url: url,
-      timeout: 10000, // Force trigger the error callback
+      timeout: 30000, // Force trigger the error callback
 
       success: function(data) {
         var availablePages = 0;
@@ -158,7 +158,7 @@ var SearchableRemoteListMixin = {
       }.bind(this),
 
       error: function(xhr, status, err) {
-        this.setState(this.notFound)
+        this.setState({data: this.failed, pageLoaded: true});
         console.error(this.props.url, status, err.toString());
       }.bind(this)
     });
