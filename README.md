@@ -13,14 +13,14 @@ Use this [production site](https://shinglyu.github.io/moztrap-new-ui/#/)(only te
 # Installation 
 * `git clone` this repo.
 * Run `bower install` to install 3rd party dependencies. ( A `bower_components` folder should be created.)
-* If you need the diff function, run `git submoudle init; git submoudle update;`.
+* If you need the diff function, run `git submodule init; git submodule update;`.
 * Open the `index.html` in the browser.
 * Summary: <div>
 ```
 git clone https://github.com/shinglyu/moztrap-new-ui.git
 cd moztrap-new-ui/
 bower install
-git submoudle init; git submoudle update;
+git submodule init; git submodule update;
 firefox index.html &
 ```
 </div>
@@ -43,4 +43,4 @@ firefox index.html &
 # Contributing
 We are migrating our backlog from Trello to GitHub. Simply submit bugs or feature requests using the GitHub "issues" to the right side of the page.
 
-The feature requests are in this [Trello board](https://trello.com/b/FvWTBKjf/moztrap-enhancement-backlog), ask slyu@mozilla.com for access right. Everyone is welcomed to pick a bug/feature and work on it.
+The feature requests are in this [Trello board](https://trello.com/b/FvWTBKjf/moztrap-enhancement-backlog), ask slyu@mozilla.com for access right. Everyone is welcome to pick a bug/feature and work on it.

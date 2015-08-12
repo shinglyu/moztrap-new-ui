@@ -97,7 +97,7 @@ function buildQueryUrl(url, query, codegen) {
   //TODO: parse and transform query to tastypie filters
   var queryUrl = url + "?";
   //var queryUrl = url;
-  //console.log(query)
+  console.log("buildQueryUrl: " + query)  //TODO: if query is empty?
   var tokens = tokenize(query);
   //console.log(tokens)
   if (!tokens.map(function(tok){return tok['key']})

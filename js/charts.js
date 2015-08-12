@@ -1,13 +1,15 @@
 function createCharts(input) {
   data = [];
   for (obj in input) {
-    input[obj]["run_name"] = input[obj]["name"];
-    delete input[obj]["created_on"];
-    delete input[obj]["name"];
-    data.push(input[obj]);
+    result = {};
+    result["run_name"] = input[obj]["name"];
+    result["passed"] = input[obj]["passed"];
+    result["failed"] = input[obj]["failed"];
+    result["blocked"] = input[obj]["blocked"];
+    result["skipped"] = input[obj]["skipped"];
+    result["invalidated"] = input[obj]["invalidated"];
+    data.push(result);
   }
-  console.log(data);
-
 
   var margin = {top: 20, right: 20, bottom: 30, left: 40},
       width = 960 - margin.left - margin.right,
