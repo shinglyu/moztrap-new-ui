@@ -1,0 +1,14 @@
+{
+  "name": "jquery-textext",
+  "homepage": "https://github.com/alexgorbatchev/jquery-textext",
+  "version": "1.3.1",
+  "_release": "1.3.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.3.1",
+    "commit": "63cb01e4a07f7cfd11acc5ead08975223ed90d1b"
+  },
+  "_source": "git://github.com/alexgorbatchev/jquery-textext.git",
+  "_target": "~1.3.1",
+  "_originalSource": "jquery-textext"
+}

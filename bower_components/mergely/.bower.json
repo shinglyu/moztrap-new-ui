@@ -1,0 +1,45 @@
+{
+  "name": "Mergely",
+  "version": "3.3.10",
+  "homepage": "https://github.com/wickedest/Mergely",
+  "description": "Merge and diff documents online",
+  "main": [
+    "lib/mergely.js",
+    "lib/mergely.css"
+  ],
+  "keywords": [
+    "merge",
+    "diff"
+  ],
+  "ignore": [
+    "LICENSE.html",
+    "README.md",
+    "doc",
+    "editor",
+    "examples",
+    "test"
+  ],
+  "license": [
+    "GPL",
+    "LGPL",
+    "MPL"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wickedest/Mergely"
+  },
+  "dependencies": {
+    "mergely": "https://github.com/wickedest/Mergely.git#3.3.10",
+    "jquery": "<=2.1.3",
+    "codemirror": "<=4.6.0"
+  },
+  "_release": "3.3.10",
+  "_resolution": {
+    "type": "version",
+    "tag": "3.3.10",
+    "commit": "8883235daaf0984b122641f61945bcf8a70fa20d"
+  },
+  "_source": "git@github.com:wickedest/Mergely.git",
+  "_target": "~3.3.10",
+  "_originalSource": "git@github.com:wickedest/Mergely.git"
+}

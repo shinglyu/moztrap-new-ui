@@ -1,18 +1,22 @@
 {
   "name": "react-ui-datepicker",
   "version": "0.1.0",
-  "main":["index.html", "dist"],
-  "ignore":[
-    "vendor",
+  "main": [
+    "build",
+    "example"
+  ],
+  "ignore": [
     "src",
-    "*.json",
     "*.bowerrc",
     "*.gitignore",
-    "Gruntfile.js"
+    "./*.js"
   ],
-  "authors": ["Jason Wang"],
+  "authors": [
+    "Jason Wang"
+  ],
   "keywords": "React Datepicker",
-  "devDependencies": {
-    "react": "~0.12.2"
+  "dependencies": {
+    "react": "~0.13.3",
+    "bootstrap": "~3.3.5"
   }
 }

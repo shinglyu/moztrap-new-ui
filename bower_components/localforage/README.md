@@ -5,7 +5,7 @@ improves the offline experience of your web app by using asynchronous storage
 (IndexedDB or WebSQL) with a simple, `localStorage`-like API.
 
 localForage uses localStorage in browsers with no IndexedDB or
-WebSQL support. See below for detailed compatibility info.
+WebSQL support. See [the wiki for detailed compatibility info][supported browsers].
 
 To use localForage, just drop a single JavaScript file into your page:
 
@@ -29,8 +29,6 @@ bower install localforage
 
 localForage is compatible with [browserify](http://browserify.org/).
 
-Read about [supported browsers on the wiki][supported browsers].
-
 [supported browsers]: https://github.com/mozilla/localForage/wiki/Supported-Browsers-Platforms
 
 ## Support
@@ -44,7 +42,7 @@ to localForage, you can visit
 channel to ask questions about localForage.
 
 The best person to ask about localForage is [**tofumatt**][tofumatt], who
-is usually online from 12pm-12am GMT (London Time).
+is usually online from 8am-8pm GMT (London Time).
 
 [tofumatt]: http://tofumatt.com/
 
@@ -59,10 +57,10 @@ It's otherwise exactly the same as the
 ```javascript
 // In localStorage, we would do:
 localStorage.setItem('key', JSON.stringify('value'));
-doSomethingElse();
+alert('value');
 
 // With localForage, we use callbacks:
-localforage.setItem('key', 'value', doSomethingElse);
+localforage.setItem('key', 'value', function(err, value) { alert(value); });
 ```
 
 Similarly, please don't expect a return value from calls to

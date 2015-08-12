@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>
+			Datepicker Component for React
+		</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" type="text/css" href="./bootstrap.css" />
+		<link rel="stylesheet" type="text/css" href="../build/datepicker.css" />
+		<link rel="stylesheet" type="text/css" href="./prettify.css" />
+		<style>
+     	body {
+        	padding-top: 50px;
+        	.sidenav {
+				width: 228px;
+				margin: 30px 0 0;
+				padding: 0;
+				background-color: #fff;
+				-webkit-border-radius: 6px;
+			    	-moz-border-radius: 6px;
+			        	border-radius: 6px;
+				-webkit-box-shadow: 0 1px 4px rgba(0,0,0,.065);
+			   		-moz-box-shadow: 0 1px 4px rgba(0,0,0,.065);
+			        	box-shadow: 0 1px 4px rgba(0,0,0,.065);
+			}
+			.sidenav > li > a {
+				display: block;
+				width: 190px \9;
+				margin: 0 0 -1px;
+				padding: 8px 14px;
+				border: 1px solid #e5e5e5;
+			}
+			.sidenav > li:first-child > a {
+				-webkit-border-radius: 6px 6px 0 0;
+			   	-moz-border-radius: 6px 6px 0 0;
+			        	border-radius: 6px 6px 0 0;
+			}
+			.sidenav > li:last-child > a {
+				-webkit-border-radius: 0 0 6px 6px;
+			   	-moz-border-radius: 0 0 6px 6px;
+			        	border-radius: 0 0 6px 6px;
+			}
+			.sidenav > .active > a {
+				position: relative;
+				z-index: 2;
+				padding: 9px 15px;
+				border: 0;
+				text-shadow: 0 1px 0 rgba(0,0,0,.15);
+				-webkit-box-shadow: inset 1px 0 0 rgba(0,0,0,.1), inset -1px 0 0 rgba(0,0,0,.1);
+			   	-moz-box-shadow: inset 1px 0 0 rgba(0,0,0,.1), inset -1px 0 0 rgba(0,0,0,.1);
+			        	box-shadow: inset 1px 0 0 rgba(0,0,0,.1), inset -1px 0 0 rgba(0,0,0,.1);
+			}
+			/* Chevrons */
+			.sidenav .icon-chevron-right {
+				float: right;
+				margin-top: 2px;
+				margin-right: -6px;
+				opacity: .25;
+			}
+			.sidenav > li > a:hover {
+				background-color: #f5f5f5;
+			}
+			.sidenav a:hover .icon-chevron-right {
+				opacity: .5;
+			}
+			.sidenav .active .icon-chevron-right,
+			.sidenav .active a:hover .icon-chevron-right {
+				background-image: url(../img/glyphicons-halflings-white.png);
+				opacity: 1;
+			}
+			.sidenav.affix, .sidenav.affix-bottom {
+				position: fixed;
+				top: 20px;
+			}
+    	}
+    	</style>
+	    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	    <!--[if lt IE 9]>
+	    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	    <![endif]-->
+	</head>
+	<body>
+
+		<div class="navbar navbar-inverse navbar-fixed-top">
+	    	<div class="navbar-inner">
+	      	<div class="container">
+	        	<a class="brand navbar-brand" href="https://github.com/wjsjtu/react-datepicker">react-datepicker</a>
+	        	<ul class="nav navbar-nav">
+	          		<li class="active"><a href="#">Demo</a></li>
+	          		<li><a href="https://github.com/wjsjtu/react-datepicker" taget="_blank">GitHub</a></li>
+	        	</ul>
+	      	</div>
+	    	</div>
+	    </div>
+	    <div class="container">
+		    <h2>react-datepicker<small> Online Demo</small></h2>
+
+			<p>Welcome!</p>
+
+			
+
+			<div class="row">
+				<form id="form">
+					<div class="span12 col-md-12">
+						<div style="padding: 0px 20px;border: #ccc 1px solid" id="position-radio">
+							<h3>Position</h3>
+				        </div>
+						<br/>
+					</div>
+					<div class="span12 col-md-12">
+						<div style="width:50%;float:left;padding-right:5px;">
+							<div class="input-group">
+								<span class="input-group-addon">active</span>
+								<input type="text" class="form-control" placeholder="undefined or Date Object (for example: new Date) or million second" name="active">
+							</div>
+							<p style="color:#666;font-weight: bold;">This prop can be considered as a defualt value.</p>
+						</div>
+						<div style="width:50%;float:left;padding-left:5px;">
+							<div class="input-group">
+								<span class="input-group-addon">current</span>
+								<input type="text" class="form-control" placeholder="undefined or Date Object (for example: new Date) or million second" name="current">
+							</div>
+							<p style="color:#666;font-weight: bold;">This prop is set to set the day datepicker goes by default. Usually it is used when `preserve` prop is true except that the datepicker is inline.</p>
+						</div>
+						<div class="clearfix"></div>
+						<br/>
+					</div>
+					<div class="span12 col-md-12">
+						<div style="padding: 0px 20px;border: #ccc 1px solid;">
+							<div class="span6 col-md-6" style="float:left;">
+								<label for="focused" class="checkbox">
+								    <input name="focused" value="true" type="checkbox">
+								    focused
+								    <p style="color:#666;">(Not for inline) Note: this prop is tiggered in componentDidMount function which means you can not see the input get foucused because datepicker has mounted once.</p>
+								</label>
+							</div>
+							<div class="span6 col-md-6" style="float:left;">
+								<label for="preserve" class="checkbox">
+								    <input name="preserve" value="true" type="checkbox">
+								    preserve
+								    <p style="color:#666;">(Not for inline) If this prop is true allows the component remember where you go if its blur event has triggered, otherwise when you refocus on datepicker input, it will automatically show you the active day/</p>
+								</label>
+							</div>
+							<div class="clearfix"></div>
+						</div>
+						<br/>
+					</div>
+					<div class="span12 col-md-12" id="fmt">
+						<a href="#">What is fmt below?</a>
+					</div>
+					<br/>
+					<div class="span12 col-md-12">
+						<p>fmt is a very useful function that format the date by using format string such as "mm/dd/yyyy", it receives two args, Date object or null and format string. If null it will return empty string. Its source is shown below.</p>
+						<pre class="prettyprint linenums" id="prettify-format"></pre>
+					</div>
+					<div class="span6 col-md-6">
+						<div style="padding: 0px 20px;border: #ccc 1px solid;">
+							<h3>format</h3>
+							<p>format the day you've select, note date could be null if `active` prop is not set.</p>
+<textarea class="form-control" name="format" rows="5">function(date, fmt){
+	return fmt(date, "mm/dd/yyyy");
+}</textarea><br/>
+				        </div>
+						<br/>
+					</div>
+					<div class="span6 col-md-6">
+						<div style="padding: 0px 20px;border: #ccc 1px solid;">
+							<h3>rule</h3>
+							<p>Determine if a day can be selected, this provides flexible ways to accomplish complex rules.(Note the day is disabled only when rule function return false not null or undefined, so you don't need to return true explicitly.</p>
+<textarea class="form-control" name="rule" rows="5">function(date, fmt){
+	if(date.getDay() == 3){
+		// disable all Wednesday
+		return false;
+	}
+}</textarea><br/>
+				        </div>
+						<br/>
+					</div>
+					<div class="row" style="padding:0 15px;">
+						<div class="span6 col-md-6">
+							<div style="padding: 0px 20px;border: #ccc 1px solid;">
+								<h3>onSelect</h3>
+								<p>Triggered when a day is selected. (Note the `active` prop which set the default day will not trigger this function.)</p>
+<textarea class="form-control" name="onSelect" rows="5">function(date, fmt){
+	alert(fmt(date, "yyyy-mm-dd"));
+}</textarea><br/>
+					        </div>
+							<br/>
+						</div>
+						<div class="span6 col-md-6">
+							<div style="border: #ccc 1px solid;padding:20px;">
+								<h3>HTML</h3>
+				        		<pre class="prettyprint linenums" id="prettify-html"></pre>
+				        	</div>
+			        	</div>
+		        	</div>
+				</form>
+
+				<div class="span5 col-md-5">
+					<div style="height:100px;" class="row">
+						<div class="span12 col-md-12">
+							<a class="btn btn-primary" id="render">Render</a>
+							<p>If any function like 'alert' is triggered when you start to validate the props you've set, do not be superised.</p>
+						</div>
+						<p style="color:red;" id="info"></p>
+					</div>
+					<div id="datepicker" style="width: 400px;"></div>
+					<div style="height:400px;" class="row"></div>
+				</div>
+				<div class="span7 col-md-7">
+		        	<pre class="prettyprint linenums" id="prettify-js"></pre>
+		        </div>
+			</div>
+			
+	    </div>
+
+<script type="text/javascript" id="js-date-format">
+var dateFormat = function(date, fmt) {
+	if(!(date instanceof Date)){
+		return "";
+	}
+	var day = date.getDate(),
+		month = date.getMonth() + 1,
+		year = date.getFullYear()
+		o = {
+			"m+": month,
+			"d+": day,
+			"q+": Math.floor((month + 2) / 3)
+		};
+	if (/(y+)/.test(fmt)){
+		fmt = fmt.replace(RegExp.$1, (year + "").substr(4 - RegExp.$1.length));
+	}
+	for (var k in o){
+		if(new RegExp("(" + k + ")").test(fmt)) {
+			fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+		}
+	}
+	return fmt;
+};
+</script>
+
+		<script src="./prettify.min.js"></script>
+		<script src="./react.js"></script>
+		<script type="text/javascript" src="../build/datepicker.en.min.js"></script>
+		<script type="text/javascript" src="./jquery-1.9.1.min.js"></script>
+		<script type="text/javascript">
+
+		$(function(){
+			var positionRadio = $("#position-radio");
+
+			['TOP.LEFT', 'TOP.AUTO', 'TOP.RIGHT', 'BOTTOM.LEFT', 'BOTTOM.AUTO', 'BOTTOM.RIGHT']
+			.forEach(function(ele){
+				var str = '<label for="position" class="radio" style="width:50%;display:inline-block; padding-left:10px;">' + 
+					    	'<input name="position" value="Datepicker.position.' + ele +'" type="radio">' +
+					    	'Datepicker.position.' + ele + '</label>';
+
+				positionRadio.append($(str));
+			});
+			positionRadio.append($('<label for="position" class="radio" style="width:100%;display:inline-block; padding-left:10px;">' + 
+					    	'<input name="position" value="Datepicker.position.INLINE" type="radio">' +
+					    	'Datepicker.position.INLINE</label>'));
+
+
+			$('#prettify-html').html(prettyPrintOne(
+				'<div id="datepicker" style="width: 400px;"></div>'.replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+				'html',
+				true
+			));
+
+			var js = $("#js-date-format").text()
+						.replace(/</g, '&lt;')
+						.replace(/>/g, '&gt;')
+						.replace(/\t/g, '    ');
+
+            $('#prettify-format').html(prettyPrintOne(
+            	js,
+            	'js',
+            	true
+            )).parent().hide();
+
+            $("#fmt").on("click", function(e){
+            	e.preventDefault();
+            	$('#prettify-format').parent().toggle();
+            });
+
+            String.prototype.trim = function(){
+			     return this.replace(/(^\s*)|(\s*$)/g, '');
+			}
+
+			var validate = function(str){
+				var res = [0];
+				try{
+					eval("var func = " + str);
+					if(typeof func != "function"){
+						res.push("not a function!");
+						return res;
+					}
+					func(new Date, dateFormat);
+					res[0] = 1;
+				} catch(error){
+					res.push(error.toString());
+					return res;
+				}
+				return res;
+			};
+
+			var validateFunc = function(name, funcStr){
+				if(funcStr){
+            		var res = validate(funcStr);
+            		if(res[0]){
+            			return true;
+            		} else {
+            			$("#info").html(
+            				$("#info").html() + 
+            				("Error occur in prop " + name + ":" + res[1])
+            				.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            				 + "<br/>" 
+            			);
+            			return false;
+            		}
+            	} else {
+            		return true;
+            	}
+			};
+
+			var printObj = function(obj){
+				var str ="{\n", tag = "    ";
+				for(var i in obj){
+					var propStr = obj[i];
+					propStr = propStr.replace(/\n/g, "\n" + tag);
+					propStr = propStr.replace(/\n\s*$/g, '')
+					str += tag + i + ": " + propStr + ",\n";
+				}
+				str = str.replace(/[,]\n$/g, '\n');
+				str += "}";
+				return str;
+			};
+
+            var onClick = function(){
+            	$("#info").html("");
+
+            	var pairs = $("#form").serialize().split("&"),obj = {};
+            	pairs.forEach(function(pairStr){
+            		var pair = pairStr.split("=");
+            		if(pair[1] && pair[1].trim() != ""){
+            			obj[pair[0].trim()] = decodeURIComponent(pair[1].replace(/[+]/g, ' '));
+            		}
+            	});
+
+            	var isOK = validateFunc("format", obj.format) &&
+            				validateFunc("rule", obj.rule) &&
+            				validateFunc("onSelect", obj.onSelect);
+
+            	if(!isOK){
+            		alert("Some thing wrong happened, check the red words to find the detail.");
+            		return;
+            	}
+
+            	var code = "React.render(React.createElement(Datepicker, " + printObj(obj) + "), document.getElementById('datepicker'));";
+            	
+
+            	$('#prettify-js').html(prettyPrintOne(
+	            	code.replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+	            	'js',
+	            	true
+	            ));
+
+	            try{
+            		eval(code);
+            	} catch(e){
+            		alert(e.toString());
+            	}
+            };
+            $("#render").on("click", onClick);
+            onClick();
+
+		});
+        </script>
+	</body>
+</html>

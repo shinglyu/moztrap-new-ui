@@ -1,30 +1,29 @@
 {
   "name": "react-ui-datepicker",
   "main": [
-    "index.html",
-    "dist"
+    "build",
+    "example"
   ],
   "ignore": [
-    "vendor",
     "src",
-    "*.json",
     "*.bowerrc",
     "*.gitignore",
-    "Gruntfile.js"
+    "./*.js"
   ],
   "authors": [
     "Jason Wang"
   ],
   "keywords": "React Datepicker",
-  "devDependencies": {
-    "react": "~0.12.2"
+  "dependencies": {
+    "react": "~0.13.3",
+    "bootstrap": "~3.3.5"
   },
   "homepage": "https://github.com/WJsjtu/react-datepicker",
-  "_release": "7b97813502",
+  "_release": "06d16343d2",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "7b978135027d55f755c8519169af995c9b104956"
+    "commit": "06d16343d2b20fdb65bc4cbdc2a1b76229e91cb3"
   },
   "_source": "git://github.com/WJsjtu/react-datepicker.git",
   "_target": "*",
